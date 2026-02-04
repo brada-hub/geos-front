@@ -30,6 +30,12 @@ import EssentialLink from 'components/EssentialLink.vue'
 
 const linksList = [
   {
+    title: 'Kardex RRHH',
+    caption: 'Gemelo Digital',
+    icon: 'inventory_2',
+    link: '/kardex',
+  },
+  {
     title: 'Docs',
     caption: 'quasar.dev',
     icon: 'school',

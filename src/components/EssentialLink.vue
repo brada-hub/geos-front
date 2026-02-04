@@ -1,5 +1,11 @@
 <template>
-  <q-item clickable tag="a" target="_blank" :href="props.link">
+  <q-item
+    clickable
+    :tag="props.link.startsWith('http') ? 'a' : 'div'"
+    :target="props.link.startsWith('http') ? '_blank' : undefined"
+    :href="props.link.startsWith('http') ? props.link : undefined"
+    :to="!props.link.startsWith('http') ? props.link : undefined"
+  >
     <q-item-section v-if="props.icon" avatar>
       <q-icon :name="props.icon" />
     </q-item-section>
