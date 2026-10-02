@@ -30,8 +30,18 @@
           </div>
         </div>
 
-        <!-- ESPACIO VACÍO CENTRAL (SIN BOTONES ARRIBA) -->
+        <!-- ESPACIO CENTRAL: BUSCADOR SPOTLIGHT RÁPIDO (CTRL + K) -->
         <q-space />
+
+        <div
+          class="spotlight-header-trigger gt-xs row items-center q-px-sm q-py-xs cursor-pointer q-mr-sm"
+          @click="spotlightOpen = true"
+          title="Abrir búsqueda global de expedientes (Ctrl + K)"
+        >
+          <q-icon name="search" size="15px" color="indigo-7" />
+          <span class="spotlight-trigger-text text-slate-500 q-mx-xs">Buscar expediente...</span>
+          <span class="spotlight-trigger-kbd">Ctrl K</span>
+        </div>
 
         <!-- ACCIONES RÁPIDAS A LA DERECHA -->
         <div class="row items-center q-gutter-xs q-gutter-sm-sm no-wrap">
@@ -204,6 +214,69 @@
           </div>
 
           <q-list class="q-gutter-y-xs">
+            <!-- BOTÓN BÚSQUEDA SPOTLIGHT -->
+            <q-item
+              clickable
+              v-ripple
+              @click="spotlightOpen = true"
+              class="drawer-nav-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon name="search" size="18px" color="indigo-7" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">Búsqueda Rápida</q-item-label>
+                <q-item-label caption class="drawer-item-sub">Spotlight de expedientes</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <span class="spotlight-kbd-side">Ctrl K</span>
+              </q-item-section>
+            </q-item>
+
+            <!-- BOTÓN EXPORTAR EXCEL -->
+            <q-item
+              clickable
+              v-ripple
+              @click="triggerExportExcel"
+              class="drawer-nav-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center" style="background: #ecfdf5; border-color: #a7f3d0;">
+                  <q-icon name="table_view" size="18px" color="emerald-7" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">Inventario en Excel</q-item-label>
+                <q-item-label caption class="drawer-item-sub">Descargar reporte (.xlsx)</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="download" size="14px" color="emerald-8" />
+              </q-item-section>
+            </q-item>
+
+            <!-- BOTÓN MÉTRICAS DE CAPACIDAD -->
+            <q-item
+              clickable
+              v-ripple
+              @click="metricasOpen = true"
+              class="drawer-nav-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center" style="background: #faf5ff; border-color: #e9d5ff;">
+                  <q-icon name="insights" size="18px" color="purple-7" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">Métricas de Ocupación</q-item-label>
+                <q-item-label caption class="drawer-item-sub">Capacidad y distribución</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="arrow_forward" size="14px" color="grey-6" />
+              </q-item-section>
+            </q-item>
+
             <!-- BOTÓN IMPORTAR EXCEL -->
             <q-item
               clickable
@@ -373,6 +446,12 @@
       v-model="importDialogOpen"
       @import-complete="onGlobalImportComplete"
     />
+
+    <!-- MODAL DE BÚSQUEDA SPOTLIGHT (CTRL + K) -->
+    <GlobalSpotlightDialog v-model="spotlightOpen" />
+
+    <!-- MODAL DE MÉTRICAS DE CAPACIDAD & OCUPACIÓN -->
+    <MetricasCapacidadDialog v-model="metricasOpen" />
   </q-layout>
 </template>
 
@@ -381,6 +460,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useGeosStore } from 'src/stores/geosStore';
 import ImportPersonalDialog from 'src/components/Personal/ImportPersonalDialog.vue';
+import GlobalSpotlightDialog from 'src/components/Search/GlobalSpotlightDialog.vue';
+import MetricasCapacidadDialog from 'src/components/Kardex/MetricasCapacidadDialog.vue';
+import { exportInventoryExcel } from 'src/utils/exportInventoryExcel';
 
 const $q = useQuasar();
 const store = useGeosStore();
@@ -389,9 +471,47 @@ const leftDrawerOpen = ref(true);
 const syncing = ref(false);
 const isFullscreen = ref(false);
 const importDialogOpen = ref(false);
+const spotlightOpen = ref(false);
+const metricasOpen = ref(false);
 const liveTime = ref('');
 
 let clockInterval = null;
+
+const handleKeyDown = (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    spotlightOpen.value = true;
+  }
+};
+
+const triggerExportExcel = () => {
+  const all = store.allEmpleadosWithLocation || [];
+  if (all.length === 0) {
+    $q.notify({
+      type: 'warning',
+      message: 'No hay expedientes registrados para exportar.',
+      position: 'top'
+    });
+    return;
+  }
+
+  try {
+    exportInventoryExcel(all, store.muebles, store.sedes);
+    $q.notify({
+      type: 'positive',
+      icon: 'download_done',
+      message: `¡Inventario descargado con éxito! (${all.length} expedientes exportados)`,
+      position: 'top'
+    });
+  } catch (err) {
+    console.error('Error al exportar inventario Excel:', err);
+    $q.notify({
+      type: 'negative',
+      message: 'Ocurrió un error al generar el archivo Excel.',
+      position: 'top'
+    });
+  }
+};
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -492,10 +612,13 @@ onMounted(() => {
   document.addEventListener('fullscreenchange', () => {
     isFullscreen.value = !!document.fullscreenElement;
   });
+
+  window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval);
+  window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 
@@ -856,5 +979,45 @@ onUnmounted(() => {
 .page-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+/* SPOTLIGHT TRIGGER STYLES */
+.spotlight-header-trigger {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px 10px;
+  transition: all 0.2s ease;
+}
+
+.spotlight-header-trigger:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.spotlight-trigger-text {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.spotlight-trigger-kbd {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.spotlight-kbd-side {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 </style>

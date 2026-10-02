@@ -17,9 +17,48 @@ export const useGeosStore = defineStore('geos', {
     personalLoading: false,
     expedientesSinAsignar: [],
     sinAsignarLoading: false,
+    locatorTarget: null, // { muebleId, cajonId, empleadoId, isVirtual, timestamp }
   }),
 
   getters: {
+    // Lista completa de todos los empleados con su ubicación física o virtual resuelta
+    allEmpleadosWithLocation(state) {
+      const list = [];
+      // 1. Empleados en archivadores físicos
+      (state.muebles || []).forEach(mueble => {
+        (mueble.cajones || []).forEach(cajon => {
+          (cajon.empleados || []).forEach(emp => {
+            list.push({
+              ...emp,
+              isVirtual: false,
+              mueble_id: mueble.id,
+              mueble_nombre: mueble.nombre,
+              cajon_id: cajon.id,
+              fila: cajon.fila,
+              columna: cajon.columna,
+              cajon_etiqueta: cajon.etiqueta,
+              ubicacion_texto: `${mueble.nombre} • Gaveta ${cajon.fila} (Col ${String.fromCharCode(64 + cajon.columna)})${cajon.etiqueta ? ` - "${cajon.etiqueta}"` : ''}`
+            });
+          });
+        });
+      });
+      // 2. Empleados en gaveta virtual
+      (state.expedientesSinAsignar || []).forEach(emp => {
+        list.push({
+          ...emp,
+          isVirtual: true,
+          mueble_id: null,
+          mueble_nombre: 'Gaveta Virtual',
+          cajon_id: null,
+          fila: null,
+          columna: null,
+          cajon_etiqueta: 'Sin archivar físicamente',
+          ubicacion_texto: 'Gaveta Virtual (Bandeja de Entrada)'
+        });
+      });
+      return list;
+    },
+
     // Muebles filtrados dinámicamente por Sede y/o Tipo de Contrato
     filteredMuebles(state) {
       let list = state.muebles || [];
@@ -45,6 +84,16 @@ export const useGeosStore = defineStore('geos', {
   },
 
   actions: {
+    locateEmpleado(target) {
+      this.locatorTarget = {
+        ...target,
+        timestamp: Date.now()
+      };
+    },
+    clearLocatorTarget() {
+      this.locatorTarget = null;
+    },
+
     setDragContext(ctx) {
       this.dragContext = ctx;
     },

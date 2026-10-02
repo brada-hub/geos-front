@@ -3,8 +3,10 @@
     v-model="localEmpleados"
     group="expedientes"
     item-key="id"
+    :id="`cajon-cell-${cajon.id}`"
+    :data-cajon-id="cajon.id"
     class="cajon-cell"
-    :class="{ 'cajon-highlighted': isHighlighted }"
+    :class="{ 'cajon-highlighted': isHighlighted, 'cajon-targeted-pulse': isTargeted }"
     @change="handleChange"
     @click="$emit('open')"
   >
@@ -14,6 +16,12 @@
 
     <template #header>
       <div class="cajon-content">
+        <!-- BALIZA VISUAL LOCALIZADORA SPOTLIGHT -->
+        <div v-if="isTargeted" class="targeted-beacon-badge">
+          <q-icon name="place" size="13px" color="white" />
+          <span>¡AQUÍ ESTÁ!</span>
+        </div>
+
         <!-- TIRADOR DE ALUMINIO MODERNO -->
         <div class="drawer-handle-bar"></div>
 
@@ -115,6 +123,10 @@ const props = defineProps({
     required: true
   },
   isHighlighted: {
+    type: Boolean,
+    default: false
+  },
+  isTargeted: {
     type: Boolean,
     default: false
   }
@@ -311,6 +323,47 @@ const handleChange = (evt) => {
   background: #f8fafc;
   color: #334155;
   border: 1px solid #cbd5e1;
+}
+
+.cajon-targeted-pulse {
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4), 0 0 20px rgba(245, 158, 11, 0.6) !important;
+  animation: targetedPulse 1s infinite alternate ease-in-out;
+  z-index: 10;
+}
+
+@keyframes targetedPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4), 0 0 15px rgba(245, 158, 11, 0.6);
+  }
+  100% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.7), 0 0 28px rgba(245, 158, 11, 0.9);
+  }
+}
+
+.targeted-beacon-badge {
+  position: absolute;
+  top: -12px;
+  right: 8px;
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  animation: bounceBeacon 0.6s infinite alternate;
+  z-index: 25;
+}
+
+@keyframes bounceBeacon {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
 }
 
 .hidden { display: none; }

@@ -170,6 +170,7 @@
           :key="cajon.id"
           :cajon="cajon"
           :is-highlighted="highlightedCajones.has(cajon.id)"
+          :is-targeted="targetedCajonId === cajon.id"
           @open="$emit('open-drawer', cajon)"
           @configure="(c) => $emit('configure-drawer', c)"
           @drag-change="(evt, id) => $emit('drag-change', evt, id)"
@@ -431,6 +432,10 @@ const props = defineProps({
   highlightedCajones: {
     type: Set,
     default: () => new Set()
+  },
+  targetedCajonId: {
+    type: [Number, String],
+    default: null
   }
 });
 

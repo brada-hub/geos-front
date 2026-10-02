@@ -30,7 +30,21 @@
               </div>
             </div>
           </div>
-          <q-btn icon="close" flat round @click="$emit('update:modelValue', false)" />
+          <div class="row items-center q-gutter-xs">
+            <q-btn
+              unelevated
+              size="sm"
+              icon="print"
+              label="Ficha PDF"
+              color="amber-5"
+              text-color="dark"
+              class="text-weight-bold"
+              @click="showFicha = true"
+            >
+              <q-tooltip>Imprimir ficha oficial de expediente en PDF</q-tooltip>
+            </q-btn>
+            <q-btn icon="close" flat round @click="$emit('update:modelValue', false)" />
+          </div>
         </div>
       </q-card-section>
 
@@ -110,6 +124,9 @@
         </div>
       </q-card-section>
     </q-card>
+
+    <!-- FICHA OFICIAL DE KARDEX (IMPRIMIBLE / PDF) -->
+    <FichaKardexDialog v-model="showFicha" :empleado="kardex" />
   </q-dialog>
 </template>
 
@@ -118,9 +135,11 @@ import { ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useGeosStore } from 'src/stores/geosStore';
+import FichaKardexDialog from 'src/components/Kardex/FichaKardexDialog.vue';
 
 const $q = useQuasar();
 const store = useGeosStore();
+const showFicha = ref(false);
 
 const props = defineProps({
   modelValue: Boolean,

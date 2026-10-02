@@ -69,6 +69,7 @@
           <KardexMueble
             :mueble="mueble"
             :highlighted-cajones="highlightedCajones"
+            :targeted-cajon-id="targetedCajonId"
             @open-drawer="openDrawer"
             @configure-drawer="openDrawerConfig"
             @drag-change="onDragChange"
@@ -124,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
 import { useGeosStore } from 'src/stores/geosStore';
 import draggable from 'vuedraggable';
@@ -232,6 +233,80 @@ const onDropSeparateColumn = async (evt) => {
     store.clearDragContext();
   }
 };
+
+// Localizador Visual Spotlight (Ctrl + K)
+const targetedCajonId = ref(null);
+
+const handleSpotlightLocator = async (target) => {
+  if (!target) return;
+
+  if (target.isVirtual) {
+    // Si es virtual, hacer scroll al dock de Gaveta Virtual y abrir su kardex
+    const dockEl = document.querySelector('.dock-wrapper') || document.querySelector('.gaveta-dock');
+    if (dockEl) {
+      dockEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    const emp = (store.expedientesSinAsignar || []).find((e) => e.id === target.empleadoId);
+    if (emp) {
+      openKardex(emp);
+    }
+    return;
+  }
+
+  if (target.cajonId) {
+    targetedCajonId.value = target.cajonId;
+
+    // Buscar el cajon en los muebles para abrirlo
+    let targetCajon = null;
+    for (const m of store.muebles || []) {
+      const found = (m.cajones || []).find((c) => c.id === target.cajonId);
+      if (found) {
+        targetCajon = found;
+        break;
+      }
+    }
+
+    await nextTick();
+    const cellEl = document.getElementById(`cajon-cell-${target.cajonId}`);
+    if (cellEl) {
+      cellEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    $q.notify({
+      type: 'info',
+      icon: 'my_location',
+      color: 'amber-9',
+      textColor: 'white',
+      position: 'top',
+      message: `¡Localizado! Expediente de ${target.nombre || 'Personal'} en la gaveta señalada.`,
+      timeout: 4500
+    });
+
+    // Abrir automáticamente el panel lateral de la gaveta tras 1.2s
+    setTimeout(() => {
+      if (targetCajon) {
+        selectedDrawer.value = targetCajon;
+        highlightedKardexId.value = target.empleadoId;
+        drawerPanelOpen.value = true;
+      }
+    }, 1200);
+
+    // Desactivar el pulso visual después de 6 segundos
+    setTimeout(() => {
+      targetedCajonId.value = null;
+      store.clearLocatorTarget();
+    }, 6000);
+  }
+};
+
+watch(
+  () => store.locatorTarget,
+  (target) => {
+    if (!target) return;
+    handleSpotlightLocator(target);
+  },
+  { deep: true, immediate: true }
+);
 
 // Lifecycle
 onMounted(() => {
