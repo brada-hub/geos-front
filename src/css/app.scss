@@ -72,3 +72,199 @@ body {
 .text-slate-200 { color: #e2e8f0 !important; }
 .text-slate-100 { color: #f1f5f9 !important; }
 
+/* ============================================================
+   TEMA OSCURO PREMIUM (DARK MODE)
+   ============================================================ */
+body.body--dark {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+
+  .page-container-bg {
+    background: #0b0f19 !important;
+  }
+
+  .kardex-page-canvas {
+    background: radial-gradient(circle at top right, #111827 0%, #0f172a 45%, #090d16 100%) !important;
+  }
+
+  /* Header & Drawer */
+  .main-header {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border-bottom: 1px solid #1e293b !important;
+  }
+
+  .main-drawer {
+    background: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+  }
+
+  .drawer-header-box {
+    border-bottom: 1px solid #1e293b !important;
+  }
+
+  .drawer-nav-item:hover {
+    background: #1e293b !important;
+  }
+
+  .drawer-item-title {
+    color: #f8fafc !important;
+  }
+
+  .drawer-item-sub {
+    color: #94a3b8 !important;
+  }
+
+  .drawer-section-title {
+    color: #64748b !important;
+  }
+
+  .workspace-avatar {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+  }
+
+  /* Cards & Muebles */
+  .mueble-card {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+  }
+
+  .mueble-header {
+    background: #0f172a !important;
+    border-bottom: 1px solid #1e293b !important;
+  }
+
+  .cajon-cell {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  .cajon-content {
+    background: #1e293b !important;
+  }
+
+  .cajon-cell:hover {
+    background: #243048 !important;
+    border-color: #6366f1 !important;
+  }
+
+  .drawer-label-badge {
+    background: #0f172a !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+  }
+
+  .count-pill {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+  }
+
+  .count-pill-active {
+    background: #1e1b4b !important;
+    color: #a5b4fc !important;
+    border-color: #4338ca !important;
+  }
+
+  .drawer-number-text {
+    color: #94a3b8 !important;
+  }
+
+  .mueble-base {
+    background: #0f172a !important;
+    border-top: 1px solid #1e293b !important;
+  }
+
+  /* Gaveta Virtual Dock */
+  .dock-card {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+  }
+
+  .dock-header {
+    background: #1e293b !important;
+  }
+
+  /* Folders */
+  .folder-card {
+    background: #182235 !important;
+    border-color: #334155 !important;
+  }
+
+  .folder-card:hover {
+    background: #1e2d47 !important;
+  }
+
+  /* Search & Spotlight */
+  .spotlight-card {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+  }
+
+  .spotlight-search-header {
+    background: #0f172a !important;
+  }
+
+  .spotlight-input {
+    color: #f8fafc !important;
+  }
+
+  .spotlight-toolbar,
+  .spotlight-footer {
+    background: #131b2e !important;
+    border-color: #1e293b !important;
+  }
+
+  .spotlight-item:hover,
+  .spotlight-item-selected {
+    background: #1e293b !important;
+  }
+
+  .spotlight-header-trigger {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  .spotlight-trigger-kbd {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+  }
+
+  /* Utility slate overrides */
+  .text-slate-900 { color: #f8fafc !important; }
+  .text-slate-800 { color: #f1f5f9 !important; }
+  .text-slate-700 { color: #e2e8f0 !important; }
+  .text-slate-600 { color: #cbd5e1 !important; }
+  .text-slate-500 { color: #94a3b8 !important; }
+
+  /* User pill and actions */
+  .user-pill {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  .clock-display {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  .clock-text {
+    color: #818cf8 !important;
+  }
+
+  .toolbar-action-btn {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #cbd5e1 !important;
+  }
+}
+

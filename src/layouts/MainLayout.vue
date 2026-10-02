@@ -51,6 +51,20 @@
             <span class="clock-text">{{ liveTime }}</span>
           </div>
 
+          <!-- BOTÓN TEMA OSCURO / CLARO -->
+          <q-btn
+            flat
+            round
+            dense
+            size="sm"
+            :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+            :color="$q.dark.isActive ? 'amber-4' : 'slate-600'"
+            class="toolbar-action-btn"
+            @click="toggleDarkMode"
+          >
+            <q-tooltip>{{ $q.dark.isActive ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro' }}</q-tooltip>
+          </q-btn>
+
           <!-- BOTÓN SINCRONIZAR DATOS EN VIVO -->
           <q-btn
             flat
@@ -315,6 +329,48 @@
                 <q-item-label caption class="drawer-item-sub">Refrescar estado en vivo</q-item-label>
               </q-item-section>
             </q-item>
+
+            <!-- TOGGLE MODO OSCURO -->
+            <q-item
+              clickable
+              v-ripple
+              @click="toggleDarkMode"
+              class="drawer-nav-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center" :style="$q.dark.isActive ? 'background: #312e81; border-color: #4338ca;' : ''">
+                  <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" size="18px" :color="$q.dark.isActive ? 'amber-4' : 'indigo-7'" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">{{ $q.dark.isActive ? 'Modo Claro' : 'Modo Oscuro' }}</q-item-label>
+                <q-item-label caption class="drawer-item-sub">{{ $q.dark.isActive ? 'Tema claro de alto contraste' : 'Descansar la vista' }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="$q.dark.isActive ? 'toggle_on' : 'toggle_off'" :color="$q.dark.isActive ? 'amber-4' : 'grey-5'" size="24px" />
+              </q-item-section>
+            </q-item>
+
+            <!-- BOTÓN INSTALAR APLICACIÓN (PWA) -->
+            <q-item
+              clickable
+              v-ripple
+              @click="installPwaApp"
+              class="drawer-nav-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center" style="background: #eff6ff; border-color: #bfdbfe;">
+                  <q-icon :name="isAppInstalled ? 'verified' : 'install_desktop'" size="18px" color="blue-7" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">{{ isAppInstalled ? 'App Instalada' : 'Instalar Aplicación' }}</q-item-label>
+                <q-item-label caption class="drawer-item-sub">{{ isAppInstalled ? 'Funcionando como app nativa' : 'En tu PC o celular' }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <span class="spotlight-kbd-side" style="background: #e0e7ff; color: #4338ca;">PWA</span>
+              </q-item-section>
+            </q-item>
           </q-list>
 
           <q-separator class="q-my-md" style="background: #e2e8f0;" />
@@ -475,7 +531,45 @@ const spotlightOpen = ref(false);
 const metricasOpen = ref(false);
 const liveTime = ref('');
 
+const installPromptEvent = ref(null);
+const isAppInstalled = ref(false);
+
 let clockInterval = null;
+
+const toggleDarkMode = () => {
+  $q.dark.toggle();
+  localStorage.setItem('docus_dark_mode', $q.dark.isActive);
+  $q.notify({
+    type: 'info',
+    icon: $q.dark.isActive ? 'dark_mode' : 'light_mode',
+    message: $q.dark.isActive ? 'Modo oscuro activado' : 'Modo claro activado',
+    position: 'top-right',
+    timeout: 1000
+  });
+};
+
+const installPwaApp = async () => {
+  if (installPromptEvent.value) {
+    installPromptEvent.value.prompt();
+    const choiceResult = await installPromptEvent.value.userChoice;
+    if (choiceResult.outcome === 'accepted') {
+      isAppInstalled.value = true;
+      $q.notify({
+        type: 'positive',
+        icon: 'verified',
+        message: '¡DOCUS RRHH instalado con éxito como aplicación nativa!',
+        position: 'top'
+      });
+    }
+    installPromptEvent.value = null;
+  } else {
+    $q.dialog({
+      title: 'Instalar Aplicación DOCUS RRHH',
+      message: 'Puedes usar DOCUS RRHH como una app instalada en tu dispositivo:\n\n• En PC (Google Chrome o Edge): Haz clic en el ícono de instalación (⊕) ubicado en la barra de direcciones superior derecha.\n• En celular Android: Abre el menú del navegador y selecciona "Instalar aplicación" o "Agregar a pantalla principal".\n• En iPhone/iPad: Presiona el botón "Compartir" en Safari y selecciona "Agregar al inicio".',
+      ok: { label: 'Entendido', color: 'primary', unelevated: true }
+    });
+  }
+};
 
 const handleKeyDown = (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -605,6 +699,9 @@ const porcentajeArchivado = computed(() => {
   return Math.round(porcentajeArchivadoDecimal.value * 100);
 });
 
+let onBeforeInstallPrompt = null;
+let onAppInstalled = null;
+
 onMounted(() => {
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
@@ -614,11 +711,24 @@ onMounted(() => {
   });
 
   window.addEventListener('keydown', handleKeyDown);
+
+  onBeforeInstallPrompt = (e) => {
+    e.preventDefault();
+    installPromptEvent.value = e;
+  };
+  onAppInstalled = () => {
+    isAppInstalled.value = true;
+    installPromptEvent.value = null;
+  };
+  window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+  window.addEventListener('appinstalled', onAppInstalled);
 });
 
 onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval);
   window.removeEventListener('keydown', handleKeyDown);
+  if (onBeforeInstallPrompt) window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+  if (onAppInstalled) window.removeEventListener('appinstalled', onAppInstalled);
 });
 </script>
 
