@@ -2,12 +2,32 @@
   <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" persistent>
     <q-card style="min-width: 500px; max-width: 700px">
       <q-card-section class="bg-primary text-white">
-        <div class="row items-center justify-between">
+        <div class="row items-center justify-between no-wrap">
           <div class="row items-center no-wrap">
             <div class="kardex-numero-big q-mr-md">{{ kardex?.numero_unico || kardex?.id }}</div>
             <div>
               <div class="text-h5 text-weight-bold">{{ kardex?.nombre_completo }}</div>
-              <div class="text-caption">{{ kardex?.codigo_archivo }}</div>
+              <div class="row items-center q-gutter-x-sm text-caption q-mt-xs">
+                <span><strong>Código:</strong> {{ kardex?.codigo_archivo }}</span>
+                <span v-if="kardex?.documento_identidad">• <strong>CI:</strong> {{ kardex?.documento_identidad }}</span>
+                <span v-if="kardex?.cargo">• <strong>Cargo:</strong> {{ kardex?.cargo }}</span>
+              </div>
+              <div class="row items-center q-gutter-x-sm q-mt-xs">
+                <q-badge
+                  v-if="kardex?.tipo_contrato"
+                  :color="kardex.tipo_contrato.color || 'indigo-9'"
+                  text-color="white"
+                  class="text-weight-bold"
+                >
+                  {{ kardex.tipo_contrato.nombre }}
+                </q-badge>
+                <span v-if="kardex?.fecha_nacimiento" class="text-caption text-blue-grey-1">
+                  Nacimiento: {{ kardex?.fecha_nacimiento }}
+                </span>
+                <span v-if="kardex?.sexo || kardex?.sexo_id" class="text-caption text-blue-grey-1">
+                  Sexo: {{ (typeof kardex?.sexo === 'object' ? kardex?.sexo?.nombre : null) || (kardex?.sexo === 'M' || kardex?.sexo_id === 1 ? 'Masculino' : 'Femenino') }}
+                </span>
+              </div>
             </div>
           </div>
           <q-btn icon="close" flat round @click="$emit('update:modelValue', false)" />
@@ -47,15 +67,40 @@
           <q-timeline-entry
             v-for="mov in historial"
             :key="mov.id"
+            :icon="getMovIcon(mov)"
+            :color="getMovColor(mov)"
             :subtitle="formatDate(mov.created_at)"
           >
             <template v-slot:title>
-              <span v-if="mov.estado_nuevo !== null">Estado: {{ getEstadoLabel(mov.estado_anterior) }} → {{ getEstadoLabel(mov.estado_nuevo) }}</span>
-              <span v-else>Movimiento registrado</span>
+              <div class="row items-center q-gutter-xs">
+                <span class="text-weight-bold">{{ getMovTitle(mov) }}</span>
+              </div>
             </template>
-            <div v-if="mov.comentario" class="text-grey-7">{{ mov.comentario }}</div>
-            <div v-if="mov.cajon_destino_id" class="text-caption text-grey-5">
-              Movido a gaveta ID: {{ mov.cajon_destino_id }}
+
+            <div v-if="mov.comentario" class="text-body2 text-grey-8 q-my-xs">
+              {{ mov.comentario }}
+            </div>
+
+            <!-- DETALLES DE UBICACIÓN ORIGEN / DESTINO -->
+            <div v-if="mov.tipo_movimiento === 'ubicacion' && (mov.cajon_origen || mov.cajon_destino)" class="q-mt-xs bg-grey-2 q-pa-xs rounded-borders text-caption text-grey-8">
+              <span v-if="mov.cajon_origen">
+                <strong>Origen:</strong> Gaveta F{{ mov.cajon_origen.fila }}-C{{ mov.cajon_origen.columna }} ({{ mov.cajon_origen.mueble?.nombre || 'Archivador' }})
+              </span>
+              <span v-if="mov.cajon_origen && mov.cajon_destino"> ➔ </span>
+              <span v-if="mov.cajon_destino">
+                <strong>Destino:</strong> Gaveta F{{ mov.cajon_destino.fila }}-C{{ mov.cajon_destino.columna }} ({{ mov.cajon_destino.mueble?.nombre || 'Archivador' }})
+              </span>
+            </div>
+
+            <!-- DETALLES DE CONTRATO ANTERIOR / NUEVO -->
+            <div v-if="mov.tipo_movimiento === 'contrato' && (mov.tipo_contrato_anterior || mov.tipo_contrato_nuevo)" class="q-mt-xs text-caption">
+              <q-badge color="grey-6" text-color="white" class="q-mr-xs">
+                {{ mov.tipo_contrato_anterior?.nombre || 'Sin contrato previo' }}
+              </q-badge>
+              <span>➔</span>
+              <q-badge :color="mov.tipo_contrato_nuevo?.color || 'primary'" text-color="white" class="q-ml-xs">
+                {{ mov.tipo_contrato_nuevo?.nombre || 'Nuevo contrato' }}
+              </q-badge>
             </div>
           </q-timeline-entry>
         </q-timeline>
@@ -142,6 +187,42 @@ const formatDate = (dateStr) => {
 
 const getEstadoLabel = (estado) => {
   return estadoLabels[estado] ?? 'N/A';
+};
+
+const getMovIcon = (mov) => {
+  switch (mov.tipo_movimiento) {
+    case 'contrato': return 'work_history';
+    case 'cargo': return 'badge';
+    case 'ubicacion': return 'drive_file_move';
+    case 'estado': return 'swap_horiz';
+    default: return 'event';
+  }
+};
+
+const getMovColor = (mov) => {
+  switch (mov.tipo_movimiento) {
+    case 'contrato': return 'purple-8';
+    case 'cargo': return 'teal-8';
+    case 'ubicacion': return 'indigo-8';
+    case 'estado': return 'blue-8';
+    default: return 'primary';
+  }
+};
+
+const getMovTitle = (mov) => {
+  if (mov.tipo_movimiento === 'contrato') {
+    return 'Transición de Régimen Contractual';
+  }
+  if (mov.tipo_movimiento === 'cargo') {
+    return 'Ascenso o Modificación de Cargo';
+  }
+  if (mov.tipo_movimiento === 'ubicacion') {
+    return 'Reubicación de Expediente entre Gavetas';
+  }
+  if (mov.estado_nuevo !== null && mov.estado_nuevo !== undefined) {
+    return `Estado: ${getEstadoLabel(mov.estado_anterior)} → ${getEstadoLabel(mov.estado_nuevo)}`;
+  }
+  return 'Movimiento registrado';
 };
 </script>
 

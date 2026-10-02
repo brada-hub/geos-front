@@ -3,8 +3,9 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
-      { path: 'kardex', component: () => import('pages/MapaKardex.vue') }
+      { path: '', redirect: '/kardex' },
+      { path: 'kardex', component: () => import('pages/MapaKardex.vue') },
+      { path: 'personal', component: () => import('pages/PersonalPage.vue') },
     ],
   },
 

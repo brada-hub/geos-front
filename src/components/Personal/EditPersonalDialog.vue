@@ -1,17 +1,20 @@
 <template>
   <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
-    <q-card style="min-width: 520px; max-width: 600px; border-radius: 12px;">
+    <q-card style="min-width: 540px; max-width: 640px; border-radius: 14px;">
       <q-card-section class="bg-primary text-white row items-center justify-between">
         <div class="row items-center q-gutter-sm">
-          <q-icon name="person_add" size="24px" />
-          <div class="text-h6 font-weight-bold">Nuevo Expediente de Personal</div>
+          <q-icon name="manage_accounts" size="26px" />
+          <div>
+            <div class="text-h6 font-weight-bold">Modificar Ficha de Personal</div>
+            <div class="text-caption text-blue-grey-1">{{ persona?.codigo_archivo }} • {{ persona?.documento_identidad }}</div>
+          </div>
         </div>
         <q-btn flat round dense icon="close" v-close-popup />
       </q-card-section>
 
-      <q-card-section class="q-pa-md">
+      <q-card-section class="q-pa-md" style="max-height: 75vh; overflow-y: auto;">
         <q-form @submit="handleSubmit" class="q-gutter-y-sm">
-          <!-- DATOS DE IDENTIFICACIÓN -->
+          <!-- DATOS PERSONALES -->
           <div class="text-caption text-weight-bolder text-primary q-mb-xs">
             DATOS PERSONALES
           </div>
@@ -23,8 +26,7 @@
                 outlined
                 dense
                 label="Nombres *"
-                placeholder="Ej: Juan Carlos"
-                :rules="[val => !!val || 'Ingresa los nombres']"
+                :rules="[val => !!val || 'Requerido']"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -33,8 +35,7 @@
                 outlined
                 dense
                 label="Primer Apellido *"
-                placeholder="Ej: Pérez"
-                :rules="[val => !!val || 'Primer apellido requerido']"
+                :rules="[val => !!val || 'Requerido']"
               />
             </div>
           </div>
@@ -46,7 +47,7 @@
                 outlined
                 dense
                 label="Segundo Apellido"
-                placeholder="Ej: Gómez (opcional)"
+                placeholder="Opcional"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -55,8 +56,7 @@
                 outlined
                 dense
                 label="Documento de Identidad (CI) *"
-                placeholder="Ej: 4892019 LP"
-                :rules="[val => !!val || 'Documento de identidad requerido']"
+                :rules="[val => !!val || 'Requerido']"
               />
             </div>
           </div>
@@ -90,7 +90,7 @@
 
           <q-separator class="q-my-sm" />
 
-          <!-- SEDE, RÉGIMEN CONTRACTUAL Y CARGO (3FN) -->
+          <!-- SEDE, RÉGIMEN CONTRACTUAL Y CARGO -->
           <div class="text-caption text-weight-bolder text-primary q-mb-xs">
             SEDE, RÉGIMEN CONTRACTUAL Y CARGO
           </div>
@@ -106,8 +106,8 @@
                 map-options
                 outlined
                 dense
-                label="Sede Asignada *"
-                :rules="[val => !!val || 'Selecciona la sede']"
+                label="Sede *"
+                :rules="[val => !!val || 'Requerido']"
               >
                 <template v-slot:prepend>
                   <q-icon name="apartment" size="18px" color="primary" />
@@ -126,7 +126,7 @@
                 outlined
                 dense
                 label="Tipo de Contrato *"
-                :rules="[val => !!val || 'Selecciona el tipo de contrato']"
+                :rules="[val => !!val || 'Requerido']"
               >
                 <template v-slot:option="scope">
                   <q-item v-bind="scope.itemProps">
@@ -150,7 +150,7 @@
                 outlined
                 dense
                 label="Cargo *"
-                placeholder="Selecciona o escribe nuevo"
+                placeholder="Escribe o selecciona un cargo"
                 @filter="filterCargo"
               >
                 <template v-slot:prepend>
@@ -160,42 +160,34 @@
             </div>
           </div>
 
+          <div v-if="isContratoCambiado" class="bg-amber-1 q-pa-sm rounded-borders text-caption text-amber-10 q-mb-xs row items-center q-gutter-xs">
+            <q-icon name="info" size="18px" />
+            <span>Se registrará en el historial el cambio de régimen contractual.</span>
+          </div>
+
           <q-separator class="q-my-sm" />
 
-          <!-- UBICACIÓN EN ARCHIVO (MUEBLE Y GAVETA) - AHORA OPCIONAL -->
-          <div class="row items-center justify-between q-mb-xs">
-            <span class="text-caption text-weight-bolder text-primary">UBICACIÓN FÍSICA EN GAVETA (OPCIONAL)</span>
-            <q-toggle
-              v-model="asignarGavetaAhora"
-              label="Asignar gaveta física ahora"
+          <!-- TRASLADO / UBICACIÓN FÍSICA -->
+          <div class="text-caption text-weight-bolder text-primary q-mb-xs row items-center justify-between">
+            <span>UBICACIÓN FÍSICA EN ARCHIVADOR</span>
+            <q-btn
+              v-if="form.cajon_id"
+              flat
               dense
-              color="primary"
+              color="deep-purple-8"
+              icon="cloud_queue"
+              label="Mover a Gaveta Virtual"
+              size="xs"
+              @click="desasignarGaveta"
             />
           </div>
 
-          <div class="row q-col-gutter-sm">
-            <div class="col-12 col-md-6">
-              <q-input
-                v-model="form.codigo_archivo"
-                outlined
-                dense
-                label="Código de archivo *"
-                placeholder="Ej: EXP-2026-001"
-                :rules="[val => !!val || 'Código de archivo requerido']"
-              />
-            </div>
-            <div class="col-12 col-md-6">
-              <q-input
-                v-model="form.numero_unico"
-                outlined
-                dense
-                label="Número único / Folio"
-                placeholder="Ej: 001"
-              />
-            </div>
+          <div v-if="!form.cajon_id" class="q-pa-xs bg-purple-1 rounded-borders text-caption text-deep-purple-9 q-mb-xs row items-center q-gutter-xs">
+            <q-icon name="all_inbox" size="18px" />
+            <span>Este expediente se encuentra actualmente en la <strong>Gaveta Virtual (Sin Asignar)</strong>.</span>
           </div>
 
-          <div v-if="asignarGavetaAhora" class="row q-col-gutter-sm q-mt-xs">
+          <div class="row q-col-gutter-sm">
             <div class="col-12 col-md-6">
               <q-select
                 v-model="selectedMueble"
@@ -205,6 +197,7 @@
                 dense
                 clearable
                 label="Archivador / Mueble"
+                @update:model-value="val => { if (!val) form.cajon_id = null; }"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -213,7 +206,7 @@
                 v-model="form.cajon_id"
                 :options="selectedMueble.cajones"
                 option-value="id"
-                :option-label="opt => opt.etiqueta ? `${opt.columna === 1 ? 'Gaveta ' + opt.fila : 'Col ' + String.fromCharCode(64 + opt.columna) + ' - Gaveta ' + opt.fila} (${opt.etiqueta})` : (opt.columna === 1 ? 'Gaveta ' + opt.fila : `Col ${String.fromCharCode(64 + opt.columna)} - Gaveta ${opt.fila}`)"
+                :option-label="formatDrawerLabel"
                 emit-value
                 map-options
                 outlined
@@ -222,20 +215,24 @@
                 label="Gaveta de destino"
               />
               <div v-else class="text-caption text-grey-6 q-pt-sm">
-                Selecciona un archivador para elegir la gaveta.
+                Selecciona un archivador para ubicar físicamente el expediente.
               </div>
             </div>
           </div>
-          <div v-else class="q-mt-xs q-pa-sm bg-blue-1 rounded-borders row items-center q-gutter-sm text-caption text-blue-9">
-            <q-icon name="move_to_inbox" size="20px" color="primary" />
-            <div class="col">
-              El expediente se guardará en la <strong>Gaveta Virtual / Expedientes Sin Asignar</strong>. Podrás arrastrarlo interactivamente al archivador cuando desees.
-            </div>
+
+          <div class="q-mt-sm">
+            <q-input
+              v-model="form.comentario"
+              outlined
+              dense
+              label="Motivo del cambio / Observaciones para el Historial"
+              placeholder="Ej: Ascenso a indefinido, traslado por reorganización"
+            />
           </div>
 
           <div class="row justify-end q-gutter-sm q-pt-md">
-            <q-btn flat label="Cancelar" color="grey-7" @click="$emit('update:modelValue', false)" />
-            <q-btn unelevated color="primary" icon="save" label="Registrar Expediente" type="submit" :loading="loading" />
+            <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+            <q-btn unelevated color="primary" icon="save" label="Guardar Cambios" type="submit" :loading="loading" />
           </div>
         </q-form>
       </q-card-section>
@@ -244,25 +241,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useGeosStore } from 'src/stores/geosStore';
 
 const $q = useQuasar();
 const store = useGeosStore();
 
-defineProps({
-  modelValue: Boolean
+const props = defineProps({
+  modelValue: Boolean,
+  persona: Object,
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'updated']);
 
 const muebles = computed(() => store.muebles);
 const tiposContrato = computed(() => store.tiposContrato);
 const selectedMueble = ref(null);
 const selectedCargo = ref(null);
 const cargoOptions = ref([]);
-const asignarGavetaAhora = ref(false);
+const loading = ref(false);
 
 const sexosOptions = computed(() => {
   if (store.sexos && store.sexos.length > 0) {
@@ -291,10 +289,38 @@ const form = reactive({
   cargo_nombre: '',
   codigo_archivo: '',
   numero_unico: '',
-  cajon_id: null
+  cajon_id: null,
+  comentario: ''
 });
 
-const loading = ref(false);
+const isContratoCambiado = computed(() => {
+  return props.persona && form.tipo_contrato_id !== props.persona.tipo_contrato_id;
+});
+
+const desasignarGaveta = () => {
+  form.cajon_id = null;
+  selectedMueble.value = null;
+  $q.notify({
+    type: 'info',
+    icon: 'all_inbox',
+    message: 'El expediente se moverá a la Gaveta Virtual (Sin Asignar) al guardar.'
+  });
+};
+
+const formatDrawerLabel = (opt) => {
+  const colLetter = String.fromCharCode(64 + opt.columna);
+  const base = opt.columna === 1 ? `Gaveta ${opt.fila}` : `Col ${colLetter} - Gaveta ${opt.fila}`;
+  const etiq = opt.etiqueta ? ` (${opt.etiqueta})` : '';
+  let reglas = '';
+  if (opt.tipos_contrato_permitidos && opt.tipos_contrato_permitidos.length > 0) {
+    reglas = ` [Contratos: ${opt.tipos_contrato_permitidos.map(t => t.codigo || t.nombre).join(', ')}]`;
+  }
+  let reglasSedes = '';
+  if (opt.sedes_permitidas && opt.sedes_permitidas.length > 0) {
+    reglasSedes = ` [Sedes: ${opt.sedes_permitidas.map(s => s.nombre).join(', ')}]`;
+  }
+  return `${base}${etiq}${reglas}${reglasSedes}`;
+};
 
 const filterCargo = (val, update) => {
   update(() => {
@@ -308,10 +334,37 @@ const filterCargo = (val, update) => {
   });
 };
 
+watch(() => props.persona, (newVal) => {
+  if (newVal) {
+    form.nombres = newVal.nombres || '';
+    form.primer_apellido = newVal.primer_apellido || '';
+    form.segundo_apellido = newVal.segundo_apellido || '';
+    form.documento_identidad = newVal.documento_identidad || '';
+    form.fecha_nacimiento = newVal.fecha_nacimiento || '';
+    form.sexo_id = newVal.sexo_id || 1;
+    form.sede_id = newVal.sede_id || newVal.sede?.id || null;
+    form.tipo_contrato_id = newVal.tipo_contrato_id || null;
+    form.cargo_id = newVal.cargo_id || null;
+    form.cargo_nombre = newVal.cargo || '';
+    form.codigo_archivo = newVal.codigo_archivo || '';
+    form.numero_unico = newVal.numero_unico || '';
+    form.cajon_id = newVal.cajon_id || null;
+    form.comentario = '';
+
+    selectedCargo.value = newVal.cargo || null;
+
+    // Buscar el mueble actual
+    if (newVal.cajon && newVal.cajon.mueble_id) {
+      selectedMueble.value = store.muebles.find(m => m.id === newVal.cajon.mueble_id) || null;
+    } else {
+      selectedMueble.value = null;
+    }
+  }
+}, { immediate: true });
+
 const handleSubmit = async () => {
   loading.value = true;
 
-  // Manejar cargo seleccionado (objeto, string o nuevo)
   if (selectedCargo.value) {
     if (typeof selectedCargo.value === 'object' && selectedCargo.value.id) {
       form.cargo_id = selectedCargo.value.id;
@@ -328,48 +381,23 @@ const handleSubmit = async () => {
     }
   }
 
-  if (!asignarGavetaAhora.value) {
-    form.cajon_id = null;
-  }
-
-  const res = await store.createEmpleado({ ...form });
+  const res = await store.updatePersonal(props.persona.id, { ...form });
   loading.value = false;
 
-  if (res && res.success) {
+  if (res.success) {
     $q.notify({
       type: 'positive',
       icon: 'check_circle',
-      message: `¡Expediente de ${form.nombres} ${form.primer_apellido} registrado con éxito!`
+      message: 'Ficha de personal actualizada correctamente'
     });
+    emit('updated');
     emit('update:modelValue', false);
-
-    // Reset form
-    form.nombres = '';
-    form.primer_apellido = '';
-    form.segundo_apellido = '';
-    form.documento_identidad = '';
-    form.fecha_nacimiento = '';
-    form.sexo_id = 1;
-    form.sede_id = null;
-    form.tipo_contrato_id = null;
-    form.cargo_id = null;
-    form.cargo_nombre = '';
-    form.codigo_archivo = '';
-    form.numero_unico = '';
-    form.cajon_id = null;
-    selectedMueble.value = null;
-    selectedCargo.value = null;
-    asignarGavetaAhora.value = false;
   } else {
     $q.notify({
       type: 'negative',
-      icon: 'error',
-      message: res?.message || 'Error al registrar el expediente. Verifica que el CI y código no estén repetidos.'
+      icon: 'warning',
+      message: res.message || 'Error al actualizar información'
     });
   }
 };
-
-onMounted(() => {
-  store.fetchCatalogos();
-});
 </script>

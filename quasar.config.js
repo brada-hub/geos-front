@@ -47,8 +47,9 @@ export default defineConfig((ctx) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
-      // rawDefine: {}
+      env: {
+        API_URL: process.env.API_URL || process.env.VITE_API_URL || 'http://localhost:8000/api'
+      },      // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
@@ -109,7 +110,7 @@ export default defineConfig((ctx) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Notify'],
+      plugins: ['Notify', 'Dialog'],
     },
 
     // animations: 'all', // --- includes all animations

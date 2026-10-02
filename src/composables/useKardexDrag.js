@@ -19,12 +19,21 @@ export function useKardexDrag() {
   const onDragChange = async (evt, newCajonId) => {
     if (evt.added) {
       const empleado = evt.added.element;
-      const success = await store.updateEmpleadoUbicacion(empleado.id, newCajonId);
-      if (success) {
+      const res = await store.updateEmpleadoUbicacion(empleado.id, newCajonId);
+      if (res && res.success) {
         $q.notify({
           type: 'positive',
-          message: `#${empleado.numero_unico || empleado.id} reubicado`,
+          icon: 'check_circle',
+          message: `#${empleado.numero_unico || empleado.id} reubicado exitosamente`,
           position: 'top-right'
+        });
+      } else {
+        $q.notify({
+          type: 'negative',
+          icon: 'block',
+          message: res?.message || 'No se puede mover el expediente a esta gaveta por reglas de admisión',
+          position: 'top-right',
+          timeout: 4500
         });
       }
     }
