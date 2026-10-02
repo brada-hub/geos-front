@@ -246,6 +246,117 @@ body.body--dark {
   .text-slate-600 { color: #cbd5e1 !important; }
   .text-slate-500 { color: #94a3b8 !important; }
 
+  /* Workspace & Brand text */
+  .drawer-workspace-title { color: #f8fafc !important; }
+  .brand-title { color: #f8fafc !important; }
+
+  /* Kardex Header and Filters */
+  .filter-dock {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+  }
+
+  .filter-pill {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+  }
+
+  .filter-pill:hover {
+    background: #27354f !important;
+    color: #ffffff !important;
+  }
+
+  .filter-pill-active {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    border-color: #4f46e5 !important;
+  }
+
+  .sede-select :deep(.q-field__control) {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+  }
+  .sede-select :deep(.q-field__native),
+  .sede-select :deep(.q-field__marginal) {
+    color: #f8fafc !important;
+  }
+
+  /* Search Bar */
+  .search-input :deep(.q-field__control) {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+  }
+  .search-input :deep(input) {
+    color: #f8fafc !important;
+  }
+  .search-results-dropdown {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+  }
+  .search-result-item:hover {
+    background: #1e293b !important;
+  }
+
+  /* Gaveta Virtual Body */
+  .dock-content-body {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+  }
+
+  .virtual-dropzone.dropzone-empty {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+    color: #94a3b8 !important;
+  }
+
+  .virtual-folder-chip {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+  }
+
+  /* Muebles and Cajones */
+  .mueble-body {
+    background: #111827 !important;
+  }
+
+  .mueble-grid {
+    background: #0b0f19 !important;
+    border-color: #1e293b !important;
+  }
+
+  .col-header-box {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+  }
+
+  .col-header-box:hover {
+    background: #27354f !important;
+    border-color: #475569 !important;
+  }
+
+  .rule-pill {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+  }
+
+  /* Dialogs and Modals */
+  .detail-header {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+  }
+
+  .expedientes-scroll-area {
+    background: #0b0f19 !important;
+  }
+
+  .bg-slate-50 {
+    background: #131b2e !important;
+  }
+
   /* User pill and actions */
   .user-pill {
     background: #1e293b !important;
@@ -266,5 +377,27 @@ body.body--dark {
     border: 1px solid #334155 !important;
     color: #cbd5e1 !important;
   }
+
+  .drawer-scroll-section::-webkit-scrollbar-thumb {
+    background: #334155;
+  }
+  .drawer-scroll-section::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+/* Custom drawer scrollbar */
+.drawer-scroll-section::-webkit-scrollbar {
+  width: 5px;
+}
+.drawer-scroll-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+.drawer-scroll-section::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.drawer-scroll-section::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 

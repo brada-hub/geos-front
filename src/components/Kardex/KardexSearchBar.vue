@@ -6,7 +6,8 @@
       outlined
       :placeholder="placeholder"
       clearable
-      bg-color="white"
+      :dark="$q.dark.isActive"
+      :bg-color="$q.dark.isActive ? 'dark' : 'white'"
       class="search-input"
       @focus="showResults = true"
       @blur="hideResultsDelayed"

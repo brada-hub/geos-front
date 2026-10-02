@@ -319,6 +319,9 @@ onMounted(() => {
 .kardex-page-canvas {
   background: radial-gradient(circle at top right, #ffffff 0%, #f8fafc 45%, #f1f5f9 100%);
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .mueble-ghost {

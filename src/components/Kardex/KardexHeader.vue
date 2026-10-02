@@ -1,7 +1,7 @@
 <template>
   <div class="kardex-header column q-gutter-y-md q-mb-lg">
     <!-- FILA PRINCIPAL: TÍTULO Y BOTONES DE ACCIÓN -->
-    <div class="row items-center justify-between no-wrap q-gutter-md">
+    <div class="row items-center justify-between q-col-gutter-md q-gutter-y-sm">
       <div class="row items-center q-gutter-md">
         <div class="header-icon-badge flex flex-center">
           <q-icon name="apartment" size="26px" color="white" />
@@ -21,7 +21,7 @@
         </div>
       </div>
 
-      <div class="row q-gutter-sm items-center no-wrap">
+      <div class="row q-gutter-sm items-center flex-wrap">
         <!-- SELECTOR DE SEDE -->
         <q-select
           v-if="store.sedes.length > 0"
@@ -34,7 +34,8 @@
           outlined
           dense
           options-dense
-          bg-color="white"
+          :dark="$q.dark.isActive"
+          :bg-color="$q.dark.isActive ? 'dark' : 'white'"
           class="sede-select"
         >
           <template v-slot:prepend>
@@ -60,7 +61,7 @@
     </div>
 
     <!-- BARRA DE FILTROS DINÁMICOS POR TIPO DE CONTRATO (3FN) -->
-    <div class="filter-dock row items-center justify-between q-py-sm q-px-md">
+    <div class="filter-dock row items-center justify-between q-py-sm q-px-md q-gutter-y-xs">
       <div class="row items-center q-gutter-xs">
         <span class="text-caption text-weight-bolder text-slate-700 q-mr-sm row items-center">
           <q-icon name="tune" size="16px" color="indigo" class="q-mr-xs" />

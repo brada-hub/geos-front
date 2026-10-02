@@ -147,17 +147,17 @@
       show-if-above
       bordered
       :width="280"
-      class="main-drawer column justify-between"
+      class="main-drawer"
     >
-      <div class="column full-height">
+      <div class="drawer-inner-container column no-wrap full-height">
         <!-- WORKSPACE HEADER -->
-        <div class="drawer-header-box q-pa-md border-bottom">
+        <div class="drawer-header-box q-pa-md border-bottom col-auto">
           <div class="row items-center q-gutter-sm no-wrap">
             <div class="workspace-avatar flex flex-center">
               <q-icon name="apartment" size="18px" color="indigo" />
             </div>
             <div class="col ellipsis">
-              <div class="text-weight-bolder text-slate-900 ellipsis" style="font-size: 13.5px;">
+              <div class="text-weight-bolder drawer-workspace-title ellipsis" style="font-size: 13.5px;">
                 DOCUS Archivo RRHH
               </div>
               <div class="text-caption text-slate-500" style="font-size: 11px;">
@@ -167,8 +167,8 @@
           </div>
         </div>
 
-        <!-- SECCIÓN DE NAVEGACIÓN PRINCIPAL -->
-        <div class="q-px-sm q-pt-md">
+        <!-- SECCIÓN DE NAVEGACIÓN Y HERRAMIENTAS SCROLLABLE -->
+        <div class="drawer-scroll-section col scroll q-px-sm q-pt-md q-pb-md">
           <div class="drawer-section-title q-px-sm q-mb-xs">
             NAVEGACIÓN PRINCIPAL
           </div>
@@ -416,20 +416,20 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- FOOTER DEL DRAWER -->
-      <div class="drawer-footer q-pa-md border-top">
-        <div class="row items-center justify-between">
-          <div class="row items-center q-gutter-xs">
-            <span class="footer-dot"></span>
-            <span class="text-caption text-weight-bold text-slate-600" style="font-size: 11px;">
-              DOCUS v2.4 • 3FN
-            </span>
+        <!-- FOOTER DEL DRAWER -->
+        <div class="drawer-footer q-pa-md border-top col-auto">
+          <div class="row items-center justify-between">
+            <div class="row items-center q-gutter-xs">
+              <span class="footer-dot"></span>
+              <span class="text-caption text-weight-bold text-slate-600" style="font-size: 11px;">
+                DOCUS v2.4 • 3FN
+              </span>
+            </div>
+            <q-badge color="indigo-1" text-color="indigo-8" class="text-weight-bold" style="font-size: 10px;">
+              Auditoría Activa
+            </q-badge>
           </div>
-          <q-badge color="indigo-1" text-color="indigo-8" class="text-weight-bold" style="font-size: 10px;">
-            Auditoría Activa
-          </q-badge>
         </div>
       </div>
     </q-drawer>
@@ -881,6 +881,30 @@ onUnmounted(() => {
 .main-drawer {
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
+  overflow: hidden !important;
+}
+
+.main-drawer :deep(.q-drawer__content) {
+  overflow: hidden !important;
+}
+
+.drawer-inner-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap !important;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.drawer-scroll-section {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.drawer-workspace-title {
+  color: #0f172a;
 }
 
 .drawer-header-box {
@@ -1073,6 +1097,8 @@ onUnmounted(() => {
 .page-container-bg {
   background: #f8fafc;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* TRANSICIÓN FLUIDA ENTRE PÁGINAS */

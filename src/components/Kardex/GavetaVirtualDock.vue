@@ -2,7 +2,7 @@
   <div class="gaveta-virtual-wrapper q-mb-md">
     <q-card class="gaveta-virtual-card" flat>
       <!-- BARRA SUPERIOR DEL DOCK -->
-      <div class="row items-center justify-between q-pa-sm bg-virtual text-white">
+      <div class="row items-center justify-between q-pa-sm bg-virtual text-white q-gutter-y-xs flex-wrap">
         <div class="row items-center q-gutter-sm cursor-pointer" @click="expanded = !expanded">
           <div class="virtual-icon-badge flex flex-center">
             <q-icon name="cloud_queue" size="20px" color="white" />
@@ -68,7 +68,7 @@
 
       <!-- ÁREA INTERACTIVA DRAGGABLE -->
       <q-slide-transition>
-        <div v-show="expanded" class="q-pa-sm bg-grey-1 border-top">
+        <div v-show="expanded" class="dock-content-body q-pa-sm border-top">
           <!-- DROPZONE DRAGGABLE -->
           <draggable
             v-model="localSinAsignar"
