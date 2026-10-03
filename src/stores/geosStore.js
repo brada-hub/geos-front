@@ -411,5 +411,41 @@ export const useGeosStore = defineStore('geos', {
         return { success: false, message: msg, errores: error.response?.data?.errores || [] };
       }
     },
+
+    async cambiarEstadoExpediente(empleadoId, nuevoEstado, comentario = '') {
+      try {
+        await api.post(`/empleados/${empleadoId}/movimientos`, {
+          estado_nuevo: nuevoEstado,
+          comentario: comentario || (nuevoEstado === 0 ? 'Marcado como Presente en gaveta' : nuevoEstado === 1 ? 'Marcado como Ausente' : 'Marcado como Prestado')
+        });
+
+        // Actualizar reactivamente el estado en muebles y cajones
+        for (const m of this.muebles || []) {
+          for (const c of m.cajones || []) {
+            const emp = (c.empleados || []).find(e => e.id === empleadoId);
+            if (emp) {
+              emp.estado = nuevoEstado;
+            }
+          }
+        }
+
+        // Actualizar en expedientes sin asignar si corresponde
+        const sinAsig = (this.expedientesSinAsignar || []).find(e => e.id === empleadoId);
+        if (sinAsig) {
+          sinAsig.estado = nuevoEstado;
+        }
+
+        // Actualizar en lista de personal
+        const p = (this.personal || []).find(e => e.id === empleadoId);
+        if (p) {
+          p.estado = nuevoEstado;
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error al cambiar estado de expediente:', error);
+        return false;
+      }
+    },
   },
 });

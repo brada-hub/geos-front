@@ -95,6 +95,7 @@
           v-model="draggableEmpleados"
           group="expedientes"
           item-key="id"
+          handle=".drag-handle"
           class="carpetas-container"
           @change="handleChange"
           @start="$emit('drag-start')"
