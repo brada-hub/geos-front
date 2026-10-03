@@ -1,18 +1,50 @@
 <template>
-  <q-page class="kardex-page-canvas q-pa-lg">
-    <!-- HEADER -->
+  <q-page class="kardex-page-canvas q-pa-sm q-pa-sm-md q-pa-md-lg">
+    <!-- HEADER COMPACTO Y RESPONSIVO -->
     <KardexHeader
       @add-mueble="muebleDialog = true"
       @add-empleado="empleadoDialog = true"
     />
 
-    <!-- BUSCADOR -->
-    <KardexSearchBar
-      v-model="searchQuery"
-      :result-count="resultCount"
-      :search-results="searchResults"
-      @select-result="navigateToResult"
-    />
+    <!-- NAVEGACIÓN ENTRE APARTADOS PRINCIPALES (AMIGABLE Y OPTIMIZADO) -->
+    <div class="row items-center justify-between q-mb-md view-tabs-bar q-col-gutter-xs">
+      <div class="view-segmented-pills row items-center q-gutter-none">
+        <button
+          class="view-pill-btn"
+          :class="{ 'view-pill-btn-active': activeViewTab === 'muebles' }"
+          @click="activeViewTab = 'muebles'"
+        >
+          <q-icon name="dashboard" size="15px" class="q-mr-xs" />
+          <span>Archivadores Físicos</span>
+          <span class="view-pill-count">{{ muebles.length }}</span>
+        </button>
+
+        <button
+          class="view-pill-btn"
+          :class="{ 'view-pill-btn-active': activeViewTab === 'virtual' }"
+          @click="activeViewTab = 'virtual'"
+        >
+          <q-icon name="cloud_queue" size="15px" class="q-mr-xs" />
+          <span>Gaveta Virtual</span>
+          <span
+            class="view-pill-count"
+            :class="store.expedientesSinAsignar?.length > 0 ? 'view-pill-count-alert' : ''"
+          >
+            {{ store.expedientesSinAsignar?.length || 0 }}
+          </span>
+        </button>
+      </div>
+
+      <!-- BUSCADOR RÁPIDO INTEGRADO CUANDO SE ESTÁ EN ARCHIVADORES FÍSICOS -->
+      <div class="col-12 col-sm-auto q-mt-xs q-mt-sm-none" v-if="activeViewTab === 'muebles'" style="min-width: 250px;">
+        <KardexSearchBar
+          v-model="searchQuery"
+          :result-count="resultCount"
+          :search-results="searchResults"
+          @select-result="navigateToResult"
+        />
+      </div>
+    </div>
 
     <!-- ZONA DE SEPARACIÓN FLOTANTE (NO MUEVE EL LAYOUT NI INTERRUMPE EL ARRASTRE) -->
     <transition name="fade">
@@ -43,12 +75,17 @@
       <q-spinner color="primary" size="48px" />
     </div>
 
-    <!-- GAVETA VIRTUAL (EXPEDIENTES SIN ASIGNAR) - PERMANENTE Y ULTRA INTERACTIVA -->
-    <GavetaVirtualDock
-      @drag-start="onDragStart"
-      @drag-end="onDragEnd"
-      @open-kardex="openKardex"
-    />
+    <!-- APARTADO 1: GAVETA VIRTUAL (CUANDO SE SELECCIONA O SI SE ARRASTRA) -->
+    <div v-show="activeViewTab === 'virtual' || isDragging" class="q-mb-md">
+      <GavetaVirtualDock
+        @drag-start="onDragStart"
+        @drag-end="onDragEnd"
+        @open-kardex="openKardex"
+      />
+    </div>
+
+    <!-- APARTADO 2: MAPA DE ARCHIVADORES FÍSICOS -->
+    <div v-show="activeViewTab === 'muebles'">
 
     <!-- MUEBLES CON DRAG & DROP -->
     <draggable
@@ -91,6 +128,7 @@
         @click="muebleDialog = true"
       />
     </div>
+  </div>
 
     <!-- PANEL DE DETALLE DE GAVETA (SOLO EXPEDIENTES) -->
     <KardexDetailPanel
@@ -165,6 +203,7 @@ const { searchQuery, searchResults, highlightedCajones, resultCount } = useKarde
 );
 
 // State for dialogs/panels
+const activeViewTab = ref('muebles');
 const muebleDialog = ref(false);
 const empleadoDialog = ref(false);
 const drawerPanelOpen = ref(false);
@@ -196,11 +235,12 @@ const openKardex = (kardex) => {
 // Navegar al resultado de búsqueda
 const navigateToResult = (result) => {
   if (result.isVirtual) {
-    // Si está en la gaveta virtual, abrir su modal de expediente directamente
+    activeViewTab.value = 'virtual';
     openKardex(result.empleado);
     return;
   }
 
+  activeViewTab.value = 'muebles';
   // Abrir la gaveta física del resultado
   selectedDrawer.value = result.cajon;
   // Marcar el kardex específico para resaltarlo
@@ -241,7 +281,8 @@ const handleSpotlightLocator = async (target) => {
   if (!target) return;
 
   if (target.isVirtual) {
-    // Si es virtual, hacer scroll al dock de Gaveta Virtual y abrir su kardex
+    activeViewTab.value = 'virtual';
+    await nextTick();
     const dockEl = document.querySelector('.dock-wrapper') || document.querySelector('.gaveta-dock');
     if (dockEl) {
       dockEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -253,6 +294,7 @@ const handleSpotlightLocator = async (target) => {
     return;
   }
 
+  activeViewTab.value = 'muebles';
   if (target.cajonId) {
     targetedCajonId.value = target.cajonId;
 
@@ -346,5 +388,64 @@ onMounted(() => {
   border-color: #6ee7b7 !important;
   transform: scale(1.05);
   box-shadow: 0 20px 35px -5px rgba(5, 150, 105, 0.5) !important;
+}
+
+/* SWITCHER DE APARTADOS (AMIGABLE Y MODERNO) */
+.view-tabs-bar {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.view-segmented-pills {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 3px;
+  border-radius: 12px;
+  display: inline-flex;
+}
+
+.view-pill-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.view-pill-btn:hover {
+  color: #0f172a;
+}
+
+.view-pill-btn-active {
+  background: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.view-pill-count {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  margin-left: 5px;
+}
+
+.view-pill-btn-active .view-pill-count {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.view-pill-count-alert {
+  background: #f43f5e !important;
+  color: #ffffff !important;
 }
 </style>

@@ -1,27 +1,28 @@
 <template>
-  <div class="kardex-header column q-gutter-y-md q-mb-lg">
-    <!-- FILA PRINCIPAL: TÍTULO Y BOTONES DE ACCIÓN -->
-    <div class="row items-center justify-between q-col-gutter-md q-gutter-y-sm">
-      <div class="row items-center q-gutter-md">
-        <div class="header-icon-badge flex flex-center">
-          <q-icon name="apartment" size="26px" color="white" />
+  <div class="kardex-header column q-gutter-y-xs q-mb-md">
+    <!-- FILA PRINCIPAL: TÍTULO Y ACCIONES COMPACTAS -->
+    <div class="row items-center justify-between q-gutter-xs">
+      <div class="row items-center q-gutter-sm">
+        <div class="header-icon-badge flex flex-center gt-xs">
+          <q-icon name="apartment" size="24px" color="white" />
         </div>
         <div>
           <div class="row items-center q-gutter-xs">
-            <span class="text-h5 text-weight-bolder text-slate-900" style="letter-spacing: -0.02em;">
-              Gestión de Archivadores & Kardex
+            <span class="text-h6 text-weight-bolder text-slate-900 header-title-responsive">
+              Archivadores & Kardex
             </span>
-            <q-badge color="indigo-1" text-color="indigo-9" class="text-weight-bold q-ml-xs header-tag">
+            <q-badge color="indigo-1" text-color="indigo-9" class="text-weight-bold q-ml-xs header-tag gt-xs">
               Gemelo Digital
             </q-badge>
           </div>
-          <div class="text-caption text-slate-500 q-mt-xs">
+          <div class="text-caption text-slate-500 gt-xs" style="font-size: 11.5px;">
             Control Físico y Normalizado de Expedientes de Personal • Modelo 3FN
           </div>
         </div>
       </div>
 
-      <div class="row q-gutter-sm items-center flex-wrap">
+      <!-- ACCIONES EN DESKTOP / TABLET (gt-xs) -->
+      <div class="gt-xs row q-gutter-sm items-center no-wrap">
         <!-- SELECTOR DE SEDE -->
         <q-select
           v-if="store.sedes.length > 0"
@@ -58,14 +59,63 @@
           @click="$emit('add-empleado')"
         />
       </div>
+
+      <!-- ACCIONES COMPACTAS EN MÓVIL (lt-sm) -->
+      <div class="lt-sm row items-center q-gutter-xs col-12 q-mt-xs">
+        <q-select
+          v-if="store.sedes.length > 0"
+          v-model="store.selectedSedeId"
+          :options="sedesOptions"
+          option-value="id"
+          option-label="label"
+          emit-value
+          map-options
+          outlined
+          dense
+          options-dense
+          :dark="$q.dark.isActive"
+          :bg-color="$q.dark.isActive ? 'dark' : 'white'"
+          class="col"
+        >
+          <template v-slot:prepend>
+            <q-icon name="location_on" color="indigo" size="16px" />
+          </template>
+        </q-select>
+
+        <!-- BOTÓN NUEVO DESPLEGABLE EN MÓVIL (AHORRA ESPACIO) -->
+        <q-btn-dropdown
+          unelevated
+          color="indigo-7"
+          icon="add"
+          label="Crear"
+          dense
+          class="action-btn-primary q-px-sm"
+          auto-close
+        >
+          <q-list dense style="min-width: 190px;">
+            <q-item clickable @click="$emit('add-mueble')">
+              <q-item-section avatar>
+                <q-icon name="apartment" size="18px" color="indigo" />
+              </q-item-section>
+              <q-item-section class="text-weight-bold">Nuevo Archivador</q-item-section>
+            </q-item>
+            <q-item clickable @click="$emit('add-empleado')">
+              <q-item-section avatar>
+                <q-icon name="person_add" size="18px" color="indigo" />
+              </q-item-section>
+              <q-item-section class="text-weight-bold">Nuevo Expediente</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </div>
     </div>
 
-    <!-- BARRA DE FILTROS DINÁMICOS POR TIPO DE CONTRATO (3FN) -->
-    <div class="filter-dock row items-center justify-between q-py-sm q-px-md q-gutter-y-xs">
-      <div class="row items-center q-gutter-xs">
-        <span class="text-caption text-weight-bolder text-slate-700 q-mr-sm row items-center">
-          <q-icon name="tune" size="16px" color="indigo" class="q-mr-xs" />
-          Régimen Contractual:
+    <!-- BARRA DE FILTROS DINÁMICOS POR TIPO DE CONTRATO (HORIZONTAL SWIPE COMPACTO) -->
+    <div class="filter-dock row items-center no-wrap q-py-xs q-px-sm">
+      <div class="filter-scroll-row row items-center no-wrap scroll hide-scrollbar col q-gutter-xs">
+        <span class="text-caption text-weight-bolder text-slate-700 gt-xs q-mr-xs row items-center">
+          <q-icon name="tune" size="15px" color="indigo" class="q-mr-xs" />
+          Régimen:
         </span>
 
         <button
@@ -73,7 +123,7 @@
           :class="{ 'filter-pill-active': store.selectedContratoIds.length === 0 }"
           @click="clearContratoFilters"
         >
-          Todos (Mezcla Libre)
+          Todos ({{ totalMueblesMostrados }})
         </button>
 
         <button
@@ -91,15 +141,10 @@
           <q-icon
             v-if="store.selectedContratoIds.includes(contrato.id)"
             name="check"
-            size="12px"
+            size="11px"
             class="q-ml-xs"
           />
         </button>
-      </div>
-
-      <div class="text-caption text-slate-500 row items-center q-gutter-xs">
-        <q-icon name="inventory_2" size="14px" color="slate-400" />
-        <span><b>{{ totalMueblesMostrados }}</b> archivador(es) visible(s)</span>
       </div>
     </div>
   </div>
@@ -216,8 +261,33 @@ onMounted(() => {
 .filter-dock {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.filter-scroll-row {
+  -webkit-overflow-scrolling: touch;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.header-title-responsive {
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+@media (min-width: 600px) {
+  .header-title-responsive {
+    font-size: 1.45rem;
+  }
 }
 
 .filter-pill {

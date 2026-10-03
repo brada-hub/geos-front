@@ -4,6 +4,7 @@
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
       outlined
+      dense
       :placeholder="placeholder"
       clearable
       :dark="$q.dark.isActive"
@@ -181,7 +182,7 @@ const formatNombre = (emp) => {
 <style scoped>
 .search-container {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .search-input :deep(.q-field__control) {

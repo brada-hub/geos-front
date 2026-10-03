@@ -378,6 +378,55 @@ body.body--dark {
     color: #cbd5e1 !important;
   }
 
+  /* View Switcher Tabs Dark Mode */
+  .view-tabs-bar {
+    border-color: #1e293b !important;
+  }
+
+  .view-segmented-pills {
+    background: #111827 !important;
+    border-color: #1e293b !important;
+  }
+
+  .view-pill-btn {
+    color: #94a3b8 !important;
+  }
+
+  .view-pill-btn:hover {
+    color: #f8fafc !important;
+  }
+
+  .view-pill-btn-active {
+    background: #1e293b !important;
+    color: #818cf8 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .view-pill-count {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+  }
+
+  .view-pill-btn-active .view-pill-count {
+    background: #312e81 !important;
+    color: #c7d2fe !important;
+  }
+
+  /* Mobile Bottom Navigation Dark Mode */
+  .mobile-bottom-nav {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+  }
+  .mobile-nav-btn {
+    color: #94a3b8 !important;
+  }
+  .mobile-nav-btn-active {
+    color: #818cf8 !important;
+  }
+  .mobile-nav-label {
+    color: #cbd5e1 !important;
+  }
+
   .drawer-scroll-section::-webkit-scrollbar-thumb {
     background: #334155;
   }

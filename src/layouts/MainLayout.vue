@@ -45,6 +45,20 @@
 
         <!-- ACCIONES RÁPIDAS A LA DERECHA -->
         <div class="row items-center q-gutter-xs q-gutter-sm-sm no-wrap">
+          <!-- BOTÓN BÚSQUEDA SPOTLIGHT EN MÓVIL (lt-sm) -->
+          <q-btn
+            flat
+            round
+            dense
+            size="sm"
+            icon="search"
+            color="indigo-7"
+            class="toolbar-action-btn lt-sm"
+            @click="spotlightOpen = true"
+          >
+            <q-tooltip>Buscar expediente (Ctrl+K)</q-tooltip>
+          </q-btn>
+
           <!-- RELOJ DIGITAL EN VIVO (Desktop) -->
           <div class="clock-display gt-sm row items-center q-gutter-xs q-px-sm q-py-xs">
             <q-icon name="schedule" size="14px" color="indigo-7" />
@@ -435,7 +449,7 @@
     </q-drawer>
 
     <!-- NAVEGACIÓN MOBILE-FIRST INFERIOR (EN PANTALLAS MÓVILES) -->
-    <q-footer class="mobile-bottom-nav lt-md bg-white border-top">
+    <q-footer class="mobile-bottom-nav lt-md border-top">
       <div class="row items-center justify-around q-py-xs">
         <router-link
           to="/kardex"
@@ -467,12 +481,12 @@
 
         <div
           class="mobile-nav-btn column items-center justify-center cursor-pointer"
-          @click="openImportDialog"
+          @click="metricasOpen = true"
         >
-          <div class="mobile-icon-action-circle flex flex-center">
-            <q-icon name="upload_file" size="20px" color="white" />
+          <div class="mobile-icon-wrapper">
+            <q-icon name="insights" size="22px" color="purple-7" />
           </div>
-          <span class="mobile-nav-label text-slate-700">Importar</span>
+          <span class="mobile-nav-label">Métricas</span>
         </div>
 
         <div
