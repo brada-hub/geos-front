@@ -19,7 +19,7 @@
         <!-- BRANDING / LOGOTIPO -->
         <div class="row items-center q-gutter-sm cursor-pointer brand-container" @click="$router.push('/kardex')">
           <div class="brand-icon-box flex flex-center">
-            <img src="/icons/docus-app-icon.png" alt="DOCUS" class="brand-logo-img" />
+            <img :src="docusLogo" alt="DOCUS" class="brand-logo-img" />
           </div>
           <div>
             <div class="row items-center q-gutter-xs">
@@ -169,7 +169,7 @@
         <div class="drawer-header-box q-pa-md border-bottom col-auto">
           <div class="row items-center q-gutter-sm no-wrap">
             <div class="workspace-avatar flex flex-center">
-              <img src="/icons/docus-app-icon.png" alt="DOCUS" class="sidebar-avatar-img" />
+              <img :src="docusLogo" alt="DOCUS" class="sidebar-avatar-img" />
             </div>
             <div class="col ellipsis">
               <div class="text-weight-bolder drawer-workspace-title ellipsis" style="font-size: 13.5px;">
@@ -534,6 +534,7 @@ import ImportPersonalDialog from 'src/components/Personal/ImportPersonalDialog.v
 import GlobalSpotlightDialog from 'src/components/Search/GlobalSpotlightDialog.vue';
 import MetricasCapacidadDialog from 'src/components/Kardex/MetricasCapacidadDialog.vue';
 import { exportInventoryExcel } from 'src/utils/exportInventoryExcel';
+import docusLogo from 'src/assets/docus-app-icon.png';
 
 const $q = useQuasar();
 const store = useGeosStore();

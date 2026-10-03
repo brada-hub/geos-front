@@ -1,10 +1,11 @@
 // Service Worker for DOCUS RRHH PWA
-const CACHE_NAME = 'docus-rrhh-v1';
+const CACHE_NAME = 'docus-rrhh-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.ico',
+  '/icons/docus-app-icon.png',
+  '/icons/docus-full-logo.png',
   '/icons/favicon-128x128.png',
   '/icons/favicon-96x96.png',
   '/icons/favicon-32x32.png',
