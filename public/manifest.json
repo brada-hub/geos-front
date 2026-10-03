@@ -10,14 +10,14 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/icons/favicon-128x128.png",
-      "sizes": "128x128",
+      "src": "/icons/docus-app-icon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/favicon-96x96.png",
-      "sizes": "96x96",
+      "src": "/icons/docus-app-icon.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },

@@ -19,14 +19,15 @@
         <!-- BRANDING / LOGOTIPO -->
         <div class="row items-center q-gutter-sm cursor-pointer brand-container" @click="$router.push('/kardex')">
           <div class="brand-icon-box flex flex-center">
-            <q-icon name="inventory_2" size="20px" color="white" />
+            <img src="/icons/docus-app-icon.png" alt="DOCUS" class="brand-logo-img" />
           </div>
           <div>
             <div class="row items-center q-gutter-xs">
-              <span class="text-weight-bolder brand-title">DOCUS RRHH</span>
+              <span class="text-weight-bolder brand-title">DOCUS</span>
+              <span class="brand-badge-pill">RRHH</span>
               <span class="online-indicator" title="Sistema conectado en tiempo real"></span>
             </div>
-            <div class="brand-subtitle gt-xs">GESTIÓN DE EXPEDIENTES & KARDEX</div>
+            <div class="brand-subtitle gt-xs">SISTEMA INTELIGENTE DE GAVETAS & EXPEDIENTES</div>
           </div>
         </div>
 
@@ -168,7 +169,7 @@
         <div class="drawer-header-box q-pa-md border-bottom col-auto">
           <div class="row items-center q-gutter-sm no-wrap">
             <div class="workspace-avatar flex flex-center">
-              <q-icon name="apartment" size="18px" color="indigo" />
+              <img src="/icons/docus-app-icon.png" alt="DOCUS" class="sidebar-avatar-img" />
             </div>
             <div class="col ellipsis">
               <div class="text-weight-bolder drawer-workspace-title ellipsis" style="font-size: 13.5px;">
@@ -771,33 +772,66 @@ onUnmounted(() => {
 
 .brand-container {
   user-select: none;
+  transition: opacity 0.2s ease;
 }
 
 .brand-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
-  transition: transform 0.2s ease;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.22), 0 1px 3px rgba(15, 23, 42, 0.08);
+  padding: 2px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
 }
 
 .brand-container:hover .brand-icon-box {
-  transform: scale(1.05);
+  transform: scale(1.08) rotate(-2deg);
+  box-shadow: 0 8px 20px -2px rgba(99, 102, 241, 0.38);
 }
 
 .brand-title {
-  font-size: 15px;
-  letter-spacing: 0.02em;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: 1.1;
   color: #0f172a;
 }
 
+.brand-badge-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  color: white;
+  padding: 1px 6px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.3);
+}
+
 .brand-subtitle {
   font-size: 8.5px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #64748b;
   font-weight: 700;
+}
+
+.sidebar-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
 }
 
 .online-indicator {
@@ -1169,5 +1203,24 @@ onUnmounted(() => {
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 4px;
+}
+
+/* MODO OSCURO PARA BRAND */
+body.body--dark .brand-icon-box {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.5);
+}
+
+body.body--dark .brand-title {
+  color: #f8fafc !important;
+}
+
+body.body--dark .brand-subtitle {
+  color: #94a3b8 !important;
+}
+
+body.body--dark .drawer-workspace-title {
+  color: #f8fafc !important;
 }
 </style>
