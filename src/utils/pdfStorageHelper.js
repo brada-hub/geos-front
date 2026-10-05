@@ -115,7 +115,7 @@ export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBytesOrBlob, 
         pdfBytesOrBlob.byteOffset + pdfBytesOrBlob.byteLength
       );
     } else if (pdfBytesOrBlob instanceof ArrayBuffer) {
-      dataBuffer = pdfBytesOrBlob;
+      dataBuffer = pdfBytesOrBlob.slice(0);
     } else {
       dataBuffer = new ArrayBuffer(0);
     }
@@ -232,7 +232,7 @@ export async function saveMasterPdf(empleadoId, pdfBytesOrBlob, meta = {}) {
         pdfBytesOrBlob.byteOffset + pdfBytesOrBlob.byteLength
       );
     } else if (pdfBytesOrBlob instanceof ArrayBuffer) {
-      dataBuffer = pdfBytesOrBlob;
+      dataBuffer = pdfBytesOrBlob.slice(0);
     } else {
       dataBuffer = new ArrayBuffer(0);
     }

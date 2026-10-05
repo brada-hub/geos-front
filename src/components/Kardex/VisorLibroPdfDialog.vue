@@ -12,7 +12,7 @@
       <!-- HEADER CONSOLA / BARRA DE HERRAMIENTAS RESPONSIVA -->
       <div class="row no-wrap items-center justify-between q-px-sm q-px-md-md q-py-xs bg-slate-900 border-bottom col-auto z-top shadow-3">
         <!-- IZQUIERDA: VOLVER + METADATOS COMPACTOS -->
-        <div class="row no-wrap items-center q-gutter-x-xs q-gutter-x-sm-sm ellipsis" style="min-width: 0; max-width: 40%;">
+        <div class="row no-wrap items-center q-gutter-x-xs q-gutter-x-sm-sm ellipsis" style="min-width: 0; max-width: 38%;">
           <q-btn
             flat
             dense
@@ -49,13 +49,12 @@
               </q-badge>
             </div>
             <div class="text-caption text-slate-400 ellipsis font-mono" style="font-size: 10.5px;">
-              {{ currentPage === 1 ? 'Portada / Carátula' : `Foja ${currentPage - 1} de ${pdfDocProxy?.numPages || 0}` }}
-              <span v-if="pdfDocProxy" class="gt-xs">• {{ (pdfDocProxy?.numPages || 0) }} fojas digitalizadas</span>
+              {{ textoEstadoPagina }}
             </div>
           </div>
         </div>
 
-        <!-- CENTRO: NAVEGADOR DE PÁGINAS -->
+        <!-- CENTRO: NAVEGADOR DE PÁGINAS Y APERTURAS -->
         <div class="row no-wrap items-center q-gutter-x-xs bg-slate-950 q-px-sm q-py-xs rounded-borders border col-auto">
           <q-btn
             flat
@@ -84,18 +83,24 @@
           </q-btn>
 
           <!-- INDICADOR VISUAL CLARO -->
-          <div class="row items-center q-px-xs text-caption font-mono text-weight-bold text-center" style="min-width: 90px; justify-content: center;">
+          <div class="row items-center q-px-xs text-caption font-mono text-weight-bold text-center" style="min-width: 120px; justify-content: center;">
             <template v-if="currentPage === 1">
               <span class="text-amber-4">Carátula</span>
             </template>
+            <template v-else-if="currentPage === 2 && viewMode === 'book'">
+              <span class="text-amber-4">Índice • Foja 1</span>
+            </template>
+            <template v-else-if="currentPage === 2 && viewMode === 'single'">
+              <span class="text-amber-4">Índice General</span>
+            </template>
             <template v-else-if="viewMode === 'book'">
-              <span class="text-amber-4">Fojas {{ currentPage - 1 }} - {{ Math.min(currentPage, totalPages - 1) }}</span>
+              <span class="text-amber-4">Fojas {{ getLeftPdfNum(currentPage) }} - {{ Math.min(getRightPdfNum(currentPage), totalPdfPages) }}</span>
             </template>
             <template v-else>
-              <span class="text-amber-4">Foja {{ currentPage - 1 }}</span>
+              <span class="text-amber-4">Foja {{ currentPage - 2 }}</span>
             </template>
             <span class="text-slate-500 q-mx-xs">/</span>
-            <span class="text-slate-300">{{ totalPages > 1 ? `${totalPages - 1} f.` : '1 p.' }}</span>
+            <span class="text-slate-300">{{ totalPdfPages > 0 ? `${totalPdfPages} f.` : 'Sin fojas' }}</span>
           </div>
 
           <q-btn
@@ -105,7 +110,7 @@
             icon="chevron_right"
             size="md"
             color="amber-4"
-            :disable="currentPage >= totalPages || (viewMode === 'book' && currentPage + 1 >= totalPages)"
+            :disable="currentPage >= totalPages"
             @click="nextPage"
           >
             <q-tooltip>Página siguiente (Tecla →)</q-tooltip>
@@ -218,8 +223,8 @@
               <q-btn flat round dense icon="chevron_left" size="xs" color="slate-400" @click="showSidebar = false" />
             </div>
 
-            <!-- BOTÓN CARÁTULA EN EL ÍNDICE -->
-            <div class="q-pa-xs">
+            <!-- BOTÓN CARÁTULA E ÍNDICE GENERAL EN EL SIDEBAR -->
+            <div class="q-pa-xs q-gutter-y-xs">
               <div
                 class="sidebar-section-item q-pa-xs cursor-pointer row items-center justify-between"
                 :class="{ 'item-active': currentPage === 1 }"
@@ -231,6 +236,22 @@
                 </div>
                 <q-badge color="amber-9" text-color="dark" label="Portada" class="text-weight-bold" />
               </div>
+
+              <div
+                class="sidebar-section-item q-pa-xs cursor-pointer row items-center justify-between"
+                :class="{ 'item-active': currentPage === 2 }"
+                @click="goToPage(2)"
+              >
+                <div class="row items-center q-gutter-xs ellipsis">
+                  <q-icon name="toc" size="16px" color="indigo-4" />
+                  <span class="text-caption text-weight-bold text-slate-200">Índice General</span>
+                </div>
+                <q-badge color="indigo-8" text-color="white" label="Tabla" class="text-weight-bold" />
+              </div>
+            </div>
+
+            <div class="q-px-sm q-py-xs text-caption text-slate-400 font-mono text-weight-bold" style="font-size: 10px;">
+              SECCIONES DOCUMENTALES ({{ totalPdfPages }} fojas)
             </div>
 
             <q-scroll-area class="col q-px-xs">
@@ -241,9 +262,9 @@
                   class="sidebar-section-item q-pa-xs cursor-pointer row items-center justify-between"
                   :class="{
                     'item-active': seccionActivaCodigo === sec.codigo,
-                    'item-has-pdf': pdfsDisponibles[sec.codigo]
+                    'item-has-pdf': pdfsDisponibles[sec.codigo]?.hasPdf
                   }"
-                  @click="cargarSeccionEspecifica(sec.codigo)"
+                  @click="saltarASeccion(sec.codigo)"
                 >
                   <div class="row items-center q-gutter-xs ellipsis col">
                     <span class="sidebar-sec-num">{{ String(sec.id).padStart(2, '0') }}</span>
@@ -262,11 +283,11 @@
                       {{ sec.fojas }} f.
                     </q-badge>
                     <q-icon
-                      v-if="pdfsDisponibles[sec.codigo]"
+                      v-if="pdfsDisponibles[sec.codigo]?.hasPdf"
                       name="description"
                       size="14px"
                       color="amber-4"
-                      title="Tiene archivo PDF adjunto"
+                      title="Tiene fojas digitalizadas"
                     />
                   </div>
                 </div>
@@ -286,7 +307,7 @@
             <div class="column items-center q-gutter-y-sm">
               <q-spinner-dots size="56px" color="amber-4" />
               <div class="text-caption text-amber-3 font-mono text-weight-bold">
-                Renderizando fojas en alta definición...
+                Construyendo libro de expediente en alta definición...
               </div>
             </div>
           </div>
@@ -358,7 +379,7 @@
                 <div class="cover-sections-table q-pa-sm rounded-borders">
                   <div class="row items-center justify-between q-mb-xs q-px-xs">
                     <span class="cover-sections-header">REGISTRO DE SECCIONES DEL ARCHIVO</span>
-                    <span class="cover-sections-badge">{{ resumenFile.totalFojas }} fojas físicas • {{ resumenFile.porcentaje }}% completitud</span>
+                    <span class="cover-sections-badge">{{ resumenFile.totalFojas }} fojas físicas • {{ totalPdfPages }} fojas digitalizadas</span>
                   </div>
                   <div class="row q-col-gutter-xs">
                     <div
@@ -390,7 +411,7 @@
                   color="amber-9"
                   text-color="dark"
                   icon-right="arrow_forward"
-                  label="Abrir Fojas del Expediente"
+                  label="Abrir Expediente & Fojas"
                   class="text-weight-bolder cover-open-btn shadow-3"
                   @click="nextPage"
                 />
@@ -408,12 +429,11 @@
             </button>
           </div>
 
-          <!-- ========================================== -->
-          <!-- PÁGINAS 2+: DOCUMENTOS DIGITALES ADJUNTOS -->
-          <!-- ========================================== -->
-          <!-- MODO LIBRO (2 PÁGINAS LADO A LADO) -->
+          <!-- ================================================== -->
+          <!-- PÁGINA 2 EN MODO LIBRO: ÍNDICE GENERAL + FOJA 1   -->
+          <!-- ================================================== -->
           <div
-            v-else-if="viewMode === 'book'"
+            v-else-if="viewMode === 'book' && currentPage === 2"
             class="book-spread-wrapper row items-center justify-center relative-position"
             :style="{ transform: `scale(${zoomScale})`, transformOrigin: 'center center' }"
           >
@@ -426,13 +446,73 @@
               <q-icon name="chevron_left" size="32px" />
             </button>
 
-            <!-- ENCUADERNACIÓN 2 PÁGINAS -->
+            <!-- ENCUADERNACIÓN SPREAD: ÍNDICE (IZQ) + FOJA 1 (DER) -->
             <div class="book-binder-spread row no-wrap items-stretch shadow-24">
-              <!-- HOJA IZQUIERDA -->
-              <div class="book-page-left column relative-position">
-                <canvas id="page-canvas-left" class="page-canvas-rendered"></canvas>
+              <!-- HOJA IZQUIERDA: ÍNDICE GENERAL DEL EXPEDIENTE -->
+              <div class="book-page-left column relative-position page-indice-container">
+                <!-- CABECERA DEL ÍNDICE -->
+                <div class="indice-header q-pa-md border-bottom bg-slate-50">
+                  <div class="row items-center justify-between q-mb-xs">
+                    <div class="row items-center q-gutter-x-xs">
+                      <q-icon name="toc" size="22px" color="indigo-9" />
+                      <span class="text-subtitle2 text-weight-bolder text-slate-900 font-mono">ÍNDICE GENERAL DEL EXPEDIENTE</span>
+                    </div>
+                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold">
+                      13 SECCIONES
+                    </q-badge>
+                  </div>
+                  <div class="text-caption text-slate-600 font-mono" style="font-size: 11px;">
+                    Titular: <strong>{{ empleado?.nombre_completo }}</strong> • {{ totalPdfPages }} fojas digitalizadas
+                  </div>
+                </div>
+
+                <!-- LISTA DE LAS 13 SECCIONES CON ACCESO DIRECTO -->
+                <div class="indice-body col q-pa-sm scroll">
+                  <div class="q-gutter-y-xs">
+                    <div
+                      v-for="sec in secciones"
+                      :key="sec.codigo"
+                      class="indice-item row items-center justify-between q-pa-xs rounded-borders"
+                      :class="{ 'indice-item-has-pdf': pdfsDisponibles[sec.codigo]?.hasPdf }"
+                    >
+                      <div class="row items-center q-gutter-x-xs ellipsis col">
+                        <span class="indice-sec-num font-mono">{{ String(sec.id).padStart(2, '0') }}</span>
+                        <div class="column ellipsis" style="min-width: 0;">
+                          <span class="text-caption text-weight-bold text-slate-900 ellipsis">{{ sec.nombre }}</span>
+                          <span class="text-caption text-slate-500 ellipsis" style="font-size: 9.5px;">{{ sec.descripcion }}</span>
+                        </div>
+                      </div>
+
+                      <div class="row items-center q-gutter-x-xs col-auto">
+                        <q-badge
+                          :color="pdfsDisponibles[sec.codigo]?.hasPdf ? 'positive' : 'grey-5'"
+                          text-color="white"
+                          class="text-weight-bold"
+                          style="font-size: 9px;"
+                        >
+                          {{ pdfsDisponibles[sec.codigo]?.hasPdf ? `${sec.fojas || 1} f.` : '0 f.' }}
+                        </q-badge>
+
+                        <q-btn
+                          v-if="pdfsDisponibles[sec.codigo]?.hasPdf"
+                          dense
+                          flat
+                          round
+                          size="xs"
+                          icon="arrow_forward"
+                          color="indigo-9"
+                          @click="saltarASeccion(sec.codigo)"
+                        >
+                          <q-tooltip>Ir a la primera foja de esta sección</q-tooltip>
+                        </q-btn>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PIE DEL ÍNDICE -->
                 <div class="book-page-folio-left font-mono">
-                  Foja {{ currentPage - 1 }}
+                  Índice General y Registro de Fojas
                 </div>
               </div>
 
@@ -441,22 +521,43 @@
                 <div class="spine-line"></div>
               </div>
 
-              <!-- HOJA DERECHA -->
+              <!-- HOJA DERECHA: PRIMERA FOJA DEL DOCUMENTO (PDF FOJA 1) -->
               <div class="book-page-right column relative-position">
-                <canvas
-                  v-if="currentPage <= totalPages - 1"
-                  id="page-canvas-right"
-                  class="page-canvas-rendered"
-                ></canvas>
-                <div v-else class="book-blank-page flex flex-center text-slate-400">
-                  <div class="column items-center q-gutter-xs">
-                    <q-icon name="done_all" size="36px" color="slate-400" />
-                    <div class="text-caption text-italic text-weight-bold">Fin de las fojas digitalizadas</div>
-                    <div class="text-caption text-slate-400" style="font-size: 10px;">Expediente archivado conforme a ley</div>
+                <template v-if="totalPdfPages >= 1">
+                  <!-- MEMBRETE DE SECCIÓN -->
+                  <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
+                    <div class="row items-center q-gutter-x-xs ellipsis">
+                      <q-icon name="folder" size="14px" color="indigo-8" />
+                      <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
+                        SECCIÓN {{ getInfoFoja(1).seccionId }}: {{ getInfoFoja(1).seccionNombre }}
+                      </span>
+                    </div>
+                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                      Foja {{ getInfoFoja(1).fojaLocal }} de {{ getInfoFoja(1).totalFojasLocal }}
+                    </q-badge>
                   </div>
-                </div>
-                <div v-if="currentPage <= totalPages - 1" class="book-page-folio-right font-mono">
-                  Foja {{ currentPage }}
+
+                  <!-- CANVAS FOJA 1 -->
+                  <div class="col flex flex-center relative-position page-canvas-container">
+                    <canvas id="page-canvas-spread2-right" class="page-canvas-rendered"></canvas>
+                  </div>
+
+                  <!-- FOLIO INFERIOR -->
+                  <div class="book-page-folio-right font-mono row items-center justify-between q-px-md">
+                    <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
+                    <span>Foja 1 de {{ totalPdfPages }}</span>
+                    <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                  </div>
+                </template>
+
+                <div v-else class="book-blank-page flex flex-center text-slate-500 col">
+                  <div class="column items-center q-gutter-xs q-pa-md text-center">
+                    <q-icon name="description" size="48px" color="slate-400" />
+                    <div class="text-subtitle2 text-weight-bold text-slate-700">Sin fojas digitalizadas aún</div>
+                    <div class="text-caption text-slate-500" style="max-width: 280px;">
+                      Sube y desglosa el PDF del expediente desde el botón "Desglosar PDF" en el kardex para visualizar todas sus hojas aquí.
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -472,7 +573,115 @@
             </button>
           </div>
 
-          <!-- MODO HOJA SIMPLE (1 PÁGINA TRADICIONAL) -->
+          <!-- ================================================== -->
+          <!-- PÁGINAS 3+: FOJAS 2..N EN MODO LIBRO (LADO A LADO) -->
+          <!-- ================================================== -->
+          <div
+            v-else-if="viewMode === 'book' && currentPage >= 3"
+            class="book-spread-wrapper row items-center justify-center relative-position"
+            :style="{ transform: `scale(${zoomScale})`, transformOrigin: 'center center' }"
+          >
+            <!-- BOTÓN FLOTANTE ANTERIOR (IZQUIERDA) -->
+            <button
+              class="book-nav-arrow book-nav-prev"
+              title="Página anterior (←)"
+              @click.stop="prevPage"
+            >
+              <q-icon name="chevron_left" size="32px" />
+            </button>
+
+            <!-- ENCUADERNACIÓN 2 HOJAS -->
+            <div class="book-binder-spread row no-wrap items-stretch shadow-24">
+              <!-- HOJA IZQUIERDA -->
+              <div class="book-page-left column relative-position">
+                <template v-if="getLeftPdfNum(currentPage) <= totalPdfPages">
+                  <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
+                    <div class="row items-center q-gutter-x-xs ellipsis">
+                      <q-icon name="folder" size="14px" color="indigo-8" />
+                      <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
+                        SECCIÓN {{ getInfoFoja(getLeftPdfNum(currentPage)).seccionId }}: {{ getInfoFoja(getLeftPdfNum(currentPage)).seccionNombre }}
+                      </span>
+                    </div>
+                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                      Foja {{ getInfoFoja(getLeftPdfNum(currentPage)).fojaLocal }} de {{ getInfoFoja(getLeftPdfNum(currentPage)).totalFojasLocal }}
+                    </q-badge>
+                  </div>
+
+                  <div class="col flex flex-center relative-position page-canvas-container">
+                    <canvas id="page-canvas-left" class="page-canvas-rendered"></canvas>
+                  </div>
+
+                  <div class="book-page-folio-left font-mono row items-center justify-between q-px-md">
+                    <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
+                    <span>Foja {{ getLeftPdfNum(currentPage) }} de {{ totalPdfPages }}</span>
+                    <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                  </div>
+                </template>
+
+                <div v-else class="book-blank-page flex flex-center text-slate-400 col">
+                  <div class="column items-center q-gutter-xs text-center">
+                    <q-icon name="done_all" size="36px" color="slate-400" />
+                    <div class="text-caption text-italic text-weight-bold">Fin de las fojas digitalizadas</div>
+                    <div class="text-caption text-slate-400" style="font-size: 10px;">Expediente archivado conforme a ley</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LOMO / ESPINA CENTRAL CON SOMBRA 3D -->
+              <div class="book-spine-crease">
+                <div class="spine-line"></div>
+              </div>
+
+              <!-- HOJA DERECHA -->
+              <div class="book-page-right column relative-position">
+                <template v-if="getRightPdfNum(currentPage) <= totalPdfPages">
+                  <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
+                    <div class="row items-center q-gutter-x-xs ellipsis">
+                      <q-icon name="folder" size="14px" color="indigo-8" />
+                      <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
+                        SECCIÓN {{ getInfoFoja(getRightPdfNum(currentPage)).seccionId }}: {{ getInfoFoja(getRightPdfNum(currentPage)).seccionNombre }}
+                      </span>
+                    </div>
+                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                      Foja {{ getInfoFoja(getRightPdfNum(currentPage)).fojaLocal }} de {{ getInfoFoja(getRightPdfNum(currentPage)).totalFojasLocal }}
+                    </q-badge>
+                  </div>
+
+                  <div class="col flex flex-center relative-position page-canvas-container">
+                    <canvas id="page-canvas-right" class="page-canvas-rendered"></canvas>
+                  </div>
+
+                  <div class="book-page-folio-right font-mono row items-center justify-between q-px-md">
+                    <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
+                    <span>Foja {{ getRightPdfNum(currentPage) }} de {{ totalPdfPages }}</span>
+                    <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                  </div>
+                </template>
+
+                <div v-else class="book-blank-page flex flex-center text-slate-400 col">
+                  <div class="column items-center q-gutter-xs text-center">
+                    <q-icon name="done_all" size="36px" color="slate-400" />
+                    <div class="text-caption text-italic text-weight-bold">Fin de las fojas digitalizadas</div>
+                    <div class="text-caption text-slate-400" style="font-size: 10px;">Expediente archivado conforme a ley</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BOTÓN FLOTANTE SIGUIENTE (DERECHA) -->
+            <button
+              v-if="currentPage < totalPages"
+              class="book-nav-arrow book-nav-next"
+              title="Página siguiente (→)"
+              @click.stop="nextPage"
+            >
+              <q-icon name="chevron_right" size="32px" />
+            </button>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- MODO HOJA SIMPLE (1 PÁGINA TRADICIONAL)    -->
+          <!-- ========================================== -->
           <div
             v-else
             class="single-page-wrapper column items-center justify-center relative-position"
@@ -486,10 +695,93 @@
               <q-icon name="chevron_left" size="32px" />
             </button>
 
-            <div class="single-page-card shadow-12 relative-position">
-              <canvas id="page-canvas-single" class="page-canvas-rendered"></canvas>
+            <!-- CASO HOJA SIMPLE: ÍNDICE GENERAL EN PÁG 2 -->
+            <div v-if="currentPage === 2" class="single-page-card shadow-12 relative-position page-indice-container" style="width: 540px; min-height: 760px;">
+              <div class="indice-header q-pa-md border-bottom bg-slate-50">
+                <div class="row items-center justify-between q-mb-xs">
+                  <div class="row items-center q-gutter-x-xs">
+                    <q-icon name="toc" size="22px" color="indigo-9" />
+                    <span class="text-subtitle2 text-weight-bolder text-slate-900 font-mono">ÍNDICE GENERAL DEL EXPEDIENTE</span>
+                  </div>
+                  <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold">
+                    13 SECCIONES
+                  </q-badge>
+                </div>
+                <div class="text-caption text-slate-600 font-mono" style="font-size: 11px;">
+                  Titular: <strong>{{ empleado?.nombre_completo }}</strong> • {{ totalPdfPages }} fojas digitalizadas
+                </div>
+              </div>
+
+              <div class="indice-body col q-pa-sm scroll" style="max-height: 640px;">
+                <div class="q-gutter-y-xs">
+                  <div
+                    v-for="sec in secciones"
+                    :key="sec.codigo"
+                    class="indice-item row items-center justify-between q-pa-xs rounded-borders"
+                    :class="{ 'indice-item-has-pdf': pdfsDisponibles[sec.codigo]?.hasPdf }"
+                  >
+                    <div class="row items-center q-gutter-x-xs ellipsis col">
+                      <span class="indice-sec-num font-mono">{{ String(sec.id).padStart(2, '0') }}</span>
+                      <div class="column ellipsis" style="min-width: 0;">
+                        <span class="text-caption text-weight-bold text-slate-900 ellipsis">{{ sec.nombre }}</span>
+                        <span class="text-caption text-slate-500 ellipsis" style="font-size: 9.5px;">{{ sec.descripcion }}</span>
+                      </div>
+                    </div>
+
+                    <div class="row items-center q-gutter-x-xs col-auto">
+                      <q-badge
+                        :color="pdfsDisponibles[sec.codigo]?.hasPdf ? 'positive' : 'grey-5'"
+                        text-color="white"
+                        class="text-weight-bold"
+                        style="font-size: 9px;"
+                      >
+                        {{ pdfsDisponibles[sec.codigo]?.hasPdf ? `${sec.fojas || 1} f.` : '0 f.' }}
+                      </q-badge>
+
+                      <q-btn
+                        v-if="pdfsDisponibles[sec.codigo]?.hasPdf"
+                        dense
+                        flat
+                        round
+                        size="xs"
+                        icon="arrow_forward"
+                        color="indigo-9"
+                        @click="saltarASeccion(sec.codigo)"
+                      >
+                        <q-tooltip>Ir a la primera foja de esta sección</q-tooltip>
+                      </q-btn>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="book-page-folio font-mono">
-                Foja {{ currentPage - 1 }} de {{ totalPages - 1 }}
+                Índice General del Expediente
+              </div>
+            </div>
+
+            <!-- CASO HOJA SIMPLE: FOJAS DEL PDF EN PÁG 3+ -->
+            <div v-else class="single-page-card shadow-12 relative-position" style="min-width: 520px;">
+              <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
+                <div class="row items-center q-gutter-x-xs ellipsis">
+                  <q-icon name="folder" size="14px" color="indigo-8" />
+                  <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
+                    SECCIÓN {{ getInfoFoja(currentPage - 2).seccionId }}: {{ getInfoFoja(currentPage - 2).seccionNombre }}
+                  </span>
+                </div>
+                <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                  Foja {{ getInfoFoja(currentPage - 2).fojaLocal }} de {{ getInfoFoja(currentPage - 2).totalFojasLocal }}
+                </q-badge>
+              </div>
+
+              <div class="flex flex-center page-canvas-container">
+                <canvas id="page-canvas-single" class="page-canvas-rendered"></canvas>
+              </div>
+
+              <div class="book-page-folio font-mono row items-center justify-between q-px-md">
+                <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
+                <span>Foja {{ currentPage - 2 }} de {{ totalPdfPages }}</span>
+                <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
               </div>
             </div>
 
@@ -516,23 +808,36 @@
               @click="goToPage(1)"
             >
               <div class="filmstrip-thumb-box flex flex-center bg-amber-9 text-dark text-weight-bolder">
-                <q-icon name="folder_shared" size="26px" color="amber-1" />
+                <q-icon name="folder_shared" size="24px" color="amber-1" />
               </div>
               <span class="filmstrip-num font-mono">Carátula</span>
             </div>
 
-            <!-- MINIATURAS 2..N: FOJAS DEL PDF -->
+            <!-- MINIATURA 2: ÍNDICE GENERAL -->
             <div
-              v-for="p in (pdfDocProxy?.numPages || 0)"
+              class="filmstrip-item column items-center cursor-pointer"
+              :class="{ 'filmstrip-active': currentPage === 2 }"
+              @click="goToPage(2)"
+            >
+              <div class="filmstrip-thumb-box flex flex-center bg-indigo-9 text-white text-weight-bolder">
+                <q-icon name="toc" size="24px" color="indigo-2" />
+              </div>
+              <span class="filmstrip-num font-mono">Índice</span>
+            </div>
+
+            <!-- MINIATURAS 3..N: FOJAS DEL PDF -->
+            <div
+              v-for="p in totalPdfPages"
               :key="p"
               class="filmstrip-item column items-center cursor-pointer"
-              :class="{
-                'filmstrip-active': viewMode === 'book' ? (currentPage === p + 1 || (currentPage > 1 && currentPage === p)) : currentPage === p + 1
-              }"
-              @click="goToPage(p + 1)"
+              :class="{ 'filmstrip-active': isFilmstripActive(p) }"
+              @click="irAFoja(p)"
             >
-              <div class="filmstrip-thumb-box flex flex-center">
+              <div class="filmstrip-thumb-box flex flex-center relative-position">
                 <canvas :id="`filmstrip-canvas-${p}`" class="filmstrip-canvas"></canvas>
+                <div class="filmstrip-badge font-mono">
+                  S{{ getInfoFoja(p).seccionId }}
+                </div>
               </div>
               <span class="filmstrip-num font-mono">Foja {{ p }}</span>
             </div>
@@ -546,6 +851,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
+import { PDFDocument } from 'pdf-lib/dist/pdf-lib.min.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import QRCode from 'qrcode';
 import docusLogo from 'src/assets/docus-app-icon.png';
@@ -557,11 +863,12 @@ import {
 import {
   getMasterPdf,
   getSectionPdf,
-  getEmpleadoPdfsMap
+  getEmpleadoPdfsMap,
+  saveMasterPdf
 } from 'src/utils/pdfStorageHelper';
 
 // Configurar worker de PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version || '4.10.38'}/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version || '6.4.299'}/build/pdf.worker.min.mjs`;
 
 const props = defineProps({
   modelValue: Boolean,
@@ -588,11 +895,16 @@ const showFilmstrip = ref(true);
 const viewerContainerRef = ref(null);
 
 // Datos del documento
-const totalPages = ref(1); // Mínimo 1 por la Carátula
-const currentPage = ref(1); // 1 = Carátula, 2 = Foja 1, 3 = Foja 2...
-const tituloDocumento = ref('Libro de Expediente');
+const totalPages = ref(2); // Mínimo 2: Carátula + Índice
+const currentPage = ref(1); // 1 = Carátula, 2 = Índice (o Índice + Foja 1 en libro), 3..N
+const totalPdfPages = ref(0);
 let pdfDocProxy = ref(null);
 const qrDataUrl = ref('');
+
+// Mapeos de secciones por página
+const pageSectionMap = ref({});
+const seccionStartPageMap = ref({});
+const activeRenderTasks = new Map();
 
 // Metadatos de secciones
 const secciones = ref(JSON.parse(JSON.stringify(SECCIONES_FILE_DEFAULT)));
@@ -612,6 +924,57 @@ const ubicacionTextoEmpleado = computed(() => {
   }
   return 'Gaveta Virtual (Sin asignar a mueble físico)';
 });
+
+const textoEstadoPagina = computed(() => {
+  if (currentPage.value === 1) return 'Portada / Carátula';
+  if (currentPage.value === 2) {
+    return viewMode.value === 'book'
+      ? `Índice General • Foja 1 de ${totalPdfPages.value}`
+      : 'Índice General de Secciones';
+  }
+  if (viewMode.value === 'book') {
+    const l = getLeftPdfNum(currentPage.value);
+    const r = Math.min(getRightPdfNum(currentPage.value), totalPdfPages.value);
+    return `Fojas ${l} - ${r} de ${totalPdfPages.value} fojas`;
+  }
+  return `Foja ${currentPage.value - 2} de ${totalPdfPages.value}`;
+});
+
+// Ayudantes de número de foja PDF según página en modo libro
+const getLeftPdfNum = (page) => {
+  if (page <= 2) return 1;
+  return (page - 2) * 2;
+};
+
+const getRightPdfNum = (page) => {
+  if (page === 2) return 1;
+  return (page - 2) * 2 + 1;
+};
+
+const getInfoFoja = (pdfPageNum) => {
+  if (pageSectionMap.value[pdfPageNum]) {
+    return pageSectionMap.value[pdfPageNum];
+  }
+  return {
+    seccionId: 1,
+    seccionCodigo: 'DOC_PER',
+    seccionNombre: 'Documentos Digitales',
+    fojaLocal: pdfPageNum,
+    totalFojasLocal: totalPdfPages.value
+  };
+};
+
+const isFilmstripActive = (pdfNum) => {
+  if (viewMode.value === 'single') {
+    return currentPage.value === pdfNum + 2;
+  }
+  if (currentPage.value === 2) {
+    return pdfNum === 1;
+  }
+  const l = getLeftPdfNum(currentPage.value);
+  const r = getRightPdfNum(currentPage.value);
+  return pdfNum === l || pdfNum === r;
+};
 
 const cerrarVisor = () => {
   emit('update:modelValue', false);
@@ -653,12 +1016,27 @@ watch(
 );
 
 const limpiarInstancia = () => {
+  // Cancelar renders activos
+  activeRenderTasks.forEach((task) => {
+    try {
+      task.cancel();
+    } catch {
+      // Ignorar error al cancelar
+    }
+  });
+  activeRenderTasks.clear();
+
   pdfDocProxy.value = null;
-  totalPages.value = 1;
+  totalPages.value = 2;
   currentPage.value = 1;
+  totalPdfPages.value = 0;
+  pageSectionMap.value = {};
+  seccionStartPageMap.value = {};
 };
 
-// Inicializar y cargar el documento correspondiente
+// =========================================================================
+// ENSAMBLADOR DE LIBRO UNIFICADO (MULTI-SECCIÓN SECUENCIAL)
+// =========================================================================
 const inicializarVisor = async () => {
   if (!props.empleado?.id) return;
   isLoading.value = true;
@@ -669,65 +1047,128 @@ const inicializarVisor = async () => {
     pdfsDisponibles.value = await getEmpleadoPdfsMap(props.empleado.id);
     await generarQrCaratula();
 
-    // Caso 1: Se pasó un código de sección específico
+    // Caso 1: Se pasó un buffer directo por prop
+    if (props.pdfDataBuffer) {
+      await cargarPdfDesdeBuffer(props.pdfDataBuffer);
+      return;
+    }
+
+    // Caso 2: Construir el libro unificado secuencial a partir de todas las secciones
+    await armarYProcesarLibroCompleto();
+
+    // Si se solicitó abrir en una sección específica al inicio
     if (props.seccionCodigoInicial) {
-      await cargarSeccionEspecifica(props.seccionCodigoInicial);
-    }
-    // Caso 2: Se pasó un buffer directamente por prop
-    else if (props.pdfDataBuffer) {
-      await cargarPdfDesdeBuffer(props.pdfDataBuffer, 'Expediente Completo');
-    }
-    // Caso 3: Buscar si hay Master PDF guardado en Supabase / IndexedDB
-    else {
-      const master = await getMasterPdf(props.empleado.id);
-      if (master && master.blob) {
-        tituloDocumento.value = 'Expediente Completo Digital (Modo Libro)';
-        const buf = await master.blob.arrayBuffer();
-        await cargarPdfDesdeBuffer(buf, tituloDocumento.value);
-      } else {
-        // Si no hay master, buscar si hay al menos una sección con PDF para abrirla
-        const codigosConPdf = Object.keys(pdfsDisponibles.value);
-        if (codigosConPdf.length > 0) {
-          await cargarSeccionEspecifica(codigosConPdf[0]);
-        } else {
-          totalPages.value = 1; // Solo carátula
-        }
-      }
+      saltarASeccion(props.seccionCodigoInicial);
     }
   } catch (error) {
     console.error('Error inicializando visor:', error);
-    $q.notify({ type: 'negative', message: 'No se pudo cargar el documento para el visor.' });
+    $q.notify({ type: 'negative', message: 'No se pudo cargar el expediente para el visor.' });
   } finally {
     isLoading.value = false;
   }
 };
 
-const cargarSeccionEspecifica = async (codigo) => {
-  seccionActivaCodigo.value = codigo;
-  const sec = secciones.value.find((s) => s.codigo === codigo);
-  tituloDocumento.value = sec ? `Sección ${String(sec.id).padStart(2, '0')}: ${sec.nombre}` : `Sección ${codigo}`;
+const armarYProcesarLibroCompleto = async () => {
+  try {
+    pageSectionMap.value = {};
+    seccionStartPageMap.value = {};
 
-  const record = await getSectionPdf(props.empleado.id, codigo);
-  if (record && record.blob) {
-    const buf = await record.blob.arrayBuffer();
-    await cargarPdfDesdeBuffer(buf, tituloDocumento.value);
-  } else {
-    $q.notify({ type: 'info', message: `La sección "${sec?.nombre || codigo}" no tiene archivo digital adjunto aún.` });
+    const unifiedDoc = await PDFDocument.create();
+    let globalPageCounter = 1;
+    let anyPageLoaded = false;
+
+    // Recorremos las 13 secciones en riguroso orden archivístico (01 al 13)
+    for (const sec of secciones.value) {
+      const hasPdf = pdfsDisponibles.value[sec.codigo]?.hasPdf;
+      if (hasPdf) {
+        const secRecord = await getSectionPdf(props.empleado.id, sec.codigo);
+        if (secRecord && secRecord.blob) {
+          try {
+            const buf = await secRecord.blob.arrayBuffer();
+            if (buf && buf.byteLength > 0) {
+              const subDoc = await PDFDocument.load(buf);
+              const count = subDoc.getPageCount();
+
+              if (count > 0) {
+                anyPageLoaded = true;
+                seccionStartPageMap.value[sec.codigo] = globalPageCounter;
+
+                const indices = Array.from({ length: count }, (_, i) => i);
+                const copiedPages = await unifiedDoc.copyPages(subDoc, indices);
+
+                copiedPages.forEach((page, idx) => {
+                  unifiedDoc.addPage(page);
+                  pageSectionMap.value[globalPageCounter] = {
+                    seccionId: sec.id,
+                    seccionCodigo: sec.codigo,
+                    seccionNombre: sec.nombre,
+                    fojaLocal: idx + 1,
+                    totalFojasLocal: count,
+                    globalPage: globalPageCounter
+                  };
+                  globalPageCounter++;
+                });
+              }
+            }
+          } catch (e) {
+            console.warn(`Aviso leyendo PDF de sección ${sec.codigo}:`, e);
+          }
+        }
+      }
+    }
+
+    // Si encontramos secciones con PDF, guardamos el unificado y lo cargamos
+    if (anyPageLoaded) {
+      const unifiedBytes = await unifiedDoc.save();
+      // Guardar en la caché master en segundo plano
+      saveMasterPdf(props.empleado.id, unifiedBytes, {
+        filename: `EXP_${props.empleado.id}_UNIFICADO.pdf`,
+        pagesCount: globalPageCounter - 1
+      }).catch(() => {});
+
+      await cargarPdfDesdeBuffer(unifiedBytes.buffer);
+    } else {
+      // Si no encontramos secciones separadas, verificamos si existe un Master directo previo
+      const master = await getMasterPdf(props.empleado.id);
+      if (master && master.blob) {
+        const buf = await master.blob.arrayBuffer();
+        await cargarPdfDesdeBuffer(buf);
+      } else {
+        // Expediente solo con Carátula e Índice
+        totalPdfPages.value = 0;
+        calcularTotalPaginasVisor();
+      }
+    }
+  } catch (err) {
+    console.error('Error armando libro unificado:', err);
+    totalPdfPages.value = 0;
+    calcularTotalPaginasVisor();
   }
 };
 
-const cargarPdfDesdeBuffer = async (buffer, titulo = 'Documento PDF') => {
+const cargarPdfDesdeBuffer = async (buffer) => {
   try {
     isLoading.value = true;
-    tituloDocumento.value = titulo;
-
-    // Cargar con PDF.js
     const proxy = await pdfjsLib.getDocument({ data: buffer }).promise;
     pdfDocProxy.value = proxy;
-    // Total de páginas = 1 (Carátula) + páginas del PDF
-    totalPages.value = proxy.numPages + 1;
-    currentPage.value = 1;
+    totalPdfPages.value = proxy.numPages;
 
+    // Si no teníamos un mapa detallado (por ejemplo PDF master directo), mapeamos 1 a 1
+    if (Object.keys(pageSectionMap.value).length === 0) {
+      for (let i = 1; i <= proxy.numPages; i++) {
+        pageSectionMap.value[i] = {
+          seccionId: 1,
+          seccionCodigo: 'DOC_PER',
+          seccionNombre: 'Documentos Personales',
+          fojaLocal: i,
+          totalFojasLocal: proxy.numPages,
+          globalPage: i
+        };
+      }
+      seccionStartPageMap.value['DOC_PER'] = 1;
+    }
+
+    calcularTotalPaginasVisor();
     ajustarZoomOptimo();
 
     await nextTick();
@@ -742,75 +1183,136 @@ const cargarPdfDesdeBuffer = async (buffer, titulo = 'Documento PDF') => {
   }
 };
 
-const toggleFilmstrip = async () => {
-  showFilmstrip.value = !showFilmstrip.value;
-  if (showFilmstrip.value) {
-    await nextTick();
-    renderFilmstrip();
-  }
-};
-
-const renderFilmstrip = async () => {
-  if (!pdfDocProxy.value || !showFilmstrip.value) return;
-  await nextTick();
-  await new Promise((r) => setTimeout(r, 150));
-
-  for (let i = 1; i <= pdfDocProxy.value.numPages; i++) {
-    try {
-      const page = await pdfDocProxy.value.getPage(i);
-      const canvas = document.getElementById(`filmstrip-canvas-${i}`);
-      if (canvas) {
-        const viewport = page.getViewport({ scale: 0.16 });
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        const context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        await page.render({ canvasContext: context, viewport }).promise;
-      }
-    } catch {
-      // Ignorar error individual en miniatura
+const calcularTotalPaginasVisor = () => {
+  if (viewMode.value === 'book') {
+    // Portada (1) + Spread Índice/Foja1 (2) + spreads de fojas restantes
+    if (totalPdfPages.value <= 1) {
+      totalPages.value = 2;
+    } else {
+      // Foja 1 está en página 2. Fojas 2..N van de 2 en 2 en páginas 3..M
+      totalPages.value = 2 + Math.ceil((totalPdfPages.value - 1) / 2);
     }
+  } else {
+    // Hoja simple: 1 = Carátula, 2 = Índice, 3.. = Fojas
+    totalPages.value = 2 + totalPdfPages.value;
   }
 };
 
-// Renderizado con alta nitidez (Retina / HiDPI seguro)
+const saltarASeccion = (codigo) => {
+  seccionActivaCodigo.value = codigo;
+  const startFoja = seccionStartPageMap.value[codigo];
+  const sec = secciones.value.find((s) => s.codigo === codigo);
+
+  if (!startFoja) {
+    $q.notify({
+      type: 'info',
+      message: `La sección "${sec?.nombre || codigo}" no tiene fojas digitalizadas aún.`,
+      icon: 'info'
+    });
+    return;
+  }
+
+  irAFoja(startFoja);
+  $q.notify({
+    type: 'positive',
+    message: `Abriendo Sección ${sec?.id || ''}: ${sec?.nombre || ''} (Foja ${startFoja})`,
+    icon: 'menu_book',
+    timeout: 1500
+  });
+};
+
+const irAFoja = (fojaNum) => {
+  if (viewMode.value === 'single') {
+    goToPage(fojaNum + 2);
+    return;
+  }
+  // En modo libro:
+  if (fojaNum === 1) {
+    goToPage(2);
+    return;
+  }
+  const spread = 2 + Math.ceil((fojaNum - 1) / 2);
+  goToPage(spread);
+};
+
+// =========================================================================
+// RENDERIZADO ULTRA-ROBUSTO DE CANVASES
+// =========================================================================
+const getCanvasAsync = async (id, maxTries = 25, delayMs = 25) => {
+  for (let i = 0; i < maxTries; i++) {
+    const el = document.getElementById(id);
+    if (el && el.isConnected) return el;
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return document.getElementById(id);
+};
+
 const renderizarPaginasActuales = async () => {
   if (!pdfDocProxy.value) return;
 
   if (currentPage.value === 1) {
-    // La carátula se renderiza con HTML vectorial, no necesita canvas
+    // Carátula HTML pura, sin canvas
     return;
   }
 
   await nextTick();
 
   if (viewMode.value === 'book') {
-    // Modo libro: Pág izquierda = currentPage - 1
-    const leftPdfPage = currentPage.value - 1;
-    await renderizarCanvas('page-canvas-left', leftPdfPage);
+    if (currentPage.value === 2) {
+      // Spread 2: Izquierda = Índice General (HTML), Derecha = Foja 1 (Canvas)
+      if (totalPdfPages.value >= 1) {
+        await renderizarCanvas('page-canvas-spread2-right', 1);
+      }
+    } else {
+      // Spread 3+: Izquierda y Derecha son fojas PDF
+      const leftFoja = getLeftPdfNum(currentPage.value);
+      const rightFoja = getRightPdfNum(currentPage.value);
 
-    // Pág derecha = currentPage
-    const rightPdfPage = currentPage.value;
-    if (rightPdfPage <= pdfDocProxy.value.numPages) {
-      await renderizarCanvas('page-canvas-right', rightPdfPage);
+      if (leftFoja <= totalPdfPages.value) {
+        await renderizarCanvas('page-canvas-left', leftFoja);
+      }
+      if (rightFoja <= totalPdfPages.value) {
+        await renderizarCanvas('page-canvas-right', rightFoja);
+      }
     }
   } else {
     // Modo página simple
-    const pdfPage = currentPage.value - 1;
-    await renderizarCanvas('page-canvas-single', pdfPage);
+    if (currentPage.value >= 3) {
+      const fojaNum = currentPage.value - 2;
+      if (fojaNum <= totalPdfPages.value) {
+        await renderizarCanvas('page-canvas-single', fojaNum);
+      }
+    }
   }
 };
 
 const renderizarCanvas = async (canvasId, pdfPageNum) => {
-  if (!pdfDocProxy.value || pdfPageNum < 1 || pdfPageNum > pdfDocProxy.value.numPages) return;
-  try {
-    const page = await pdfDocProxy.value.getPage(pdfPageNum);
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
+  if (!pdfDocProxy.value || pdfPageNum < 1 || pdfPageNum > totalPdfPages.value) return;
 
+  try {
+    const canvas = await getCanvasAsync(canvasId);
+    if (!canvas) {
+      console.warn(`[VisorLibro] No se encontró el canvas #${canvasId} en el DOM`);
+      return;
+    }
+
+    // Cancelar render anterior en este canvas si estaba en progreso
+    if (activeRenderTasks.has(canvasId)) {
+      try {
+        await activeRenderTasks.get(canvasId).cancel();
+      } catch {
+        // Ignorar cancelacion previa
+      }
+      activeRenderTasks.delete(canvasId);
+    }
+
+    const page = await pdfDocProxy.value.getPage(pdfPageNum);
     const dpr = window.devicePixelRatio || 1;
-    const baseScale = 1.35;
-    const scale = baseScale * dpr;
+
+    // Escala nítida basada en ancho de página estándar (540px)
+    const baseTargetWidth = 530;
+    const unscaledViewport = page.getViewport({ scale: 1.0 });
+    const scale = (baseTargetWidth / unscaledViewport.width) * dpr;
     const viewport = page.getViewport({ scale });
 
     canvas.width = Math.floor(viewport.width);
@@ -821,62 +1323,83 @@ const renderizarCanvas = async (canvasId, pdfPageNum) => {
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    await page.render({
+    const renderTask = page.render({
       canvasContext: context,
       viewport: viewport
-    }).promise;
+    });
+
+    activeRenderTasks.set(canvasId, renderTask);
+    await renderTask.promise;
+    activeRenderTasks.delete(canvasId);
   } catch (err) {
-    console.error(`Error renderizando canvas ${canvasId} en pág ${pdfPageNum}:`, err);
+    if (err?.name !== 'RenderingCancelledException') {
+      console.error(`Error renderizando canvas ${canvasId} en pág ${pdfPageNum}:`, err);
+    }
   }
 };
 
-// NAVEGACIÓN
-const nextPage = async () => {
-  if (viewMode.value === 'book') {
-    if (currentPage.value === 1) {
-      currentPage.value = 2; // Salta de Carátula a fojas 1 y 2
-    } else if (currentPage.value + 2 <= totalPages.value) {
-      currentPage.value += 2;
-    } else if (currentPage.value + 1 <= totalPages.value) {
-      currentPage.value += 1;
-    }
-  } else {
-    if (currentPage.value < totalPages.value) {
-      currentPage.value++;
+const toggleFilmstrip = async () => {
+  showFilmstrip.value = !showFilmstrip.value;
+  if (showFilmstrip.value) {
+    await nextTick();
+    renderFilmstrip();
+  }
+};
+
+const renderFilmstrip = async () => {
+  if (!pdfDocProxy.value || !showFilmstrip.value || totalPdfPages.value === 0) return;
+  await nextTick();
+  await new Promise((r) => setTimeout(r, 120));
+
+  for (let i = 1; i <= totalPdfPages.value; i++) {
+    try {
+      const page = await pdfDocProxy.value.getPage(i);
+      const canvas = await getCanvasAsync(`filmstrip-canvas-${i}`, 15, 20);
+      if (canvas) {
+        const viewport = page.getViewport({ scale: 0.18 });
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: context, viewport }).promise;
+      }
+    } catch {
+      // Ignorar errores individuales en miniaturas
     }
   }
-  await nextTick();
-  await renderizarPaginasActuales();
+};
+
+// =========================================================================
+// NAVEGACIÓN
+// =========================================================================
+const nextPage = async () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    await nextTick();
+    await renderizarPaginasActuales();
+  }
 };
 
 const prevPage = async () => {
-  if (viewMode.value === 'book') {
-    if (currentPage.value <= 2) {
-      currentPage.value = 1; // Vuelve a la Carátula
-    } else {
-      currentPage.value = Math.max(2, currentPage.value - 2);
-    }
-  } else {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-    }
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    await nextTick();
+    await renderizarPaginasActuales();
   }
-  await nextTick();
-  await renderizarPaginasActuales();
 };
 
 const goToPage = async (page) => {
-  let target = Math.max(1, Math.min(page, totalPages.value));
-  // En modo libro, si la página es par (excepto 1), alinear a la apertura del par
-  if (viewMode.value === 'book' && target > 1 && target % 2 !== 0 && target > 2) {
-    target = target - 1;
-  }
+  const target = Math.max(1, Math.min(page, totalPages.value));
   currentPage.value = target;
   await nextTick();
   await renderizarPaginasActuales();
 };
 
 const onModeChange = async () => {
+  calcularTotalPaginasVisor();
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value;
+  }
   await nextTick();
   ajustarZoomOptimo();
   await renderizarPaginasActuales();
@@ -927,6 +1450,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeydown);
+  limpiarInstancia();
 });
 </script>
 
@@ -1143,8 +1667,12 @@ onBeforeUnmount(() => {
 
 .book-page-left,
 .book-page-right {
+  min-width: 520px;
+  min-height: 730px;
   background: #ffffff;
   position: relative;
+  display: flex;
+  flex-direction: column;
   box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.02);
 }
 
@@ -1190,6 +1718,50 @@ onBeforeUnmount(() => {
   background: rgba(0, 0, 0, 0.35);
 }
 
+/* PÁGINA ÍNDICE GENERAL */
+.page-indice-container {
+  background: #ffffff;
+}
+
+.indice-header {
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.indice-item {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: all 0.15s ease;
+}
+
+.indice-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.indice-item-has-pdf {
+  border-left: 3px solid #10b981;
+}
+
+.indice-sec-num {
+  font-size: 11px;
+  font-weight: 900;
+  color: #1e293b;
+  background: #e2e8f0;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* MEMBRETE SUPERIOR DE SECCIÓN EN FOJA */
+.page-sec-header {
+  height: 28px;
+}
+
+.page-canvas-container {
+  min-height: 660px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
 .page-canvas-rendered {
   display: block;
   max-width: 100%;
@@ -1204,11 +1776,11 @@ onBeforeUnmount(() => {
   text-align: center;
   border-top: 1px solid #f1f5f9;
   background: #ffffff;
+  height: 28px;
 }
 
 .book-blank-page {
-  width: 480px;
-  height: 680px;
+  min-height: 680px;
   background: #fafafa;
 }
 
@@ -1262,7 +1834,7 @@ onBeforeUnmount(() => {
 
 /* SIDEBAR DE LAS 13 SECCIONES */
 .sidebar-sections {
-  width: 250px;
+  width: 260px;
   background: #0f172a;
   z-index: 40;
 }
@@ -1285,7 +1857,7 @@ onBeforeUnmount(() => {
 }
 
 .sidebar-section-item.item-has-pdf {
-  border-left: 3px solid #fbbf24;
+  border-left: 3px solid #10b981;
 }
 
 .sidebar-sec-num {
@@ -1300,7 +1872,7 @@ onBeforeUnmount(() => {
 
 /* FILMSTRIP (CARRUSEL INFERIOR) */
 .filmstrip-drawer {
-  height: 115px;
+  height: 118px;
   background: #090d16;
   border-top: 1px solid #1e293b;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
@@ -1337,6 +1909,19 @@ onBeforeUnmount(() => {
   border-radius: 3px;
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.filmstrip-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fbbf24;
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1;
 }
 
 .filmstrip-canvas {
