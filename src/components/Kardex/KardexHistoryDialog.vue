@@ -178,6 +178,22 @@
                   dense
                   no-caps
                   unelevated
+                  color="teal-8"
+                  text-color="white"
+                  icon="cloud_sync"
+                  label="Sincronizar Nube"
+                  :loading="isSyncingCloud"
+                  class="q-px-sm text-weight-bolder"
+                  size="sm"
+                  @click="forzarSincronizacionNube"
+                >
+                  <q-tooltip>Verificar y respaldar todos los archivos locales en Supabase Cloud Storage</q-tooltip>
+                </q-btn>
+
+                <q-btn
+                  dense
+                  no-caps
+                  unelevated
                   color="positive"
                   icon="save"
                   label="Guardar"
@@ -417,7 +433,7 @@ import {
   calcularResumenFile,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
-import { getEmpleadoPdfsMap } from 'src/utils/pdfStorageHelper';
+import { getEmpleadoPdfsMap, syncEmpleadoFilesToCloud } from 'src/utils/pdfStorageHelper';
 
 const $q = useQuasar();
 const store = useGeosStore();
@@ -428,6 +444,7 @@ const showRotulo = ref(false);
 const seccionSeleccionadaVisor = ref(null);
 const pdfsMap = ref({});
 const activeTab = ref('secciones');
+const isSyncingCloud = ref(false);
 
 const props = defineProps({
   modelValue: Boolean,
@@ -446,6 +463,27 @@ const abrirVisorLibroCompleto = () => {
 const previsualizarPdfSeccion = (codigo) => {
   seccionSeleccionadaVisor.value = codigo;
   showVisorLibro.value = true;
+};
+
+// Forzar sincronización manual con Supabase Cloud
+const forzarSincronizacionNube = async () => {
+  if (!props.kardex?.id) return;
+  try {
+    isSyncingCloud.value = true;
+    const res = await syncEmpleadoFilesToCloud(props.kardex.id);
+    await cargarPdfsMap();
+    $q.notify({
+      type: 'positive',
+      message: `¡Sincronización en la nube completada! (${res.uploaded} archivos verificados/subidos a Supabase Storage)`,
+      icon: 'cloud_done',
+      timeout: 2500
+    });
+  } catch (err) {
+    console.error('Error sincronizando con la nube:', err);
+    $q.notify({ type: 'negative', message: 'Error de conexión al sincronizar con Supabase Cloud.' });
+  } finally {
+    isSyncingCloud.value = false;
+  }
 };
 
 // Estados: 0 = Presente, 1 = Ausente, 2 = Prestado
