@@ -135,10 +135,78 @@
             </div>
           </div>
 
-          <!-- SECCIÓN 3: HISTORIAL DE MOVIMIENTOS -->
+          <!-- SECCIÓN 3: CONTROL Y RECUENTO DE FOJAS DEL FILE FÍSICO (13 SECCIONES) -->
+          <div class="ficha-section-box q-mb-md">
+            <div class="row items-center justify-between ficha-section-title">
+              <span>3. ÍNDICE Y CONTROL DE FOJAS DEL LEGAJO FÍSICO (13 SECCIONES)</span>
+              <span class="text-caption text-weight-bolder" style="text-transform: none;">
+                Total Foliado: <b>{{ resumenFile.totalFojas }} Fojas</b> • Completitud: <b>{{ resumenFile.porcentaje }}%</b>
+              </span>
+            </div>
+            
+            <div class="q-pa-xs">
+              <table class="ficha-table ficha-sections-table">
+                <thead>
+                  <tr>
+                    <th style="width: 5%; text-align: center;">#</th>
+                    <th style="width: 33%;">Sección Documental</th>
+                    <th style="width: 17%; text-align: center;">Estado Físico</th>
+                    <th style="width: 10%; text-align: center;">Fojas</th>
+                    <th style="width: 35%;">Detalle / Respaldo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="sec in seccionesList" :key="sec.id" :class="{ 'row-pendiente': sec.estado === 'pendiente' }">
+                    <td class="text-center font-mono text-weight-bold" style="font-size: 11px;">
+                      {{ String(sec.id).padStart(2, '0') }}
+                    </td>
+                    <td>
+                      <div class="text-weight-bold text-slate-900" style="font-size: 11.5px;">{{ sec.nombre }}</div>
+                      <div class="text-caption text-slate-500" style="font-size: 9.5px; line-height: 1.1;">{{ sec.descripcion }}</div>
+                    </td>
+                    <td class="text-center">
+                      <span v-if="sec.estado === 'presente'" class="badge-status-presente">
+                        ✓ ARCHIVADO
+                      </span>
+                      <span v-else-if="sec.estado === 'pendiente'" class="badge-status-pendiente">
+                        ✗ PENDIENTE
+                      </span>
+                      <span v-else class="badge-status-noaplica">
+                        — NO APLICA
+                      </span>
+                    </td>
+                    <td class="text-center font-mono text-weight-bold" style="font-size: 11.5px;">
+                      {{ sec.fojas || 0 }}
+                    </td>
+                    <td class="text-caption text-slate-600" style="font-size: 10px;">
+                      {{ sec.observacion || '-' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- RESUMEN AL PIE DE LA TABLA -->
+              <div class="row items-center justify-between q-pa-sm bg-slate-50 border-top q-mt-xs text-caption">
+                <div>
+                  <span class="text-weight-bold text-slate-700">Dictamen de Auditoría: </span>
+                  <span class="text-weight-bolder" :class="resumenFile.porcentaje >= 75 ? 'text-teal-9' : 'text-amber-9'">
+                    {{ resumenFile.estadoGeneral }}
+                  </span>
+                </div>
+                <div class="row q-gutter-x-md text-slate-600">
+                  <span>Archivadas: <b class="text-teal-9">{{ resumenFile.presentes }}</b></span>
+                  <span>Pendientes: <b class="text-negative">{{ resumenFile.pendientes }}</b></span>
+                  <span>No aplica: <b>{{ resumenFile.noAplica }}</b></span>
+                  <span>Total fojas: <b class="text-indigo-9 font-mono">{{ resumenFile.totalFojas }}</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: HISTORIAL DE MOVIMIENTOS -->
           <div class="ficha-section-box q-mb-md">
             <div class="ficha-section-title">
-              3. HISTORIAL DE TRASLADOS Y MOVIMIENTOS ARCHIVÍSTICOS
+              4. HISTORIAL DE TRASLADOS Y MOVIMIENTOS ARCHIVÍSTICOS
             </div>
             <div v-if="movimientosList.length > 0" class="q-pa-xs">
               <table class="ficha-table">
@@ -165,7 +233,7 @@
             </div>
           </div>
 
-          <!-- SECCIÓN 4: FIRMAS Y CONFORMIDAD -->
+          <!-- SECCIÓN 5: FIRMAS Y CONFORMIDAD -->
           <div class="ficha-firmas-box q-mt-xl">
             <div class="row justify-around text-center">
               <div class="col-5">
@@ -194,6 +262,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { getEmpleadoSecciones, calcularResumenFile } from 'src/utils/fileSectionsHelper';
 
 const props = defineProps({
   modelValue: {
@@ -246,6 +315,14 @@ const formatDate = (dateStr) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString();
 };
+
+const seccionesList = computed(() => {
+  return getEmpleadoSecciones(props.empleado?.id);
+});
+
+const resumenFile = computed(() => {
+  return calcularResumenFile(seccionesList.value);
+});
 
 const imprimirFicha = () => {
   window.print();
@@ -362,7 +439,7 @@ const imprimirFicha = () => {
 }
 
 .ficha-table th, .ficha-table td {
-  padding: 6px 8px;
+  padding: 5px 8px;
   border: 1px solid #e2e8f0;
   text-align: left;
 }
@@ -371,6 +448,43 @@ const imprimirFicha = () => {
   background: #f8fafc;
   font-weight: 700;
   font-size: 11px;
+}
+
+.badge-status-presente {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.badge-status-pendiente {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.badge-status-noaplica {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.row-pendiente {
+  background: #fffafa;
 }
 
 .firma-line {
