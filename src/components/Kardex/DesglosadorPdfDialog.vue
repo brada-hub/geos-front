@@ -232,12 +232,45 @@
         <!-- PANEL DERECHO: LAS 13 SECCIONES A CLASIFICAR -->
         <div class="col-4 column no-wrap bg-slate-950">
           <div class="q-px-md q-py-sm border-bottom col-auto">
-            <div class="text-subtitle2 text-weight-bolder text-white">
-              13 Secciones del Legajo
+            <div class="row items-center justify-between no-wrap">
+              <div class="text-subtitle2 text-weight-bolder text-white">
+                13 Secciones del Legajo
+              </div>
+              <q-badge color="indigo-9" class="text-weight-bold font-mono">
+                {{ Object.keys(asignaciones).filter(k => (asignaciones[k] || []).length > 0).length }} asignadas
+              </q-badge>
             </div>
-            <div class="text-caption text-slate-400" style="font-size: 11px;">
-              Selecciona hojas a la izquierda y presiona la sección a la que corresponden:
+            <div class="text-caption text-slate-400" style="font-size: 10.5px;">
+              Selecciona hojas a la izquierda y presiona "Asignar":
             </div>
+          </div>
+
+          <!-- SELECTOR DE MODO: ACUMULAR VS REEMPLAZAR -->
+          <div class="q-px-sm q-py-xs bg-slate-900 border-bottom col-auto row items-center justify-between">
+            <span class="text-caption text-slate-300 font-mono text-weight-bold" style="font-size: 10px;">
+              Modo:
+            </span>
+            <q-btn-toggle
+              v-model="modoGuardado"
+              dense
+              no-caps
+              rounded
+              unelevated
+              size="xs"
+              toggle-color="teal-8"
+              color="slate-800"
+              text-color="slate-300"
+              :options="[
+                { label: 'Acumular / Sumar', value: 'acumular', icon: 'library_add' },
+                { label: 'Reemplazar', value: 'reemplazar', icon: 'sync' }
+              ]"
+            >
+              <q-tooltip>
+                {{ modoGuardado === 'acumular' 
+                  ? 'Acumular: Conserva los documentos previos en cada sección y anexa las nuevas páginas al final' 
+                  : 'Reemplazar: Sobrescribe los documentos anteriores de las secciones que asignes' }}
+              </q-tooltip>
+            </q-btn-toggle>
           </div>
 
           <!-- LISTA SCROLLABLE DE LAS 13 SECCIONES -->
@@ -338,7 +371,7 @@ import {
   saveEmpleadoSecciones,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
-import { saveSectionPdf, saveMasterPdf } from 'src/utils/pdfStorageHelper';
+import { saveSectionPdf, saveMasterPdf, appendSectionPdf } from 'src/utils/pdfStorageHelper';
 
 // Polyfill preventivo para navegadores sin Uint8Array.prototype.toHex
 if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.toHex) {
@@ -361,6 +394,7 @@ const emit = defineEmits(['update:modelValue', 'saved']);
 
 const $q = useQuasar();
 
+const modoGuardado = ref('acumular'); // 'acumular' | 'reemplazar'
 const fileInputRef = ref(null);
 const isDragging = ref(false);
 const isProcessing = ref(false);
@@ -618,19 +652,31 @@ const ejecutarDesglose = async () => {
 
       const subPdfBytes = await subDoc.save();
 
-      // Guardar en IndexedDB de forma limpia y clonable
-      await saveSectionPdf(props.empleado.id, codigo, subPdfBytes, {
-        filename: `${codigo}_EXP_${props.empleado.id}.pdf`,
-        pagesCount: pageNums.length,
-        pageNumbers: pageNums
-      });
+      let totalFojasSec = pageNums.length;
+      if (modoGuardado.value === 'acumular') {
+        const res = await appendSectionPdf(props.empleado.id, codigo, subPdfBytes, {
+          filename: `${codigo}_EXP_${props.empleado.id}.pdf`,
+          pagesCount: pageNums.length,
+          pageNumbers: pageNums
+        });
+        totalFojasSec = res.totalPages;
+      } else {
+        await saveSectionPdf(props.empleado.id, codigo, subPdfBytes, {
+          filename: `${codigo}_EXP_${props.empleado.id}.pdf`,
+          pagesCount: pageNums.length,
+          pageNumbers: pageNums
+        });
+      }
 
       // Actualizar metadata de la sección
       const targetSec = seccionesActualizadas.find(s => s.codigo === codigo);
       if (targetSec) {
-        targetSec.fojas = pageNums.length;
+        targetSec.fojas = totalFojasSec;
         targetSec.estado = 'presente';
-        targetSec.observacion = `Documento escaneado desglosado (Págs. ${pageNums.join(', ')})`;
+        const obsAppend = modoGuardado.value === 'acumular' && totalFojasSec > pageNums.length
+          ? ` (Acumulado: ${totalFojasSec} fojas)`
+          : ` (${pageNums.length} fojas)`;
+        targetSec.observacion = `Documento escaneado desglosado${obsAppend}`;
       }
 
       totalDesglosados++;

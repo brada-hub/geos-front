@@ -1,3 +1,5 @@
+import { PDFDocument } from 'pdf-lib/dist/pdf-lib.min.js';
+
 // Utilidad para almacenamiento híbrido de PDFs (Cloud Supabase Storage + Caché Local IndexedDB)
 // Garantiza persistencia en la nube compartida entre equipos y acceso local de alta velocidad sin bloqueos
 
@@ -156,6 +158,72 @@ export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBytesOrBlob, 
   } catch (error) {
     console.error('Error guardando PDF:', error);
     return false;
+  }
+}
+
+/**
+ * Concatena / anexa páginas adicionales al PDF de una sección existente (o lo crea si no existía).
+ * Acumula fojas para que nuevos documentos (contratos, adendas, certificados) no borren los anteriores.
+ */
+export async function appendSectionPdf(empleadoId, seccionCodigo, newPdfBytesOrBlob, meta = {}) {
+  try {
+    const cleanId = String(empleadoId);
+    const cleanCod = String(seccionCodigo);
+
+    // 1. Obtener registro existente si lo hay
+    const existing = await getSectionPdf(cleanId, cleanCod);
+
+    // 2. Normalizar buffer del nuevo archivo
+    let newBuffer;
+    if (newPdfBytesOrBlob instanceof Blob) {
+      newBuffer = await newPdfBytesOrBlob.arrayBuffer();
+    } else if (newPdfBytesOrBlob instanceof Uint8Array) {
+      newBuffer = newPdfBytesOrBlob.buffer.slice(
+        newPdfBytesOrBlob.byteOffset,
+        newPdfBytesOrBlob.byteOffset + newPdfBytesOrBlob.byteLength
+      );
+    } else if (newPdfBytesOrBlob instanceof ArrayBuffer) {
+      newBuffer = newPdfBytesOrBlob;
+    } else {
+      newBuffer = new ArrayBuffer(0);
+    }
+
+    if (!existing || !existing.dataBuffer || existing.dataBuffer.byteLength === 0) {
+      // Si no existía nada previamente, simplemente guardamos el nuevo
+      const subDoc = await PDFDocument.load(newBuffer);
+      const pagesCount = subDoc.getPageCount();
+      const saved = await saveSectionPdf(cleanId, cleanCod, newBuffer, {
+        ...meta,
+        pagesCount: pagesCount || meta.pagesCount || 1,
+      });
+      return { success: saved, totalPages: pagesCount || meta.pagesCount || 1, addedPages: pagesCount || 1 };
+    }
+
+    // 3. Fusionar PDF existente con las nuevas páginas añadidas
+    const baseDoc = await PDFDocument.load(existing.dataBuffer);
+    const addedDoc = await PDFDocument.load(newBuffer);
+
+    const addedCount = addedDoc.getPageCount();
+    const addedIndices = Array.from({ length: addedCount }, (_, i) => i);
+    const copiedPages = await baseDoc.copyPages(addedDoc, addedIndices);
+    copiedPages.forEach((p) => baseDoc.addPage(p));
+
+    const mergedBytes = await baseDoc.save();
+    const totalPages = baseDoc.getPageCount();
+
+    const mergedMeta = {
+      filename: meta.filename || existing.filename,
+      pagesCount: totalPages,
+      pageNumbers: Array.from({ length: totalPages }, (_, i) => i + 1),
+    };
+
+    const saved = await saveSectionPdf(cleanId, cleanCod, mergedBytes, mergedMeta);
+    return { success: saved, totalPages, addedPages: addedCount };
+  } catch (error) {
+    console.error('Error acumulando fojas en appendSectionPdf:', error);
+    // Fallback de contingencia: guardar nuevo
+    const saved = await saveSectionPdf(empleadoId, seccionCodigo, newPdfBytesOrBlob, meta);
+    return { success: saved, totalPages: meta.pagesCount || 1, addedPages: meta.pagesCount || 1 };
   }
 }
 

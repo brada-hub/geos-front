@@ -310,6 +310,21 @@
                 >
                   <q-tooltip>Previsualizar PDF interactivo de esta sección ({{ pdfsMap[sec.codigo]?.pagesCount || 0 }} fojas)</q-tooltip>
                 </q-btn>
+
+                <!-- BOTÓN PARA ADJUNTAR O SUMAR FOJAS DIRECTAMENTE A ESTA SECCIÓN -->
+                <q-btn
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  icon="note_add"
+                  color="indigo-7"
+                  @click="iniciarSubidaSeccion(sec)"
+                >
+                  <q-tooltip>
+                    {{ pdfsMap[sec.codigo] ? `Anexar / sumar más fojas a ${sec.nombre}` : `Adjuntar PDF a ${sec.nombre}` }}
+                  </q-tooltip>
+                </q-btn>
               </div>
             </div>
           </div>
@@ -415,6 +430,90 @@
 
     <!-- RÓTULO ADHESIVO CON QR PARA EL FOLDER FÍSICO -->
     <RotuloFolderDialog v-model="showRotulo" :empleado="kardex" />
+
+    <!-- MODAL DE ADJUNCIÓN / ACUMULACIÓN DE FOJAS EN SECCIÓN ESPECÍFICA -->
+    <q-dialog v-model="showSubidaSeccionModal">
+      <q-card style="min-width: 440px; max-width: 520px; width: 95vw;" class="bg-slate-900 text-white q-pa-sm">
+        <q-card-section class="q-pb-none row items-center justify-between">
+          <div class="row items-center q-gutter-x-sm">
+            <q-icon name="note_add" size="24px" color="amber-4" />
+            <div>
+              <div class="text-subtitle1 text-weight-bolder">
+                {{ seccionSubidaActual?.nombre }}
+              </div>
+              <div class="text-caption text-slate-400 font-mono" style="font-size: 11px;">
+                Sección {{ String(seccionSubidaActual?.id).padStart(2, '0') }} • {{ kardex?.nombre_completo }}
+              </div>
+            </div>
+          </div>
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="q-gutter-y-sm">
+          <div class="row items-center justify-between bg-slate-950 q-pa-sm rounded-borders border border-slate-800">
+            <span class="text-caption text-slate-300">Fojas físicas actuales:</span>
+            <q-badge color="indigo-7" class="text-weight-bold font-mono" style="font-size: 12px;">
+              {{ seccionSubidaActual?.fojas || 0 }} fojas
+            </q-badge>
+          </div>
+
+          <div class="q-py-xs">
+            <div class="text-caption text-slate-400 q-mb-xs text-weight-bold">
+              ¿Cómo deseas incorporar el nuevo documento?
+            </div>
+            <q-btn-toggle
+              v-model="modoSubidaDirecta"
+              spread
+              dense
+              no-caps
+              rounded
+              unelevated
+              toggle-color="teal-8"
+              color="slate-800"
+              text-color="slate-300"
+              :options="[
+                { label: 'Acumular / Sumar fojas', value: 'acumular', icon: 'library_add' },
+                { label: 'Reemplazar documento', value: 'reemplazar', icon: 'sync' }
+              ]"
+            />
+            <div class="text-caption q-mt-xs font-mono" style="font-size: 10.5px;" :class="modoSubidaDirecta === 'acumular' ? 'text-teal-3' : 'text-amber-4'">
+              {{ modoSubidaDirecta === 'acumular'
+                ? '✅ El nuevo archivo se anexará al final de los documentos existentes sin borrar nada.'
+                : '⚠️ El nuevo archivo reemplazará los documentos previos de esta sección.' }}
+            </div>
+          </div>
+
+          <q-file
+            v-model="archivoSeccionDirecto"
+            dark
+            outlined
+            dense
+            label="Seleccionar archivo PDF"
+            accept=".pdf"
+            color="amber-4"
+          >
+            <template v-slot:prepend>
+              <q-icon name="attach_file" color="amber-4" />
+            </template>
+          </q-file>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pt-none">
+          <q-btn flat label="Cancelar" color="slate-400" v-close-popup />
+          <q-btn
+            unelevated
+            color="amber-8"
+            text-color="dark"
+            icon="save"
+            :label="modoSubidaDirecta === 'acumular' ? 'Anexar Fojas' : 'Guardar y Reemplazar'"
+            :loading="guardandoArchivoSeccion"
+            :disable="!archivoSeccionDirecto"
+            class="text-weight-bolder"
+            @click="confirmarSubidaDirecta"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-dialog>
 </template>
 
@@ -433,7 +532,13 @@ import {
   calcularResumenFile,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
-import { getEmpleadoPdfsMap, syncEmpleadoFilesToCloud } from 'src/utils/pdfStorageHelper';
+import {
+  getEmpleadoPdfsMap,
+  syncEmpleadoFilesToCloud,
+  appendSectionPdf,
+  saveSectionPdf
+} from 'src/utils/pdfStorageHelper';
+import { PDFDocument } from 'pdf-lib/dist/pdf-lib.min.js';
 
 const $q = useQuasar();
 const store = useGeosStore();
@@ -446,12 +551,88 @@ const pdfsMap = ref({});
 const activeTab = ref('secciones');
 const isSyncingCloud = ref(false);
 
+// Estado para adjunción / acumulación directa de fojas
+const showSubidaSeccionModal = ref(false);
+const seccionSubidaActual = ref(null);
+const archivoSeccionDirecto = ref(null);
+const modoSubidaDirecta = ref('acumular');
+const guardandoArchivoSeccion = ref(false);
+
 const props = defineProps({
   modelValue: Boolean,
   kardex: Object
 });
 
 defineEmits(['update:modelValue']);
+
+// Iniciar adjunción de archivo a una sección específica
+const iniciarSubidaSeccion = (sec) => {
+  seccionSubidaActual.value = sec;
+  archivoSeccionDirecto.value = null;
+  modoSubidaDirecta.value = 'acumular';
+  showSubidaSeccionModal.value = true;
+};
+
+// Confirmar y guardar fojas (acumular o reemplazar)
+const confirmarSubidaDirecta = async () => {
+  if (!archivoSeccionDirecto.value || !seccionSubidaActual.value || !props.kardex?.id) return;
+  guardandoArchivoSeccion.value = true;
+  try {
+    const buffer = await archivoSeccionDirecto.value.arrayBuffer();
+    const codigo = seccionSubidaActual.value.codigo;
+    let totalFojasActualizadas = 0;
+
+    if (modoSubidaDirecta.value === 'acumular') {
+      const res = await appendSectionPdf(props.kardex.id, codigo, buffer, {
+        filename: archivoSeccionDirecto.value.name,
+      });
+      totalFojasActualizadas = res.totalPages;
+      $q.notify({
+        type: 'positive',
+        message: `¡Fojas anexadas con éxito! Se sumaron ${res.addedPages} fojas (Total en esta sección: ${res.totalPages} fojas).`,
+        icon: 'library_add',
+        timeout: 2500,
+      });
+    } else {
+      const doc = await PDFDocument.load(buffer);
+      const count = doc.getPageCount();
+      await saveSectionPdf(props.kardex.id, codigo, buffer, {
+        filename: archivoSeccionDirecto.value.name,
+        pagesCount: count,
+      });
+      totalFojasActualizadas = count;
+      $q.notify({
+        type: 'positive',
+        message: `¡Documento reemplazado con éxito! Total: ${count} fojas.`,
+        icon: 'check_circle',
+        timeout: 2500,
+      });
+    }
+
+    // Actualizar sección reactiva en la lista
+    const targetSec = secciones.value.find((s) => s.codigo === codigo);
+    if (targetSec) {
+      targetSec.fojas = totalFojasActualizadas;
+      targetSec.estado = 'presente';
+      if (!targetSec.observacion) {
+        targetSec.observacion = `Documento digital adjuntado (${archivoSeccionDirecto.value.name})`;
+      }
+    }
+
+    // Guardar metadata del file
+    saveEmpleadoSecciones(props.kardex.id, secciones.value);
+    await cargarPdfsMap();
+    showSubidaSeccionModal.value = false;
+  } catch (err) {
+    console.error('Error adjuntando archivo a sección:', err);
+    $q.notify({
+      type: 'negative',
+      message: 'No se pudo adjuntar el archivo. Asegúrate de que sea un PDF válido.',
+    });
+  } finally {
+    guardandoArchivoSeccion.value = false;
+  }
+};
 
 // Abrir visor de libro completo
 const abrirVisorLibroCompleto = () => {
