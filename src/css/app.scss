@@ -62,6 +62,7 @@ body {
 }
 
 /* Slate utility colors */
+.text-slate-950 { color: #020617 !important; }
 .text-slate-900 { color: #0f172a !important; }
 .text-slate-800 { color: #1e293b !important; }
 .text-slate-700 { color: #334155 !important; }
@@ -71,6 +72,27 @@ body {
 .text-slate-300 { color: #cbd5e1 !important; }
 .text-slate-200 { color: #e2e8f0 !important; }
 .text-slate-100 { color: #f1f5f9 !important; }
+.text-slate-50  { color: #f8fafc !important; }
+
+/* Slate background utilities */
+.bg-slate-950 { background-color: #020617 !important; }
+.bg-slate-900 { background-color: #0f172a !important; }
+.bg-slate-800 { background-color: #1e293b !important; }
+.bg-slate-700 { background-color: #334155 !important; }
+.bg-slate-600 { background-color: #475569 !important; }
+.bg-slate-500 { background-color: #64748b !important; }
+.bg-slate-400 { background-color: #94a3b8 !important; }
+.bg-slate-300 { background-color: #cbd5e1 !important; }
+.bg-slate-200 { background-color: #e2e8f0 !important; }
+.bg-slate-100 { background-color: #f1f5f9 !important; }
+.bg-slate-50  { background-color: #f8fafc !important; }
+
+/* Slate border utilities */
+.border-slate-800 { border-color: #1e293b !important; }
+.border-slate-700 { border-color: #334155 !important; }
+.border-slate-600 { border-color: #475569 !important; }
+.border-slate-300 { border-color: #cbd5e1 !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
 
 /* ============================================================
    TEMA OSCURO PREMIUM (DARK MODE)

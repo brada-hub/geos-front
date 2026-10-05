@@ -138,11 +138,20 @@
                   </q-item-section>
                 </q-item>
                 <q-separator class="q-my-xs" />
-                <q-item clickable @click="profileDialogOpen = true">
+                <q-item clickable @click="openProfileDialog('general')">
+                  <q-item-section avatar>
+                    <q-icon name="person" color="primary" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-slate-800">Mi Perfil y Seguridad</q-item-section>
+                </q-item>
+                <q-item clickable @click="openProfileDialog('usuarios')">
                   <q-item-section avatar>
                     <q-icon name="manage_accounts" color="primary" size="18px" />
                   </q-item-section>
-                  <q-item-section class="text-slate-800">Mi Perfil y Seguridad</q-item-section>
+                  <q-item-section class="text-slate-800">
+                    <q-item-label class="text-weight-bold">Gestión de Usuarios & Roles</q-item-label>
+                    <q-item-label caption class="text-slate-500" style="font-size: 10.5px;">Crear cuentas, roles y permisos</q-item-label>
+                  </q-item-section>
                 </q-item>
                 <q-item clickable @click="openImportDialog">
                   <q-item-section avatar>
@@ -335,6 +344,27 @@
               <q-item-section>
                 <q-item-label class="drawer-item-title">Importar Excel</q-item-label>
                 <q-item-label caption class="drawer-item-sub">Carga masiva de planillas</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="arrow_forward" size="14px" color="slate-400" />
+              </q-item-section>
+            </q-item>
+
+            <!-- BOTÓN GESTIÓN DE USUARIOS Y ROLES -->
+            <q-item
+              clickable
+              v-ripple
+              @click="openProfileDialog('usuarios')"
+              class="drawer-nav-item drawer-tool-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon name="manage_accounts" size="18px" color="primary" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">Usuarios & Permisos</q-item-label>
+                <q-item-label caption class="drawer-item-sub">Roles y control de accesos</q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-icon name="arrow_forward" size="14px" color="slate-400" />
@@ -539,7 +569,10 @@
     <MetricasCapacidadDialog v-model="metricasOpen" />
 
     <!-- MODAL DE PERFIL Y SEGURIDAD -->
-    <PerfilUsuarioDialog v-model="profileDialogOpen" />
+    <PerfilUsuarioDialog
+      v-model="profileDialogOpen"
+      :initial-tab="profileDialogTab"
+    />
   </q-layout>
 </template>
 
@@ -588,6 +621,12 @@ const importDialogOpen = ref(false);
 const spotlightOpen = ref(false);
 const metricasOpen = ref(false);
 const profileDialogOpen = ref(false);
+const profileDialogTab = ref('general');
+
+const openProfileDialog = (tab = 'general') => {
+  profileDialogTab.value = tab;
+  profileDialogOpen.value = true;
+};
 const liveTime = ref('');
 
 const installPromptEvent = ref(null);

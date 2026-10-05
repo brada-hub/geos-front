@@ -8,9 +8,9 @@
     class="visor-libro-dialog"
     @keydown.esc="cerrarVisor"
   >
-    <q-card class="column no-wrap full-height bg-slate-950 text-white overflow-hidden">
+    <q-card class="column no-wrap full-height bg-slate-950 text-white overflow-hidden visor-card-root">
       <!-- HEADER CONSOLA / BARRA DE HERRAMIENTAS RESPONSIVA -->
-      <div class="row no-wrap items-center justify-between q-px-sm q-px-md-md q-py-xs bg-slate-900 border-bottom col-auto z-top shadow-3">
+      <div class="row no-wrap items-center justify-between q-px-sm q-px-md-md q-py-xs bg-slate-900 border-bottom col-auto z-top shadow-3 visor-header-bar">
         <!-- IZQUIERDA: VOLVER + METADATOS COMPACTOS -->
         <div class="row no-wrap items-center q-gutter-x-xs q-gutter-x-sm-sm ellipsis" style="min-width: 0; max-width: 38%;">
           <q-btn
@@ -44,7 +44,7 @@
               <span class="text-weight-bolder text-white ellipsis text-caption" style="font-size: 13px;">
                 {{ empleado?.nombre_completo || 'Expediente' }}
               </span>
-              <q-badge color="slate-800" text-color="white" class="text-weight-bold font-mono gt-sm" style="font-size: 10px;">
+              <q-badge color="primary" text-color="white" class="text-weight-bold font-mono gt-sm" style="font-size: 10px;">
                 {{ empleado?.codigo_archivo || `EXP-${empleado?.numero_unico || empleado?.id}` }}
               </q-badge>
             </div>
@@ -55,14 +55,15 @@
         </div>
 
         <!-- CENTRO: NAVEGADOR DE PÁGINAS Y APERTURAS -->
-        <div class="row no-wrap items-center q-gutter-x-xs bg-slate-950 q-px-sm q-py-xs rounded-borders border col-auto">
+        <div class="row no-wrap items-center q-gutter-x-xs bg-slate-950 q-px-sm q-py-xs rounded-borders border col-auto visor-nav-box">
           <q-btn
             flat
             dense
             round
             icon="first_page"
             size="sm"
-            color="slate-300"
+            color="white"
+            class="visor-tool-btn"
             :disable="currentPage <= 1"
             @click="goToPage(1)"
           >
@@ -76,6 +77,7 @@
             icon="chevron_left"
             size="md"
             color="white"
+            class="visor-tool-btn"
             :disable="currentPage <= 1"
             @click="prevPage"
           >
@@ -99,8 +101,8 @@
             <template v-else>
               <span class="text-white">Foja {{ currentPage - 2 }}</span>
             </template>
-            <span class="text-slate-500 q-mx-xs">/</span>
-            <span class="text-slate-300">{{ totalPdfPages > 0 ? `${totalPdfPages} f.` : 'Sin fojas' }}</span>
+            <span class="text-slate-400 q-mx-xs">/</span>
+            <span class="text-slate-200">{{ totalPdfPages > 0 ? `${totalPdfPages} f.` : 'Sin fojas' }}</span>
           </div>
 
           <q-btn
@@ -110,6 +112,7 @@
             icon="chevron_right"
             size="md"
             color="white"
+            class="visor-tool-btn"
             :disable="currentPage >= totalPages"
             @click="nextPage"
           >
@@ -122,7 +125,8 @@
             round
             icon="last_page"
             size="sm"
-            color="slate-300"
+            color="white"
+            class="visor-tool-btn"
             :disable="currentPage >= totalPages"
             @click="goToPage(totalPages)"
           >
@@ -142,8 +146,8 @@
             size="xs"
             toggle-color="primary"
             color="slate-800"
-            text-color="slate-300"
-            class="gt-xs"
+            text-color="white"
+            class="gt-xs visor-toggle"
             :options="[
               { label: 'Libro (2 págs)', value: 'book', icon: 'menu_book' },
               { label: 'Hoja simple', value: 'single', icon: 'description' }
@@ -152,14 +156,14 @@
           />
 
           <!-- ZOOM -->
-          <div class="row items-center q-gutter-x-none bg-slate-950 rounded-borders border gt-md">
-            <q-btn flat dense icon="remove" size="xs" color="slate-300" @click="zoomOut">
+          <div class="row items-center q-gutter-x-none bg-slate-950 rounded-borders border gt-md visor-zoom-box">
+            <q-btn flat dense icon="remove" size="xs" color="white" class="visor-tool-btn" @click="zoomOut">
               <q-tooltip>Reducir zoom</q-tooltip>
             </q-btn>
-            <span class="text-caption font-mono q-px-xs" style="font-size: 11px; min-width: 38px; text-align: center;">
+            <span class="text-caption font-mono text-white q-px-xs" style="font-size: 11px; min-width: 38px; text-align: center;">
               {{ Math.round(zoomScale * 100) }}%
             </span>
-            <q-btn flat dense icon="add" size="xs" color="slate-300" @click="zoomIn">
+            <q-btn flat dense icon="add" size="xs" color="white" class="visor-tool-btn" @click="zoomIn">
               <q-tooltip>Aumentar zoom</q-tooltip>
             </q-btn>
           </div>
@@ -173,7 +177,7 @@
             color="white"
             icon="format_list_bulleted"
             label="Índice"
-            class="gt-xs"
+            class="gt-xs text-weight-bold"
             @click="showSidebar = !showSidebar"
           >
             <q-tooltip>Ver las 13 secciones del legajo</q-tooltip>
@@ -185,10 +189,10 @@
             dense
             no-caps
             size="sm"
-            :color="showFilmstrip ? 'primary' : 'slate-300'"
+            :color="showFilmstrip ? 'primary' : 'white'"
             icon="view_carousel"
             label="Miniaturas"
-            class="gt-sm"
+            class="gt-sm text-weight-bold"
             @click="toggleFilmstrip"
           >
             <q-tooltip>Mostrar / Ocultar carrusel inferior de páginas</q-tooltip>
@@ -198,11 +202,11 @@
           <q-btn
             unelevated
             no-caps
-            color="slate-800"
+            color="primary"
             text-color="white"
             icon="close"
             label="Cerrar"
-            class="text-weight-bold q-px-sm q-ml-xs shadow-2 exit-button-fixed"
+            class="text-weight-bold q-px-md q-ml-xs shadow-3 exit-button-fixed"
             @click="cerrarVisor"
           >
             <q-tooltip>Cerrar visor (Esc)</q-tooltip>
@@ -2044,5 +2048,57 @@ onBeforeUnmount(() => {
 .slide-up-leave-to {
   transform: translateY(100%);
   opacity: 0;
+}
+
+/* CONSOLA SUPERIOR DEL VISOR - MÁXIMO CONTRASTE */
+.visor-card-root {
+  background-color: #020617 !important;
+  color: #ffffff !important;
+}
+
+.visor-header-bar {
+  background-color: #0f172a !important;
+  border-bottom: 1px solid #1e293b !important;
+  color: #ffffff !important;
+}
+
+.visor-nav-box {
+  background-color: #020617 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px;
+}
+
+.visor-zoom-box {
+  background-color: #020617 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px;
+}
+
+.visor-tool-btn {
+  opacity: 0.9;
+  transition: all 0.15s ease;
+}
+
+.visor-tool-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.exit-button-fixed {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.exit-button-fixed:hover {
+  background-color: #1d4ed8 !important;
+  transform: translateY(-1px);
+}
+
+.visor-toggle {
+  border: 1px solid #334155 !important;
+  background-color: #1e293b !important;
 }
 </style>
