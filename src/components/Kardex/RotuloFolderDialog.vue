@@ -4,7 +4,7 @@
       <!-- CABECERA -->
       <div class="row items-center justify-between q-pa-sm border-bottom bg-slate-950 no-print">
         <div class="row items-center q-gutter-x-sm">
-          <q-icon name="label" size="20px" color="amber-4" />
+          <q-icon name="label" size="20px" color="primary" />
           <div>
             <div class="text-subtitle2 text-weight-bolder">Rótulo Adhesivo para Folder / Cartapacio Físico</div>
             <div class="text-caption text-slate-400">Etiqueta con Código QR para lomo o cejilla de carpeta</div>
@@ -14,7 +14,7 @@
           <q-btn
             unelevated
             no-caps
-            color="positive"
+            color="primary"
             icon="print"
             label="Imprimir Rótulo"
             class="text-weight-bolder"
@@ -66,7 +66,7 @@
             <div class="rotulo-col-right column items-center justify-center">
               <div class="rotulo-qr-box">
                 <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR Expediente" class="rotulo-qr-img" />
-                <q-spinner v-else size="24px" color="indigo" />
+                <q-spinner v-else size="24px" color="primary" />
               </div>
               <span class="rotulo-qr-label font-mono">ESCANEAR FILE</span>
             </div>
@@ -80,7 +80,7 @@
       <!-- INSTRUCCIONES -->
       <div class="q-pa-sm bg-slate-950 border-top text-caption text-slate-400 row items-center justify-between no-print">
         <span>💡 <b>Tip de Impresión:</b> Puedes imprimirlo en papel adhesivo o cartulina opalina y pegarlo en la cejilla exterior del folder.</span>
-        <span class="font-mono text-amber-4">Tamaño estándar: 14 x 4.8 cm</span>
+        <span class="font-mono text-slate-300">Tamaño estándar: 14 x 4.8 cm</span>
       </div>
     </q-card>
   </q-dialog>

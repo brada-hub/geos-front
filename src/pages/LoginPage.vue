@@ -12,7 +12,7 @@
 
         <div class="row items-center q-gutter-x-xs q-mb-xs">
           <span class="text-h5 text-weight-bolder tracking-wide text-white">DOCUS</span>
-          <q-badge color="amber-5" text-color="dark" class="text-weight-bold" style="font-size: 10px;">
+          <q-badge color="primary" text-color="white" class="text-weight-bold" style="font-size: 10px;">
             RRHH & ARCHIVOS
           </q-badge>
         </div>
@@ -22,7 +22,7 @@
         </div>
 
         <div class="row items-center q-gutter-x-xs q-mt-sm bg-slate-950 q-px-sm q-py-xs rounded-borders border">
-          <q-icon name="shield" size="14px" color="positive" />
+          <q-icon name="shield" size="14px" color="primary" />
           <span class="text-caption text-slate-300" style="font-size: 11px;">
             Acceso Protegido por Token Seguro
           </span>
@@ -55,7 +55,7 @@
             :rules="[val => !!val || 'El correo electrónico es obligatorio']"
           >
             <template v-slot:prepend>
-              <q-icon name="mail" color="amber-4" size="18px" />
+              <q-icon name="mail" color="primary" size="18px" />
             </template>
           </q-input>
         </div>
@@ -76,7 +76,7 @@
             :rules="[val => !!val || 'La contraseña es obligatoria']"
           >
             <template v-slot:prepend>
-              <q-icon name="lock" color="amber-4" size="18px" />
+              <q-icon name="lock" color="primary" size="18px" />
             </template>
             <template v-slot:append>
               <q-icon
@@ -95,7 +95,7 @@
           type="submit"
           unelevated
           no-caps
-          color="indigo-7"
+          color="primary"
           class="full-width text-weight-bolder q-py-sm shadow-3 login-submit-btn"
           label="Ingresar al Sistema"
           icon-right="arrow_forward"
@@ -110,8 +110,8 @@
         </q-btn>
 
         <!-- AVISO DE CONEXIÓN CON EL SERVIDOR -->
-        <div v-if="authStore.loading && isWarmingServer" class="text-center text-caption text-amber-4 q-mt-xs">
-          <q-spinner size="12px" color="amber-4" class="q-mr-xs" />
+        <div v-if="authStore.loading && isWarmingServer" class="text-center text-caption text-primary q-mt-xs">
+          <q-spinner size="12px" color="primary" class="q-mr-xs" />
           Conectando con el servidor seguro en la nube...
         </div>
       </q-form>
@@ -183,7 +183,7 @@ const handleLogin = async () => {
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(245, 158, 11, 0.08) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(30, 41, 59, 0.25) 50%, transparent 70%);
   pointer-events: none;
   filter: blur(40px);
 }
@@ -202,8 +202,8 @@ const handleLogin = async () => {
   height: 64px;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.35);
-  border: 2px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.35);
+  border: 2px solid rgba(37, 99, 235, 0.4);
 }
 
 .login-logo-img {
@@ -219,7 +219,7 @@ const handleLogin = async () => {
 }
 
 .login-submit-btn:hover {
-  background-color: #4338ca !important;
+  background-color: #1d4ed8 !important;
   transform: translateY(-1px);
 }
 

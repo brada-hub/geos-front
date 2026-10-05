@@ -14,7 +14,7 @@
       @blur="hideResultsDelayed"
     >
       <template v-slot:prepend>
-        <q-icon name="search" color="indigo" size="22px" />
+        <q-icon name="search" color="primary" size="22px" />
       </template>
       <template v-slot:append>
         <q-badge v-if="resultCount > 0" class="search-counter-badge">
@@ -110,7 +110,7 @@
             </div>
           </q-item-section>
           <q-item-section side>
-            <q-icon name="chevron_right" color="indigo" size="24px" />
+            <q-icon name="chevron_right" color="primary" size="24px" />
           </q-item-section>
         </q-item>
       </q-list>
@@ -156,7 +156,7 @@ const selectResult = (result) => {
 };
 
 const getEstadoColor = (estado) => {
-  const colors = { 0: 'emerald-6', 1: 'rose-6', 2: 'amber-7' };
+  const colors = { 0: 'primary', 1: 'slate-6', 2: 'slate-5' };
   return colors[estado] ?? 'slate-6';
 };
 
@@ -246,15 +246,15 @@ const formatNombre = (emp) => {
 }
 
 .badge-plazofijo {
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fde68a;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
 }
 
 .badge-prestacion {
-  background: #faf5ff;
-  color: #7e22ce;
-  border: 1px solid #e9d5ff;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
 .badge-default {
@@ -263,9 +263,9 @@ const formatNombre = (emp) => {
 }
 
 .sede-badge {
-  background: #f5f3ff;
-  color: #6d28d9;
-  border: 1px solid #ddd6fe;
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
 }
 
 .badge-mueble {
@@ -276,24 +276,24 @@ const formatNombre = (emp) => {
 }
 
 .badge-gaveta {
-  background: #4f46e5;
+  background: #2563eb;
   color: #ffffff;
   padding: 2px 7px;
   font-size: 11px;
 }
 
 .badge-etiqueta {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
   padding: 2px 7px;
   font-size: 11px;
 }
 
 .badge-virtual {
-  background: #fdf2f8;
-  color: #be185d;
-  border: 1px solid #fbcfe8;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
   padding: 2px 7px;
   font-size: 11px;
 }

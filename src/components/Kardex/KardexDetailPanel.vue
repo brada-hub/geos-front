@@ -15,15 +15,15 @@
         <div class="row items-center justify-between no-wrap">
           <div class="row items-center q-gutter-sm ellipsis">
             <div class="detail-icon-badge flex flex-center">
-              <q-icon name="inbox" size="20px" color="indigo" />
+              <q-icon name="inbox" size="20px" color="primary" />
             </div>
             <div class="ellipsis">
               <div class="row items-center q-gutter-xs no-wrap">
                 <span class="text-subtitle1 text-weight-bolder text-slate-900">{{ drawerTitle }}</span>
-                <span v-if="currentDrawer?.etiqueta" class="text-subtitle2 text-indigo-7 text-weight-bold ellipsis">
+                <span v-if="currentDrawer?.etiqueta" class="text-subtitle2 text-primary text-weight-bold ellipsis">
                   • "{{ currentDrawer.etiqueta }}"
                 </span>
-                <q-badge color="indigo-1" text-color="indigo-9" class="text-weight-bold q-ml-xs">
+                <q-badge color="blue-1" text-color="primary" class="text-weight-bold q-ml-xs">
                   {{ sortedEmpleados.length }} expedientes
                 </q-badge>
               </div>
@@ -46,8 +46,8 @@
           <div class="row items-center q-gutter-xs no-wrap">
             <q-btn
               unelevated
-              color="amber-5"
-              text-color="dark"
+              color="primary"
+              text-color="white"
               icon="tune"
               label="Configurar Gaveta"
               class="text-weight-bolder btn-config"
@@ -66,7 +66,7 @@
       <!-- BARRA DE BÚSQUEDA Y ACCIONES DENTRO DE LA GAVETA -->
       <div class="q-px-md q-py-xs bg-slate-50 row items-center justify-between border-bottom">
         <div class="text-caption text-slate-700 row items-center q-gutter-xs">
-          <q-icon name="sort_by_alpha" color="indigo" size="16px" />
+          <q-icon name="sort_by_alpha" color="primary" size="16px" />
           <span>Ordenados alfabéticamente: <b>Primer Apellido, Segundo Apellido, Nombres</b></span>
         </div>
 
@@ -277,8 +277,8 @@ const scrollToElement = (el) => {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
 }
 
 .btn-config {
@@ -286,16 +286,16 @@ const scrollToElement = (el) => {
 }
 
 .badge-rule-sede {
-  background: #f5f3ff;
-  color: #6d28d9;
-  border: 1px solid #ddd6fe;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
   font-size: 10px;
 }
 
 .badge-rule-contrato {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
   font-size: 10px;
 }
 

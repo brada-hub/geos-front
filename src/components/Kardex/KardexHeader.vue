@@ -11,7 +11,7 @@
             <span class="text-h6 text-weight-bolder text-slate-900 header-title-responsive">
               Archivadores & Kardex
             </span>
-            <q-badge color="indigo-1" text-color="indigo-9" class="text-weight-bold q-ml-xs header-tag gt-xs">
+            <q-badge color="blue-1" text-color="primary" class="text-weight-bold q-ml-xs header-tag gt-xs">
               Gemelo Digital
             </q-badge>
           </div>
@@ -40,7 +40,7 @@
           class="sede-select"
         >
           <template v-slot:prepend>
-            <q-icon name="location_on" color="indigo" size="18px" />
+            <q-icon name="location_on" color="primary" size="18px" />
           </template>
         </q-select>
 
@@ -78,14 +78,14 @@
           class="col"
         >
           <template v-slot:prepend>
-            <q-icon name="location_on" color="indigo" size="16px" />
+            <q-icon name="location_on" color="primary" size="16px" />
           </template>
         </q-select>
 
         <!-- BOTÓN NUEVO DESPLEGABLE EN MÓVIL (AHORRA ESPACIO) -->
         <q-btn-dropdown
           unelevated
-          color="indigo-7"
+          color="primary"
           icon="add"
           label="Crear"
           dense
@@ -95,13 +95,13 @@
           <q-list dense style="min-width: 190px;">
             <q-item clickable @click="$emit('add-mueble')">
               <q-item-section avatar>
-                <q-icon name="apartment" size="18px" color="indigo" />
+                <q-icon name="apartment" size="18px" color="primary" />
               </q-item-section>
               <q-item-section class="text-weight-bold">Nuevo Archivador</q-item-section>
             </q-item>
             <q-item clickable @click="$emit('add-empleado')">
               <q-item-section avatar>
-                <q-icon name="person_add" size="18px" color="indigo" />
+                <q-icon name="person_add" size="18px" color="primary" />
               </q-item-section>
               <q-item-section class="text-weight-bold">Nuevo Expediente</q-item-section>
             </q-item>
@@ -114,7 +114,7 @@
     <div class="filter-dock row items-center no-wrap q-py-xs q-px-sm">
       <div class="filter-scroll-row row items-center no-wrap scroll hide-scrollbar col q-gutter-xs">
         <span class="text-caption text-weight-bolder text-slate-700 gt-xs q-mr-xs row items-center">
-          <q-icon name="tune" size="15px" color="indigo" class="q-mr-xs" />
+          <q-icon name="tune" size="15px" color="primary" class="q-mr-xs" />
           Régimen:
         </span>
 
@@ -210,8 +210,8 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
 .text-slate-900 { color: #0f172a; }
@@ -230,18 +230,19 @@ onMounted(() => {
 }
 
 .action-btn-primary {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  background: #2563eb;
   color: white;
   padding: 8px 16px;
   border-radius: 10px;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
   transition: all 0.2s ease;
 }
 
 .action-btn-primary:hover {
+  background: #1d4ed8;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
 .action-btn-secondary {
@@ -312,10 +313,10 @@ onMounted(() => {
 }
 
 .filter-pill-active {
-  background: #4f46e5 !important;
+  background: #2563eb !important;
   color: #ffffff !important;
-  border-color: #4f46e5 !important;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  border-color: #2563eb !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
 .contract-dot {
@@ -325,10 +326,10 @@ onMounted(() => {
   display: inline-block;
 }
 
-.pill-indefinido .dot-indefinido { background: #3b82f6; }
-.pill-plazofijo .dot-plazofijo { background: #f59e0b; }
-.pill-prestacion .dot-prestacion { background: #8b5cf6; }
-.dot-default { background: #64748b; }
+.pill-indefinido .dot-indefinido { background: #2563eb; }
+.pill-plazofijo .dot-plazofijo { background: #475569; }
+.pill-prestacion .dot-prestacion { background: #64748b; }
+.dot-default { background: #94a3b8; }
 
 .filter-pill-active .contract-dot {
   background: #ffffff !important;

@@ -28,7 +28,7 @@
             class="drag-handle cursor-move text-slate-400"
             title="Arrastra para cambiar de lugar en la pantalla"
           />
-          <q-icon name="inventory_2" size="18px" color="indigo-2" />
+          <q-icon name="inventory_2" size="18px" color="white" />
           <div class="text-subtitle1 text-weight-bolder ellipsis text-slate-100" :title="mueble.nombre">
             {{ mueble.nombre }}
           </div>
@@ -41,7 +41,7 @@
             dense
             no-caps
             size="xs"
-            color="amber-9"
+            color="primary"
             text-color="white"
             icon="merge_type"
             label="Unir"
@@ -69,7 +69,7 @@
                 <!-- FUSIONAR / UNIR A OTRO MUEBLE -->
                 <q-item v-if="otherMuebles.length > 0" clickable @click="openFusionarDialog">
                   <q-item-section avatar>
-                    <q-icon name="merge_type" size="18px" color="indigo" />
+                    <q-icon name="merge_type" size="18px" color="primary" />
                   </q-item-section>
                   <q-item-section>
                     <q-item-label>Unir a otro archivador</q-item-label>
@@ -80,7 +80,7 @@
                 <!-- SEPARAR EN TORRES SI ES MULTI-COLUMNA -->
                 <q-item v-if="mueble.columnas > 1" clickable @click="openDesacoplarDialog">
                   <q-item-section avatar>
-                    <q-icon name="call_split" size="18px" color="orange-9" />
+                    <q-icon name="call_split" size="18px" color="slate-7" />
                   </q-item-section>
                   <q-item-section>
                     <q-item-label>Separar en torres</q-item-label>
@@ -92,7 +92,7 @@
 
                 <q-item clickable @click="addDrawer">
                   <q-item-section avatar>
-                    <q-icon name="add_circle" size="18px" color="teal" />
+                    <q-icon name="add_circle" size="18px" color="primary" />
                   </q-item-section>
                   <q-item-section>Añadir gaveta (+1)</q-item-section>
                 </q-item>
@@ -149,7 +149,7 @@
               dense
               size="xs"
               icon="open_in_new"
-              color="indigo"
+              color="primary"
               :title="mueble.columnas > 1 ? 'Mover o extraer esta columna' : 'Mover esta columna a otro archivador'"
               @click.stop="openExtractDialog(c)"
             >
@@ -190,7 +190,7 @@
           size="xs"
           icon="add"
           label="Gaveta"
-          color="indigo-7"
+          color="primary"
           class="q-px-xs text-weight-bold"
           style="font-size: 10px;"
           title="Añadir una gaveta más a este archivador"
@@ -309,7 +309,7 @@
           <q-btn
             unelevated
             label="Unir y Consolidar"
-            color="indigo"
+            color="primary"
             :loading="fusionando"
             :disable="!fusionarTargetId"
             @click="executeFusionar"
@@ -321,7 +321,7 @@
     <!-- DIÁLOGO DESACOPLAR TODAS LAS COLUMNAS -->
     <q-dialog v-model="desacoplarDialogOpen" persistent>
       <q-card style="min-width: 360px; max-width: 440px; border-radius: 12px;">
-        <q-card-section class="bg-orange-9 text-white row items-center q-gutter-sm">
+        <q-card-section class="bg-slate-900 text-white row items-center q-gutter-sm">
           <q-icon name="call_split" size="22px" />
           <div class="text-h6 font-weight-bold">Separar en torres individuales</div>
         </q-card-section>
@@ -340,7 +340,7 @@
           <q-btn
             unelevated
             label="Dividir en torres"
-            color="orange-9"
+            color="primary"
             :loading="desacoplando"
             @click="executeDesacoplar"
           />
@@ -767,9 +767,9 @@ const executeDelete = async () => {
 }
 
 .mueble-exp-badge {
-  background: rgba(99, 102, 241, 0.25);
-  color: #c7d2fe;
-  border: 1px solid rgba(165, 180, 252, 0.35);
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(147, 197, 253, 0.35);
   font-weight: 700;
   border-radius: 6px;
   font-size: 11px;
@@ -785,8 +785,8 @@ const executeDelete = async () => {
 }
 
 .mueble-drag-target {
-  border: 2px dashed #4f46e5 !important;
-  box-shadow: 0 0 24px rgba(79, 70, 229, 0.35) !important;
+  border: 2px dashed #2563eb !important;
+  box-shadow: 0 0 24px rgba(37, 99, 235, 0.35) !important;
 }
 
 .drop-overlay {
@@ -795,7 +795,7 @@ const executeDelete = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(79, 70, 229, 0.92);
+  background: rgba(37, 99, 235, 0.92);
   border-radius: 16px;
   z-index: 25;
   backdrop-filter: blur(4px);

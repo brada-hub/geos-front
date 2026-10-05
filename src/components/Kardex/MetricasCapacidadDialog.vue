@@ -5,7 +5,7 @@
       <div class="row items-center justify-between q-pa-md bg-slate-900 text-white">
         <div class="row items-center q-gutter-sm">
           <div class="metricas-header-icon flex flex-center">
-            <q-icon name="insights" size="20px" color="amber-4" />
+            <q-icon name="insights" size="20px" color="white" />
           </div>
           <div>
             <div class="text-subtitle1 text-weight-bolder">Métricas de Capacidad & Ocupación</div>
@@ -23,9 +23,9 @@
         <div class="row q-col-gutter-sm">
           <!-- TOTAL EXPEDIENTES -->
           <div class="col-12 col-sm-6 col-md-3">
-            <div class="kpi-box kpi-blue">
+            <div class="kpi-box kpi-highlight">
               <div class="text-caption text-slate-500 font-weight-bold">TOTAL EXPEDIENTES</div>
-              <div class="text-h4 text-weight-bolder text-slate-900 q-my-xs">
+              <div class="text-h4 text-weight-bolder text-primary q-my-xs">
                 {{ stats.totalExpedientes }}
               </div>
               <div class="text-caption text-slate-500" style="font-size: 10px;">
@@ -36,9 +36,9 @@
 
           <!-- TOTAL ARCHIVADORES -->
           <div class="col-12 col-sm-6 col-md-3">
-            <div class="kpi-box kpi-purple">
+            <div class="kpi-box">
               <div class="text-caption text-slate-500 font-weight-bold">ARCHIVADORES</div>
-              <div class="text-h4 text-weight-bolder text-indigo-9 q-my-xs">
+              <div class="text-h4 text-weight-bolder text-slate-900 q-my-xs">
                 {{ stats.totalMuebles }}
               </div>
               <div class="text-caption text-slate-500" style="font-size: 10px;">
@@ -49,9 +49,9 @@
 
           <!-- PROMEDIO POR GAVETA -->
           <div class="col-12 col-sm-6 col-md-3">
-            <div class="kpi-box kpi-amber">
+            <div class="kpi-box">
               <div class="text-caption text-slate-500 font-weight-bold">PROMEDIO / GAVETA</div>
-              <div class="text-h4 text-weight-bolder text-amber-9 q-my-xs">
+              <div class="text-h4 text-weight-bolder text-slate-900 q-my-xs">
                 {{ stats.promedioPorCajon }}
               </div>
               <div class="text-caption text-slate-500" style="font-size: 10px;">
@@ -62,9 +62,9 @@
 
           <!-- GAVETA VIRTUAL -->
           <div class="col-12 col-sm-6 col-md-3">
-            <div class="kpi-box kpi-emerald">
+            <div class="kpi-box">
               <div class="text-caption text-slate-500 font-weight-bold">GAVETAS OCUPADAS</div>
-              <div class="text-h4 text-weight-bolder text-emerald-7 q-my-xs">
+              <div class="text-h4 text-weight-bolder text-slate-900 q-my-xs">
                 {{ stats.cajonesOcupados }} / {{ stats.totalCajones }}
               </div>
               <div class="text-caption text-slate-500" style="font-size: 10px;">
@@ -100,8 +100,8 @@
               <q-linear-progress
                 :value="sede.porcentaje / 100"
                 rounded
-                color="indigo"
-                track-color="indigo-1"
+                color="primary"
+                track-color="blue-1"
                 size="8px"
               />
             </div>
@@ -150,7 +150,7 @@
               class="row items-center justify-between q-pa-sm bg-white border border-rounded"
             >
               <div class="row items-center q-gutter-sm">
-                <q-icon name="inventory_2" size="18px" color="indigo-7" />
+                <q-icon name="inventory_2" size="18px" color="primary" />
                 <div>
                   <div class="text-weight-bold text-slate-800" style="font-size: 12.5px;">{{ m.nombre }}</div>
                   <div class="text-caption text-slate-500" style="font-size: 10.5px;">
@@ -161,7 +161,7 @@
 
               <div class="row items-center q-gutter-md">
                 <div class="text-right">
-                  <span class="text-weight-bolder text-indigo-9" style="font-size: 14px;">{{ m.totalExp }}</span>
+                  <span class="text-weight-bolder text-primary" style="font-size: 14px;">{{ m.totalExp }}</span>
                   <span class="text-caption text-slate-400" style="font-size: 11px;"> exp.</span>
                 </div>
               </div>
@@ -292,26 +292,12 @@ const stats = computed(() => {
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
-.kpi-blue {
+.kpi-highlight {
   background: #eff6ff;
   border-color: #bfdbfe;
-}
-
-.kpi-purple {
-  background: #f5f3ff;
-  border-color: #ddd6fe;
-}
-
-.kpi-amber {
-  background: #fffbeb;
-  border-color: #fde68a;
-}
-
-.kpi-emerald {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
 }
 
 .border-rounded {

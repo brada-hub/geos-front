@@ -11,7 +11,7 @@
             <span class="text-h5 text-weight-bolder text-slate-900" style="letter-spacing: -0.02em;">
               Directorio Integral de Personal
             </span>
-            <q-badge color="indigo-1" text-color="indigo-9" class="text-weight-bold q-ml-xs header-tag">
+            <q-badge color="slate-800" text-color="white" class="text-weight-bold q-ml-xs header-tag">
               RRHH Activo
             </q-badge>
           </div>
@@ -114,7 +114,7 @@
             <div class="row items-center no-wrap">
               <q-avatar
                 size="34px"
-                :color="props.row.sexo_id === 2 || props.row.sexo === 'F' ? 'pink-7' : 'blue-8'"
+                color="slate-800"
                 text-color="white"
                 class="q-mr-sm"
               >
@@ -147,7 +147,7 @@
           <q-td :props="props">
             <q-badge
               v-if="props.row.tipo_contrato"
-              :color="props.row.tipo_contrato.color || 'indigo-9'"
+              color="slate-800"
               text-color="white"
               class="q-px-sm text-weight-bold"
             >
@@ -174,13 +174,13 @@
               <div>
                 <span class="text-weight-bold">{{ props.row.sede?.nombre || props.row.cajon.mueble?.sede?.nombre || 'Sede' }}</span>
                 ➔ {{ props.row.cajon.mueble?.nombre }}
-                ➔ <span class="text-teal-9 text-weight-bold">
+                ➔ <span class="text-primary text-weight-bold">
                   {{ props.row.cajon.columna === 1 ? `Gaveta ${props.row.cajon.fila}` : `Col ${String.fromCharCode(64 + props.row.cajon.columna)} - Gaveta ${props.row.cajon.fila}` }}
                 </span>
               </div>
             </div>
             <div v-else class="row items-center no-wrap text-caption">
-              <q-badge color="deep-purple-8" text-color="white" class="text-weight-bold">
+              <q-badge color="slate-800" text-color="white" class="text-weight-bold">
                 <q-icon name="all_inbox" size="12px" class="q-mr-xs" />
                 Gaveta Virtual
               </q-badge>
@@ -193,7 +193,7 @@
         <template v-slot:body-cell-estado="props">
           <q-td :props="props">
             <q-chip
-              :color="props.row.estado === 0 ? 'positive' : (props.row.estado === 1 ? 'negative' : 'warning')"
+              :color="props.row.estado === 0 ? 'primary' : 'slate-700'"
               text-color="white"
               dense
               size="sm"
@@ -213,7 +213,7 @@
                 flat
                 round
                 dense
-                color="indigo"
+                color="primary"
                 icon="history"
                 size="sm"
                 @click="openHistory(props.row)"
@@ -456,8 +456,9 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
 }
 
 .text-slate-900 { color: #0f172a; }
@@ -487,18 +488,19 @@ onMounted(() => {
 }
 
 .action-btn-primary {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  background: #2563eb;
   color: white;
   padding: 8px 16px;
   border-radius: 10px;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
   transition: all 0.2s ease;
 }
 
 .action-btn-primary:hover {
+  background: #1d4ed8;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
 .font-monospace {

@@ -4,15 +4,15 @@
       <!-- BARRA DE ACCIONES SUPERIOR (SE OCULTA AL IMPRIMIR) -->
       <div class="row items-center justify-between q-pa-sm bg-slate-900 text-white no-print">
         <div class="row items-center q-gutter-sm">
-          <q-icon name="picture_as_pdf" size="20px" color="amber-5" />
+          <q-icon name="picture_as_pdf" size="20px" color="primary" />
           <span class="text-subtitle2 font-weight-bold">Ficha Oficial de Kardex & Archivo</span>
         </div>
         <div class="row items-center q-gutter-xs">
           <q-btn
             unelevated
             no-caps
-            color="amber-8"
-            text-color="dark"
+            color="primary"
+            text-color="white"
             icon="label"
             label="Rótulo para Folder"
             class="text-weight-bolder"
@@ -23,7 +23,8 @@
           <q-btn
             unelevated
             no-caps
-            color="primary"
+            color="white"
+            text-color="primary"
             icon="print"
             label="Imprimir Ficha A4"
             class="text-weight-bold"
@@ -40,13 +41,13 @@
           <div class="row items-center justify-between border-bottom q-pb-md q-mb-md">
             <div class="row items-center q-gutter-md">
               <div class="ficha-logo-box flex flex-center">
-                <q-icon name="inventory_2" size="32px" color="indigo-9" />
+                <q-icon name="inventory_2" size="32px" color="primary" />
               </div>
               <div>
                 <div class="text-h6 text-weight-bolder text-slate-900" style="line-height: 1.1;">
                   DOCUS RRHH
                 </div>
-                <div class="text-caption text-weight-bold text-indigo-9" style="letter-spacing: 0.5px;">
+                <div class="text-caption text-weight-bold text-primary" style="letter-spacing: 0.5px;">
                   SISTEMA CENTRAL DE GESTIÓN ARCHIVÍSTICA & KARDEX
                 </div>
                 <div class="text-caption text-slate-500" style="font-size: 11px;">
@@ -70,7 +71,7 @@
               </div>
               <div class="ficha-qr-box flex flex-center">
                 <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR Expediente" class="ficha-qr-img" />
-                <q-spinner v-else size="20px" color="indigo" />
+                <q-spinner v-else size="20px" color="primary" />
               </div>
             </div>
           </div>
@@ -106,7 +107,7 @@
 
               <div class="col-4">
                 <span class="field-label">Documento de Identidad (CI):</span>
-                <div class="field-value text-weight-bold text-indigo-9">{{ empleado?.documento_identidad || '-' }}</div>
+                <div class="field-value text-weight-bold text-slate-900">{{ empleado?.documento_identidad || '-' }}</div>
               </div>
               <div class="col-4">
                 <span class="field-label">Fecha de Nacimiento:</span>
@@ -131,14 +132,14 @@
               </div>
               <div class="col-6">
                 <span class="field-label">Tipo de Contrato:</span>
-                <div class="field-value text-weight-bold text-teal-9">
+                <div class="field-value text-weight-bold text-slate-900">
                   {{ empleado?.tipo_contrato?.nombre || '-' }}
                 </div>
               </div>
 
               <div class="col-6">
                 <span class="field-label">Sede Asignada:</span>
-                <div class="field-value text-weight-bold text-indigo-9">
+                <div class="field-value text-weight-bold text-slate-900">
                   {{ empleado?.sede?.nombre || 'SEDE CENTRAL' }}
                 </div>
               </div>
@@ -206,15 +207,15 @@
               <div class="row items-center justify-between q-pa-sm bg-slate-50 border-top q-mt-xs text-caption">
                 <div>
                   <span class="text-weight-bold text-slate-700">Dictamen de Auditoría: </span>
-                  <span class="text-weight-bolder" :class="resumenFile.porcentaje >= 75 ? 'text-teal-9' : 'text-amber-9'">
+                  <span class="text-weight-bolder" :class="resumenFile.porcentaje >= 75 ? 'text-primary' : 'text-slate-6'">
                     {{ resumenFile.estadoGeneral }}
                   </span>
                 </div>
                 <div class="row q-gutter-x-md text-slate-600">
-                  <span>Archivadas: <b class="text-teal-9">{{ resumenFile.presentes }}</b></span>
+                  <span>Archivadas: <b class="text-primary">{{ resumenFile.presentes }}</b></span>
                   <span>Pendientes: <b class="text-negative">{{ resumenFile.pendientes }}</b></span>
                   <span>No aplica: <b>{{ resumenFile.noAplica }}</b></span>
-                  <span>Total fojas: <b class="text-indigo-9 font-mono">{{ resumenFile.totalFojas }}</b></span>
+                  <span>Total fojas: <b class="text-primary font-mono">{{ resumenFile.totalFojas }}</b></span>
                 </div>
               </div>
             </div>
@@ -480,12 +481,12 @@ const imprimirFicha = () => {
 }
 
 .physical-location-highlight {
-  background: #f0fdf4;
-  color: #166534;
+  background: #eff6ff;
+  color: #1e40af;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #bfdbfe;
   display: inline-flex;
   align-items: center;
 }
@@ -508,9 +509,9 @@ const imprimirFicha = () => {
 }
 
 .badge-status-presente {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
   font-size: 9.5px;
   font-weight: 800;
   padding: 2px 6px;

@@ -47,7 +47,7 @@
             <!-- BADGE TIPO DE CONTRATO (3FN) -->
             <q-badge
               v-if="kardex.tipo_contrato"
-              :color="kardex.tipo_contrato.color || 'indigo-9'"
+              :color="kardex.tipo_contrato.color || 'primary'"
               text-color="white"
               class="q-px-xs text-weight-bold"
               style="font-size: 10px;"
@@ -72,7 +72,7 @@
                 <q-list dense style="min-width: 140px">
                   <q-item clickable @click="setEstado(0)" :active="kardex.estado === 0">
                     <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
-                      <q-icon name="check_circle" color="positive" size="18px" />
+                      <q-icon name="check_circle" color="primary" size="18px" />
                     </q-item-section>
                     <q-item-section class="text-weight-medium text-caption">Presente</q-item-section>
                   </q-item>
@@ -84,7 +84,7 @@
                   </q-item>
                   <q-item clickable @click="setEstado(2)" :active="kardex.estado === 2">
                     <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
-                      <q-icon name="schedule" color="warning" size="18px" />
+                      <q-icon name="schedule" color="grey-7" size="18px" />
                     </q-item-section>
                     <q-item-section class="text-weight-medium text-caption">Prestado</q-item-section>
                   </q-item>
@@ -139,9 +139,9 @@ const isUpdating = ref(false);
 
 // Estados numéricos: 0 = Presente, 1 = Ausente, 2 = Prestado
 const estadoColors = {
-  0: 'green-8',
-  1: 'red-8',
-  2: 'orange-8'
+  0: 'primary',
+  1: 'negative',
+  2: 'grey-8'
 };
 
 const estadoLabels = {
@@ -175,14 +175,14 @@ async function setEstado(nuevoEstado) {
   if (isUpdating.value || props.kardex.estado === nuevoEstado) return;
   isUpdating.value = true;
 
-  const labels = { 0: 'PRESENTE 🟢', 1: 'AUSENTE 🔴', 2: 'PRESTADO 🟠' };
+  const labels = { 0: 'PRESENTE', 1: 'AUSENTE', 2: 'PRESTADO' };
   const num = props.kardex.numero_unico || props.kardex.id;
 
   try {
     const ok = await store.cambiarEstadoExpediente(props.kardex.id, nuevoEstado);
     if (ok) {
       $q.notify({
-        type: nuevoEstado === 0 ? 'positive' : nuevoEstado === 1 ? 'negative' : 'warning',
+        type: nuevoEstado === 0 ? 'positive' : nuevoEstado === 1 ? 'negative' : 'info',
         message: `#${num} marcado como ${labels[nuevoEstado]}`,
         position: 'bottom',
         timeout: 1300,
@@ -252,8 +252,8 @@ function handleSwipe({ direction }) {
 }
 
 .carpeta-item.is-prestado {
-  border-color: #fde68a;
-  background: #fffdf5;
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
 .carpeta-item.is-updating {
@@ -263,25 +263,25 @@ function handleSwipe({ direction }) {
 
 .carpeta-matched {
   background: #eff6ff;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
 }
 
 /* HIGHLIGHTED - Efecto de pulso suave */
 .carpeta-highlighted {
-  background: #fefce8;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+  background: #eff6ff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
   animation: pulse-highlight 1.2s ease-in-out infinite;
   transform: translateX(-8px);
 }
 
 @keyframes pulse-highlight {
   0%, 100% {
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.6);
   }
 }
 
@@ -330,9 +330,9 @@ function handleSwipe({ direction }) {
   cursor: pointer;
 }
 
-.estado-presente { background: #10b981 !important; }
-.estado-ausente { background: #ef4444 !important; }
-.estado-prestado { background: #f59e0b !important; }
+.estado-presente { background: #2563eb !important; }
+.estado-ausente { background: #dc2626 !important; }
+.estado-prestado { background: #475569 !important; }
 
 .drag-handle {
   opacity: 0.45;

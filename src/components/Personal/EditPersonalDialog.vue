@@ -160,7 +160,7 @@
             </div>
           </div>
 
-          <div v-if="isContratoCambiado" class="bg-amber-1 q-pa-sm rounded-borders text-caption text-amber-10 q-mb-xs row items-center q-gutter-xs">
+          <div v-if="isContratoCambiado" class="bg-blue-1 q-pa-sm rounded-borders text-caption text-primary q-mb-xs row items-center q-gutter-xs">
             <q-icon name="info" size="18px" />
             <span>Se registrará en el historial el cambio de régimen contractual.</span>
           </div>
@@ -174,7 +174,7 @@
               v-if="form.cajon_id"
               flat
               dense
-              color="deep-purple-8"
+              color="primary"
               icon="cloud_queue"
               label="Mover a Gaveta Virtual"
               size="xs"
@@ -182,7 +182,7 @@
             />
           </div>
 
-          <div v-if="!form.cajon_id" class="q-pa-xs bg-purple-1 rounded-borders text-caption text-deep-purple-9 q-mb-xs row items-center q-gutter-xs">
+          <div v-if="!form.cajon_id" class="q-pa-xs bg-slate-100 rounded-borders text-caption text-slate-800 q-mb-xs row items-center q-gutter-xs">
             <q-icon name="all_inbox" size="18px" />
             <span>Este expediente se encuentra actualmente en la <strong>Gaveta Virtual (Sin Asignar)</strong>.</span>
           </div>

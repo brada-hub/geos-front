@@ -164,8 +164,7 @@ const occupancyRatio = computed(() => Math.min(1, (empleadosCount.value || 0) / 
 const occupancyPercent = computed(() => (occupancyRatio.value * 100));
 const occupancyColor = computed(() => {
   if (occupancyPercent.value >= 90) return 'negative';
-  if (occupancyPercent.value >= 70) return 'warning';
-  return 'positive';
+  return 'primary';
 });
 
 const contratosPresentes = computed(() => {
@@ -211,14 +210,14 @@ const handleChange = (evt) => {
 
 .cajon-cell:hover {
   transform: translateY(-2px);
-  border-color: #818cf8;
-  box-shadow: 0 10px 20px -4px rgba(99, 102, 241, 0.16), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  border-color: #3b82f6;
+  box-shadow: 0 10px 20px -4px rgba(37, 99, 235, 0.16), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
 }
 
 .cajon-highlighted {
-  border-color: #4f46e5 !important;
-  background: #f5f3ff !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+  border-color: #2563eb !important;
+  background: #eff6ff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
 }
 
 .cajon-content {
@@ -238,7 +237,7 @@ const handleChange = (evt) => {
 }
 
 .cajon-cell:hover .drawer-handle-bar {
-  background: #818cf8;
+  background: #3b82f6;
   width: 44px;
 }
 
@@ -257,14 +256,14 @@ const handleChange = (evt) => {
 
 .cajon-cell:hover .cajon-config-btn {
   opacity: 1;
-  color: #4f46e5;
+  color: #2563eb;
   background: #f1f5f9;
 }
 
 .drawer-label-badge {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: #f8fafc;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 800;
@@ -276,7 +275,7 @@ const handleChange = (evt) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   text-align: center;
 }
 
@@ -341,15 +340,15 @@ const handleChange = (evt) => {
 }
 
 .pill-contrato-rule {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
 }
 
 .pill-sede-rule {
-  background: #f5f3ff;
-  color: #6d28d9;
-  border: 1px solid #ddd6fe;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
 }
 
 .pill-rango-rule {
@@ -359,8 +358,8 @@ const handleChange = (evt) => {
 }
 
 .cajon-targeted-pulse {
-  border: 2px solid #f59e0b !important;
-  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4), 0 0 20px rgba(245, 158, 11, 0.6) !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.4), 0 0 20px rgba(37, 99, 235, 0.6) !important;
   animation: targetedPulse 1s infinite alternate ease-in-out;
   z-index: 10;
 }
@@ -368,11 +367,11 @@ const handleChange = (evt) => {
 @keyframes targetedPulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4), 0 0 15px rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.4), 0 0 15px rgba(37, 99, 235, 0.6);
   }
   100% {
     transform: scale(1.03);
-    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.7), 0 0 28px rgba(245, 158, 11, 0.9);
+    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.7), 0 0 28px rgba(37, 99, 235, 0.9);
   }
 }
 
@@ -380,7 +379,7 @@ const handleChange = (evt) => {
   position: absolute;
   top: -12px;
   right: 8px;
-  background: #f59e0b;
+  background: #2563eb;
   color: #ffffff;
   font-size: 10px;
   font-weight: 900;

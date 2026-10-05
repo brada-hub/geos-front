@@ -172,7 +172,7 @@
           <!-- CONTENIDO SCROLLABLE CON LAS MINIATURAS DE CADA PÁGINA -->
           <div class="col scroll q-pa-md pages-grid-container">
             <div v-if="isLoadingPages" class="column items-center justify-center q-py-xl">
-              <q-spinner-dots size="48px" color="indigo-4" />
+              <q-spinner-dots size="48px" color="primary" />
               <div class="text-caption text-slate-400 q-mt-sm">
                 Generando miniaturas de las hojas del expediente ({{ renderedCount }}/{{ totalPages }})...
               </div>

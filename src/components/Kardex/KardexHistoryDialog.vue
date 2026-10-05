@@ -16,7 +16,7 @@
               <div class="row items-center q-gutter-x-sm q-mt-xs">
                 <q-badge
                   v-if="kardex?.tipo_contrato"
-                  :color="kardex.tipo_contrato.color || 'indigo-9'"
+                  :color="kardex.tipo_contrato.color || 'primary'"
                   text-color="white"
                   class="text-weight-bold"
                 >
@@ -26,7 +26,7 @@
                   Sede: {{ kardex?.sede?.nombre }}
                 </span>
                 <q-badge
-                  :color="kardex?.estado === 0 ? 'positive' : kardex?.estado === 1 ? 'negative' : 'warning'"
+                  :color="kardex?.estado === 0 ? 'primary' : kardex?.estado === 1 ? 'negative' : 'slate-7'"
                   text-color="white"
                   class="text-weight-bold"
                 >
@@ -108,14 +108,14 @@
               <div class="col-12 col-sm-6">
                 <div class="row items-center justify-between text-caption q-mb-xs">
                   <span class="text-weight-bold text-slate-700">Completitud del Legajo Físico:</span>
-                  <span class="text-weight-bolder text-indigo-9" style="font-size: 13px;">
+                  <span class="text-weight-bolder text-primary" style="font-size: 13px;">
                     {{ resumenFile.porcentaje }}%
                   </span>
                 </div>
                 <q-linear-progress
                   :value="resumenFile.porcentaje / 100"
                   rounded
-                  :color="resumenFile.porcentaje >= 75 ? 'positive' : 'warning'"
+                  :color="resumenFile.porcentaje >= 75 ? 'primary' : 'slate-6'"
                   track-color="grey-3"
                   style="height: 8px; border-radius: 999px;"
                 />
@@ -124,7 +124,7 @@
               <div class="col-12 col-sm-6 row justify-end q-gutter-x-sm">
                 <div class="metric-pill">
                   <span class="metric-lbl">Total Fojas:</span>
-                  <b class="text-indigo-9 font-mono">{{ resumenFile.totalFojas }}</b>
+                  <b class="text-primary font-mono">{{ resumenFile.totalFojas }}</b>
                 </div>
                 <div class="metric-pill">
                   <span class="metric-lbl">Archivadas:</span>
@@ -776,10 +776,10 @@ const getMovIcon = (mov) => {
 
 const getMovColor = (mov) => {
   switch (mov.tipo_movimiento) {
-    case 'contrato': return 'purple-8';
-    case 'cargo': return 'teal-8';
-    case 'ubicacion': return 'indigo-8';
-    case 'estado': return 'blue-8';
+    case 'contrato': return 'primary';
+    case 'cargo': return 'slate-7';
+    case 'ubicacion': return 'primary';
+    case 'estado': return 'primary';
     default: return 'primary';
   }
 };

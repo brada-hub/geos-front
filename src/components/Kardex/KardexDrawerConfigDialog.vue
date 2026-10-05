@@ -63,14 +63,14 @@
               v-model="ruleMode"
               val="libre"
               label="Libre (Cualquier contrato)"
-              color="positive"
+              color="primary"
               dense
             />
             <q-radio
               v-model="ruleMode"
               val="restringida"
               label="Restringido a seleccionados"
-              color="amber-9"
+              color="primary"
               dense
             />
           </div>
@@ -101,14 +101,14 @@
               v-model="ruleSedeMode"
               val="libre"
               label="Libre (Admite personal de cualquier sede)"
-              color="teal-8"
+              color="primary"
               dense
             />
             <q-radio
               v-model="ruleSedeMode"
               val="restringida"
               label="Restringida a sedes seleccionadas"
-              color="purple-8"
+              color="primary"
               dense
             />
           </div>
@@ -132,7 +132,7 @@
         <!-- 3. RANGO ALFABÉTICO DE APELLIDOS -->
         <div>
           <div class="text-caption text-weight-bold text-grey-8 q-mb-xs row items-center q-gutter-xs">
-            <q-icon name="sort_by_alpha" color="indigo-8" size="18px" />
+            <q-icon name="sort_by_alpha" color="primary" size="18px" />
             <span>3. Rango Alfabético de Apellidos (De qué apellido a qué apellido):</span>
           </div>
           <div class="q-gutter-md row items-center q-mb-xs">
@@ -140,14 +140,14 @@
               v-model="ruleApellidoMode"
               val="libre"
               label="Libre (Todos los apellidos de la A a la Z)"
-              color="blue-8"
+              color="primary"
               dense
             />
             <q-radio
               v-model="ruleApellidoMode"
               val="rango"
               label="Restringido por rango alfabético"
-              color="indigo-9"
+              color="primary"
               dense
             />
           </div>
@@ -156,11 +156,11 @@
             <!-- BOTONES DE ATAJOS -->
             <div class="row items-center q-gutter-xs">
               <span class="text-caption text-weight-bold text-grey-7 q-mr-xs">Atajos rápidos:</span>
-              <q-btn dense outline size="xs" color="indigo-9" label="A - F" @click="aplicarPreset('A', 'F')" />
-              <q-btn dense outline size="xs" color="indigo-9" label="G - M" @click="aplicarPreset('G', 'M')" />
-              <q-btn dense outline size="xs" color="indigo-9" label="N - S" @click="aplicarPreset('N', 'S')" />
-              <q-btn dense outline size="xs" color="indigo-9" label="T - Z" @click="aplicarPreset('T', 'Z')" />
-              <q-btn dense outline size="xs" color="indigo-9" label="A - Z" @click="aplicarPreset('A', 'Z')" />
+              <q-btn dense outline size="xs" color="primary" label="A - F" @click="aplicarPreset('A', 'F')" />
+              <q-btn dense outline size="xs" color="primary" label="G - M" @click="aplicarPreset('G', 'M')" />
+              <q-btn dense outline size="xs" color="primary" label="N - S" @click="aplicarPreset('N', 'S')" />
+              <q-btn dense outline size="xs" color="primary" label="T - Z" @click="aplicarPreset('T', 'Z')" />
+              <q-btn dense outline size="xs" color="primary" label="A - Z" @click="aplicarPreset('A', 'Z')" />
             </div>
 
             <div class="row q-col-gutter-sm items-center">
@@ -209,7 +209,7 @@
             <div class="col-12 col-sm-6 row justify-end q-gutter-xs">
               <q-btn
                 outline
-                color="deep-purple-9"
+                color="primary"
                 icon="sync"
                 label="Auto-Organizar Ahora"
                 size="sm"
@@ -234,9 +234,9 @@
         <q-separator />
 
         <!-- 4. ASIGNACIÓN MASIVA POR SEDE EN 1 CLIC -->
-        <div class="q-pa-sm bg-purple-1 rounded-borders">
-          <div class="text-caption text-weight-bold text-purple-10 q-mb-xs row items-center q-gutter-xs">
-            <q-icon name="flash_on" color="amber-9" size="18px" />
+        <div class="q-pa-sm bg-blue-1 rounded-borders">
+          <div class="text-caption text-weight-bold text-primary q-mb-xs row items-center q-gutter-xs">
+            <q-icon name="flash_on" color="primary" size="18px" />
             <span>Asignación Masiva en 1 Clic desde Gaveta Virtual:</span>
           </div>
           <div class="row q-col-gutter-sm items-center">
@@ -257,7 +257,7 @@
             <div class="col-12 col-sm-5">
               <q-btn
                 unelevated
-                color="deep-purple-8"
+                color="primary"
                 icon="system_update_alt"
                 label="Meter Todo de esta Sede"
                 class="full-width"

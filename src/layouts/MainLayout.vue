@@ -39,7 +39,7 @@
           @click="spotlightOpen = true"
           title="Abrir búsqueda global de expedientes (Ctrl + K)"
         >
-          <q-icon name="search" size="15px" color="indigo-7" />
+          <q-icon name="search" size="15px" color="primary" />
           <span class="spotlight-trigger-text text-slate-500 q-mx-xs">Buscar expediente...</span>
           <span class="spotlight-trigger-kbd">Ctrl K</span>
         </div>
@@ -53,7 +53,7 @@
             dense
             size="sm"
             icon="search"
-            color="indigo-7"
+            color="primary"
             class="toolbar-action-btn lt-sm"
             @click="spotlightOpen = true"
           >
@@ -62,7 +62,7 @@
 
           <!-- RELOJ DIGITAL EN VIVO (Desktop) -->
           <div class="clock-display gt-sm row items-center q-gutter-xs q-px-sm q-py-xs">
-            <q-icon name="schedule" size="14px" color="indigo-7" />
+            <q-icon name="schedule" size="14px" color="primary" />
             <span class="clock-text">{{ liveTime }}</span>
           </div>
 
@@ -73,7 +73,7 @@
             dense
             size="sm"
             :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
-            :color="$q.dark.isActive ? 'amber-4' : 'slate-600'"
+            :color="$q.dark.isActive ? 'primary' : 'slate-600'"
             class="toolbar-action-btn"
             @click="toggleDarkMode"
           >
@@ -87,6 +87,7 @@
             dense
             size="sm"
             icon="sync"
+            color="slate-600"
             class="toolbar-action-btn"
             :class="{ 'rotate-animation': syncing }"
             @click="syncAllData"
@@ -127,7 +128,7 @@
                 </q-item-label>
                 <q-item>
                   <q-item-section avatar>
-                    <q-avatar size="34px" color="indigo" text-color="white" class="text-weight-bold">
+                    <q-avatar size="34px" color="primary" text-color="white" class="text-weight-bold">
                       {{ userInitials }}
                     </q-avatar>
                   </q-item-section>
@@ -139,19 +140,19 @@
                 <q-separator class="q-my-xs" />
                 <q-item clickable @click="profileDialogOpen = true">
                   <q-item-section avatar>
-                    <q-icon name="manage_accounts" color="amber-9" size="18px" />
+                    <q-icon name="manage_accounts" color="primary" size="18px" />
                   </q-item-section>
                   <q-item-section class="text-slate-800">Mi Perfil y Seguridad</q-item-section>
                 </q-item>
                 <q-item clickable @click="openImportDialog">
                   <q-item-section avatar>
-                    <q-icon name="upload_file" color="indigo" size="18px" />
+                    <q-icon name="upload_file" color="primary" size="18px" />
                   </q-item-section>
                   <q-item-section class="text-slate-800">Importar Planilla Excel</q-item-section>
                 </q-item>
                 <q-item clickable @click="syncAllData">
                   <q-item-section avatar>
-                    <q-icon name="refresh" color="teal" size="18px" />
+                    <q-icon name="refresh" color="primary" size="18px" />
                   </q-item-section>
                   <q-item-section class="text-slate-800">Recargar Catálogos</q-item-section>
                 </q-item>
@@ -243,7 +244,7 @@
                 <q-item-label caption class="drawer-item-sub">Contratos, sedes e historial</q-item-label>
               </q-item-section>
               <q-item-section side v-if="store.personal.length > 0">
-                <span class="drawer-count-badge drawer-count-badge-sky">{{ store.personal.length }}</span>
+                <span class="drawer-count-badge">{{ store.personal.length }}</span>
               </q-item-section>
             </q-item>
           </q-list>
@@ -265,7 +266,7 @@
             >
               <q-item-section avatar class="drawer-avatar-col">
                 <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="search" size="18px" color="indigo-7" />
+                  <q-icon name="search" size="18px" color="primary" />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -285,8 +286,8 @@
               class="drawer-nav-item"
             >
               <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center" style="background: #ecfdf5; border-color: #a7f3d0;">
-                  <q-icon name="table_view" size="18px" color="emerald-7" />
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon name="table_view" size="18px" color="primary" />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -294,7 +295,7 @@
                 <q-item-label caption class="drawer-item-sub">Descargar reporte (.xlsx)</q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-icon name="download" size="14px" color="emerald-8" />
+                <q-icon name="download" size="14px" color="slate-500" />
               </q-item-section>
             </q-item>
 
@@ -306,8 +307,8 @@
               class="drawer-nav-item"
             >
               <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center" style="background: #faf5ff; border-color: #e9d5ff;">
-                  <q-icon name="insights" size="18px" color="purple-7" />
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon name="insights" size="18px" color="primary" />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -315,7 +316,7 @@
                 <q-item-label caption class="drawer-item-sub">Capacidad y distribución</q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-icon name="arrow_forward" size="14px" color="grey-6" />
+                <q-icon name="arrow_forward" size="14px" color="slate-400" />
               </q-item-section>
             </q-item>
 
@@ -327,8 +328,8 @@
               class="drawer-nav-item drawer-tool-item"
             >
               <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box drawer-icon-box-amber flex flex-center">
-                  <q-icon name="upload_file" size="18px" color="amber-9" />
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon name="upload_file" size="18px" color="primary" />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -336,7 +337,7 @@
                 <q-item-label caption class="drawer-item-sub">Carga masiva de planillas</q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-icon name="arrow_forward" size="14px" color="grey-6" />
+                <q-icon name="arrow_forward" size="14px" color="slate-400" />
               </q-item-section>
             </q-item>
 
@@ -349,7 +350,7 @@
             >
               <q-item-section avatar class="drawer-avatar-col">
                 <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="sync" size="18px" color="indigo-7" :class="{ 'rotate-animation': syncing }" />
+                  <q-icon name="sync" size="18px" color="primary" :class="{ 'rotate-animation': syncing }" />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -366,16 +367,16 @@
               class="drawer-nav-item"
             >
               <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center" :style="$q.dark.isActive ? 'background: #312e81; border-color: #4338ca;' : ''">
-                  <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" size="18px" :color="$q.dark.isActive ? 'amber-4' : 'indigo-7'" />
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" size="18px" color="primary" />
                 </div>
               </q-item-section>
               <q-item-section>
                 <q-item-label class="drawer-item-title">{{ $q.dark.isActive ? 'Modo Claro' : 'Modo Oscuro' }}</q-item-label>
-                <q-item-label caption class="drawer-item-sub">{{ $q.dark.isActive ? 'Tema claro de alto contraste' : 'Descansar la vista' }}</q-item-label>
+                <q-item-label caption class="drawer-item-sub">{{ $q.dark.isActive ? 'Tema claro institucional' : 'Tema oscuro de alto contraste' }}</q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-icon :name="$q.dark.isActive ? 'toggle_on' : 'toggle_off'" :color="$q.dark.isActive ? 'amber-4' : 'grey-5'" size="24px" />
+                <q-icon :name="$q.dark.isActive ? 'toggle_on' : 'toggle_off'" :color="$q.dark.isActive ? 'primary' : 'slate-400'" size="24px" />
               </q-item-section>
             </q-item>
 
@@ -387,8 +388,8 @@
               class="drawer-nav-item"
             >
               <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center" style="background: #eff6ff; border-color: #bfdbfe;">
-                  <q-icon :name="isAppInstalled ? 'verified' : 'install_desktop'" size="18px" color="blue-7" />
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon :name="isAppInstalled ? 'verified' : 'install_desktop'" size="18px" color="primary" />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -396,7 +397,7 @@
                 <q-item-label caption class="drawer-item-sub">{{ isAppInstalled ? 'Funcionando como app nativa' : 'En tu PC o celular' }}</q-item-label>
               </q-item-section>
               <q-item-section side>
-                <span class="spotlight-kbd-side" style="background: #e0e7ff; color: #4338ca;">PWA</span>
+                <span class="spotlight-kbd-side">PWA</span>
               </q-item-section>
             </q-item>
           </q-list>
@@ -411,15 +412,15 @@
           <div class="metrics-card q-pa-sm q-mt-xs">
             <div class="row items-center justify-between q-mb-xs">
               <span class="text-caption text-weight-bold text-slate-700">Ocupación Física</span>
-              <span class="text-caption text-weight-bolder text-indigo-7" style="font-size: 12.5px;">
+              <span class="text-caption text-weight-bolder text-primary" style="font-size: 12.5px;">
                 {{ porcentajeArchivado }}%
               </span>
             </div>
             <q-linear-progress
               :value="porcentajeArchivadoDecimal"
               rounded
-              color="indigo"
-              track-color="indigo-1"
+              color="primary"
+              track-color="slate-200"
               class="q-mb-sm"
               style="height: 6px; border-radius: 999px;"
             />
@@ -432,7 +433,7 @@
 
               <div class="row items-center justify-between text-caption text-slate-600" style="font-size: 11.5px;">
                 <span>Gaveta Virtual:</span>
-                <b :class="totalSinAsignar > 0 ? 'text-pink-7 font-mono' : 'text-slate-900 font-mono'">
+                <b class="text-slate-900 font-mono">
                   {{ totalSinAsignar }}
                 </b>
               </div>
@@ -454,7 +455,7 @@
                 DOCUS v2.4 • 3FN
               </span>
             </div>
-            <q-badge color="indigo-1" text-color="indigo-8" class="text-weight-bold" style="font-size: 10px;">
+            <q-badge color="slate-800" text-color="white" class="text-weight-bold" style="font-size: 10px;">
               Auditoría Activa
             </q-badge>
           </div>
@@ -486,7 +487,7 @@
         >
           <div class="mobile-icon-wrapper">
             <q-icon name="badge" size="22px" />
-            <span v-if="store.personal.length > 0" class="mobile-mini-badge mobile-mini-badge-sky">
+            <span v-if="store.personal.length > 0" class="mobile-mini-badge">
               {{ store.personal.length }}
             </span>
           </div>
@@ -498,7 +499,7 @@
           @click="metricasOpen = true"
         >
           <div class="mobile-icon-wrapper">
-            <q-icon name="insights" size="22px" color="purple-7" />
+            <q-icon name="insights" size="22px" color="primary" />
           </div>
           <span class="mobile-nav-label">Métricas</span>
         </div>

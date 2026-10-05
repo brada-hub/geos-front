@@ -70,26 +70,26 @@
         <div v-if="filasParseadas.length > 0" class="row q-col-gutter-sm">
           <div class="col-12 col-sm-3">
             <q-card flat bordered class="bg-blue-1 q-pa-sm text-center">
-              <div class="text-caption text-blue-9 text-weight-bold">TOTAL EXPEDIENTES</div>
-              <div class="text-h5 text-blue-10 text-weight-bolder">{{ filasParseadas.length }}</div>
+              <div class="text-caption text-primary text-weight-bold">TOTAL EXPEDIENTES</div>
+              <div class="text-h5 text-primary text-weight-bolder">{{ filasParseadas.length }}</div>
             </q-card>
           </div>
           <div class="col-12 col-sm-3">
-            <q-card flat bordered class="bg-teal-1 q-pa-sm text-center">
-              <div class="text-caption text-teal-9 text-weight-bold">SEDES ENCONTRADAS</div>
-              <div class="text-h5 text-teal-10 text-weight-bolder">{{ sedesDetectadas.length }}</div>
+            <q-card flat bordered class="bg-slate-50 q-pa-sm text-center">
+              <div class="text-caption text-slate-600 text-weight-bold">SEDES ENCONTRADAS</div>
+              <div class="text-h5 text-slate-900 text-weight-bolder">{{ sedesDetectadas.length }}</div>
             </q-card>
           </div>
           <div class="col-12 col-sm-3">
-            <q-card flat bordered class="bg-purple-1 q-pa-sm text-center">
-              <div class="text-caption text-purple-9 text-weight-bold">CONTRATOS IDENTIFICADOS</div>
-              <div class="text-h5 text-purple-10 text-weight-bolder">{{ contratosDetectados.length }}</div>
+            <q-card flat bordered class="bg-slate-50 q-pa-sm text-center">
+              <div class="text-caption text-slate-600 text-weight-bold">CONTRATOS IDENTIFICADOS</div>
+              <div class="text-h5 text-slate-900 text-weight-bolder">{{ contratosDetectados.length }}</div>
             </q-card>
           </div>
           <div class="col-12 col-sm-3">
-            <q-card flat bordered class="bg-indigo-1 q-pa-sm text-center">
-              <div class="text-caption text-indigo-9 text-weight-bold">DESTINO ASIGNADO</div>
-              <div class="text-h6 text-indigo-10 text-weight-bolder">Gaveta Virtual</div>
+            <q-card flat bordered class="bg-blue-1 q-pa-sm text-center">
+              <div class="text-caption text-primary text-weight-bold">DESTINO ASIGNADO</div>
+              <div class="text-h6 text-primary text-weight-bolder">Gaveta Virtual</div>
             </q-card>
           </div>
         </div>
@@ -132,7 +132,7 @@
             <template v-slot:body-cell-sexo="props">
               <q-td :props="props">
                 <q-badge
-                  :color="props.row.sexo === 'F' ? 'pink-6' : 'blue-7'"
+                  color="grey-8"
                   :label="props.row.sexo === 'F' ? 'F (Femenino)' : 'M (Masculino)'"
                   rounded
                 />
@@ -142,7 +142,7 @@
             <!-- COLUMNA SEDE -->
             <template v-slot:body-cell-sede="props">
               <q-td :props="props">
-                <q-badge color="indigo-7" text-color="white" :label="props.row.sede || 'Sin Sede'" />
+                <q-badge color="primary" text-color="white" :label="props.row.sede || 'Sin Sede'" />
               </q-td>
             </template>
 
@@ -257,9 +257,8 @@ const contratosDetectados = computed(() => {
 function getContratoBadgeColor(contrato) {
   if (!contrato) return 'grey-7';
   const c = contrato.toUpperCase();
-  if (c.includes('INDEF')) return 'indigo-8';
-  if (c.includes('PLAZO') || c.includes('FIJO')) return 'teal-8';
-  if (c.includes('SERV') || c.includes('CONSULT')) return 'purple-8';
+  if (c.includes('INDEF')) return 'primary';
+  if (c.includes('PLAZO') || c.includes('FIJO')) return 'slate-7';
   return 'blue-grey-8';
 }
 

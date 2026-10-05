@@ -9,7 +9,7 @@
     <q-card class="spotlight-card shadow-24">
       <!-- CABECERA DEL BUSCADOR SPOTLIGHT -->
       <div class="spotlight-search-header row items-center q-px-md q-py-sm">
-        <q-icon name="search" size="22px" color="indigo-7" class="q-mr-sm" />
+        <q-icon name="search" size="22px" color="primary" class="q-mr-sm" />
         <input
           ref="searchInputRef"
           v-model="query"
@@ -44,7 +44,7 @@
           <span class="text-caption text-slate-500 font-weight-medium" style="font-size: 11px;">
             {{ filteredResults.length }} expedientes encontrados
           </span>
-          <span v-if="query" class="text-caption text-indigo-7" style="font-size: 11px;">
+          <span v-if="query" class="text-caption text-primary" style="font-size: 11px;">
             para "{{ query }}"
           </span>
         </div>
@@ -91,11 +91,11 @@
                   {{ item.cargo }}
                 </span>
                 <span v-if="item.cargo" class="text-slate-300">•</span>
-                <span v-if="item.sede?.nombre" class="text-indigo-8 text-weight-bold">
+                <span v-if="item.sede?.nombre" class="text-slate-900 text-weight-bold">
                   {{ item.sede.nombre }}
                 </span>
                 <span v-if="item.tipo_contrato?.nombre" class="text-slate-300">•</span>
-                <span v-if="item.tipo_contrato?.nombre" class="text-teal-8">
+                <span v-if="item.tipo_contrato?.nombre" class="text-slate-700">
                   {{ item.tipo_contrato.nombre }}
                 </span>
               </div>
@@ -115,7 +115,7 @@
               <span v-if="!item.isVirtual && item.cajon_etiqueta" class="text-caption text-slate-400" style="font-size: 10px;">
                 "{{ item.cajon_etiqueta }}"
               </span>
-              <span v-else-if="item.isVirtual" class="text-caption text-amber-8" style="font-size: 10px; font-weight: 600;">
+              <span v-else-if="item.isVirtual" class="text-caption text-slate-500" style="font-size: 10px; font-weight: 600;">
                 Bandeja de Entrada
               </span>
             </div>
@@ -137,7 +137,7 @@
       <!-- FOOTER DEL MODAL -->
       <div class="spotlight-footer row items-center justify-between q-px-md q-py-sm bg-slate-100 border-top">
         <div class="row items-center q-gutter-xs text-caption text-slate-500" style="font-size: 11px;">
-          <q-icon name="my_location" size="14px" color="indigo-7" />
+          <q-icon name="my_location" size="14px" color="primary" />
           <span>Al seleccionar, el sistema hará foco y parpadeará el archivador exacto.</span>
         </div>
         <q-btn flat dense no-caps size="sm" label="Cerrar" color="grey-7" @click="close" />
@@ -331,7 +331,7 @@ const close = () => {
 .spotlight-item:hover,
 .spotlight-item-selected {
   background: #f8fafc;
-  border-left-color: #4f46e5;
+  border-left-color: #2563eb;
 }
 
 .spotlight-code-badge {
@@ -366,14 +366,14 @@ const close = () => {
 }
 
 .location-physical {
-  background: #ede9fe;
-  color: #5b21b6;
-  border: 1px solid #ddd6fe;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
 }
 
 .location-virtual {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
 }
 </style>

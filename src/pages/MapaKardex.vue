@@ -317,7 +317,7 @@ const handleSpotlightLocator = async (target) => {
     $q.notify({
       type: 'info',
       icon: 'my_location',
-      color: 'amber-9',
+      color: 'primary',
       textColor: 'white',
       position: 'top',
       message: `¡Localizado! Expediente de ${target.nombre || 'Personal'} en la gaveta señalada.`,
@@ -369,25 +369,25 @@ onMounted(() => {
 .mueble-ghost {
   opacity: 0.35 !important;
   transform: scale(0.97);
-  box-shadow: 0 0 0 2px #4f46e5, 0 16px 32px rgba(79, 70, 229, 0.25) !important;
+  box-shadow: 0 0 0 2px #2563eb, 0 16px 32px rgba(37, 99, 235, 0.25) !important;
   border-radius: 16px;
 }
 
 .separation-dock {
-  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e293b 100%);
   border: 2px dashed rgba(255, 255, 255, 0.85);
   border-radius: 16px;
   min-width: 440px;
   transition: all 0.25s ease;
   user-select: none;
-  box-shadow: 0 20px 30px -10px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 20px 30px -10px rgba(37, 99, 235, 0.35);
 }
 
 .dropzone-active {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-  border-color: #6ee7b7 !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  border-color: #93c5fd !important;
   transform: scale(1.05);
-  box-shadow: 0 20px 35px -5px rgba(5, 150, 105, 0.5) !important;
+  box-shadow: 0 20px 35px -5px rgba(37, 99, 235, 0.45) !important;
 }
 
 /* SWITCHER DE APARTADOS (AMIGABLE Y MODERNO) */
@@ -425,7 +425,7 @@ onMounted(() => {
 
 .view-pill-btn-active {
   background: #ffffff;
-  color: #4f46e5;
+  color: #2563eb;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -440,12 +440,12 @@ onMounted(() => {
 }
 
 .view-pill-btn-active .view-pill-count {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: #eff6ff;
+  color: #2563eb;
 }
 
 .view-pill-count-alert {
-  background: #f43f5e !important;
+  background: #dc2626 !important;
   color: #ffffff !important;
 }
 </style>

@@ -17,7 +17,7 @@
                 {{ totalCount }} sin archivar
               </q-badge>
             </div>
-            <div class="text-caption text-indigo-1" style="font-size: 11px;">
+            <div class="text-caption text-slate-200" style="font-size: 11px;">
               Arrastra expedientes hacia las gavetas físicas, o suelta aquí para desasignarlos
             </div>
           </div>
@@ -28,8 +28,8 @@
           <q-btn
             dense
             unelevated
-            color="amber-4"
-            text-color="dark"
+            color="white"
+            text-color="primary"
             icon="upload_file"
             label="Importar Excel"
             class="text-weight-bold q-px-sm"
@@ -49,7 +49,7 @@
             outlined
             dark
             color="white"
-            bg-color="indigo-9"
+            bg-color="primary"
             class="filter-select"
             label="Filtrar sede"
           />
@@ -83,7 +83,7 @@
             <template #item="{ element }">
               <div class="virtual-folder-chip" :title="element.nombre_completo">
                 <div class="row items-center q-gutter-xs no-wrap">
-                  <q-icon name="folder_open" size="18px" color="deep-purple-8" />
+                  <q-icon name="folder_open" size="18px" color="primary" />
                   <span class="text-weight-bold text-caption ellipsis" style="max-width: 170px;">
                     #{{ element.numero_unico || element.codigo_archivo }} {{ formatChipName(element) }}
                   </span>
@@ -244,7 +244,7 @@ const handleDropChange = async (evt) => {
 }
 
 .bg-virtual {
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 50%, #3730a3 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #0f172a 100%);
 }
 
 .virtual-tag-permanent {
@@ -256,7 +256,7 @@ const handleDropChange = async (evt) => {
 }
 
 .virtual-tag-count-active {
-  background: #f43f5e;
+  background: #dc2626;
   color: #ffffff;
   font-weight: 800;
   border-radius: 6px;
@@ -270,7 +270,7 @@ const handleDropChange = async (evt) => {
 }
 
 .border-top {
-  border-top: 1px solid #e0e7ff;
+  border-top: 1px solid #e2e8f0;
 }
 
 .filter-select {
@@ -283,9 +283,9 @@ const handleDropChange = async (evt) => {
   max-height: 180px;
   overflow-y: auto;
   padding: 8px;
-  border: 2px dashed #c7d2fe;
+  border: 2px dashed #93c5fd;
   border-radius: 12px;
-  background: #f5f7ff;
+  background: #f8fafc;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -310,7 +310,7 @@ const handleDropChange = async (evt) => {
 
 .virtual-folder-chip:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18);
-  border-color: #818cf8;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.18);
+  border-color: #3b82f6;
 }
 </style>
