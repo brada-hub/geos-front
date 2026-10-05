@@ -1,7 +1,8 @@
 // Utilidad para almacenamiento local de PDFs de secciones de expedientes usando IndexedDB
+// Diseñado con ArrayBuffer puro para garantizar compatibilidad con el Structured Clone Algorithm
 
 const DB_NAME = 'DOCUS_FILE_STORAGE';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Actualizamos versión para asegurar esquema limpio
 const STORE_NAME = 'secciones_pdf';
 
 function openDB() {
@@ -21,30 +22,58 @@ function openDB() {
 }
 
 /**
- * Guarda el archivo PDF de una sección en IndexedDB
+ * Guarda el archivo PDF de una sección en IndexedDB de forma 100% segura frente a DataCloneError
  */
-export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBlob, meta = {}) {
+export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBytesOrBlob, meta = {}) {
   try {
     const db = await openDB();
-    const key = `${empleadoId}_${seccionCodigo}`;
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
+    const cleanId = String(empleadoId);
+    const cleanCod = String(seccionCodigo);
+    const key = `${cleanId}_${cleanCod}`;
+
+    // Convertir a ArrayBuffer puro para evitar cualquier DataCloneError con Vue Proxies o Blobs
+    let dataBuffer;
+    if (pdfBytesOrBlob instanceof Blob) {
+      dataBuffer = await pdfBytesOrBlob.arrayBuffer();
+    } else if (pdfBytesOrBlob instanceof Uint8Array) {
+      dataBuffer = pdfBytesOrBlob.buffer.slice(
+        pdfBytesOrBlob.byteOffset,
+        pdfBytesOrBlob.byteOffset + pdfBytesOrBlob.byteLength
+      );
+    } else if (pdfBytesOrBlob instanceof ArrayBuffer) {
+      dataBuffer = pdfBytesOrBlob;
+    } else {
+      dataBuffer = new ArrayBuffer(0);
+    }
+
+    // Limpiar metadatos de posibles proxies reactivos de Vue 3
+    const cleanPages = Array.isArray(meta.pageNumbers)
+      ? Array.from(meta.pageNumbers).map(n => Number(n))
+      : [];
+    const cleanFilename = String(meta.filename || `${cleanCod}_EXP_${cleanId}.pdf`);
+    const cleanPagesCount = Number(meta.pagesCount || cleanPages.length || 0);
 
     const record = {
       key,
-      empleadoId,
-      seccionCodigo,
-      blob: pdfBlob,
-      filename: meta.filename || `${seccionCodigo}_EXP_${empleadoId}.pdf`,
-      pagesCount: meta.pagesCount || 0,
-      pageNumbers: meta.pageNumbers || [],
+      empleadoId: cleanId,
+      seccionCodigo: cleanCod,
+      dataBuffer,
+      filename: cleanFilename,
+      pagesCount: cleanPagesCount,
+      pageNumbers: cleanPages,
       updatedAt: new Date().toISOString()
     };
+
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
       const req = store.put(record);
       req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(false);
+      req.onerror = (err) => {
+        console.error('Error al guardar en IndexedDB store.put:', err);
+        reject(err);
+      };
     });
   } catch (error) {
     console.error('Error guardando PDF en IndexedDB:', error);
@@ -53,18 +82,34 @@ export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBlob, meta = 
 }
 
 /**
- * Obtiene el archivo PDF de una sección
+ * Obtiene el archivo PDF de una sección reconstruyendo el Blob desde el ArrayBuffer
  */
 export async function getSectionPdf(empleadoId, seccionCodigo) {
   try {
     const db = await openDB();
-    const key = `${empleadoId}_${seccionCodigo}`;
+    const key = `${String(empleadoId)}_${String(seccionCodigo)}`;
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve) => {
       const req = store.get(key);
-      req.onsuccess = () => resolve(req.result || null);
+      req.onsuccess = () => {
+        const item = req.result;
+        if (!item) return resolve(null);
+
+        // Reconstruir el Blob al vuelo para que sea utilizable por URL.createObjectURL
+        let blob = null;
+        if (item.dataBuffer && item.dataBuffer.byteLength > 0) {
+          blob = new Blob([item.dataBuffer], { type: 'application/pdf' });
+        } else if (item.blob instanceof Blob) {
+          blob = item.blob;
+        }
+
+        resolve({
+          ...item,
+          blob
+        });
+      };
       req.onerror = () => resolve(null);
     });
   } catch (error) {
@@ -114,7 +159,7 @@ export async function getEmpleadoPdfsMap(empleadoId) {
 export async function deleteSectionPdf(empleadoId, seccionCodigo) {
   try {
     const db = await openDB();
-    const key = `${empleadoId}_${seccionCodigo}`;
+    const key = `${String(empleadoId)}_${String(seccionCodigo)}`;
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
 

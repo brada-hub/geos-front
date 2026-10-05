@@ -597,7 +597,7 @@ const ejecutarDesglose = async () => {
     const seccionesActualizadas = JSON.parse(JSON.stringify(secciones.value));
 
     for (const codigo of codigosAsignados) {
-      const pageNums = asignaciones.value[codigo];
+      const pageNums = Array.from(asignaciones.value[codigo] || []).map(Number);
       // Convertir a índices 0-based para pdf-lib
       const pageIndices = pageNums.map(n => n - 1);
 
@@ -607,10 +607,9 @@ const ejecutarDesglose = async () => {
       copiedPages.forEach(p => subDoc.addPage(p));
 
       const subPdfBytes = await subDoc.save();
-      const subBlob = new Blob([subPdfBytes], { type: 'application/pdf' });
 
-      // Guardar en IndexedDB
-      await saveSectionPdf(props.empleado.id, codigo, subBlob, {
+      // Guardar en IndexedDB de forma limpia y clonable
+      await saveSectionPdf(props.empleado.id, codigo, subPdfBytes, {
         filename: `${codigo}_EXP_${props.empleado.id}.pdf`,
         pagesCount: pageNums.length,
         pageNumbers: pageNums
