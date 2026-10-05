@@ -761,7 +761,7 @@
             </div>
 
             <!-- CASO HOJA SIMPLE: FOJAS DEL PDF EN PÁG 3+ -->
-            <div v-else class="single-page-card shadow-12 relative-position" style="min-width: 520px;">
+            <div v-else class="single-page-card shadow-12 relative-position">
               <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
                 <div class="row items-center q-gutter-x-xs ellipsis">
                   <q-icon name="folder" size="14px" color="indigo-8" />
@@ -774,7 +774,7 @@
                 </q-badge>
               </div>
 
-              <div class="flex flex-center page-canvas-container">
+              <div class="col flex flex-center page-canvas-container">
                 <canvas id="page-canvas-single" class="page-canvas-rendered"></canvas>
               </div>
 
@@ -853,6 +853,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useQuasar } from 'quasar';
 import { PDFDocument } from 'pdf-lib/dist/pdf-lib.min.js';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import QRCode from 'qrcode';
 import docusLogo from 'src/assets/docus-app-icon.png';
 import {
@@ -876,8 +877,8 @@ if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.toHex) {
   };
 }
 
-// Configurar worker de PDF.js estable 4.10.38
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+// Configurar worker de PDF.js local empaquetado por Vite (evita bloqueos CORS de CDN)
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker || 'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
 
 const props = defineProps({
   modelValue: Boolean,
@@ -907,7 +908,7 @@ const viewerContainerRef = ref(null);
 const totalPages = ref(2); // Mínimo 2: Carátula + Índice
 const currentPage = ref(1); // 1 = Carátula, 2 = Índice (o Índice + Foja 1 en libro), 3..N
 const totalPdfPages = ref(0);
-let pdfDocProxy = ref(null);
+let pdfDocProxy = null; // Instancia nativa de PDFJS (NO usar ref para evitar que Vue lo envuelva en un Proxy reactivo que bloquea el worker)
 const qrDataUrl = ref('');
 
 // Mapeos de secciones por página
@@ -1035,7 +1036,7 @@ const limpiarInstancia = () => {
   });
   activeRenderTasks.clear();
 
-  pdfDocProxy.value = null;
+  pdfDocProxy = null;
   totalPages.value = 2;
   currentPage.value = 1;
   totalPdfPages.value = 0;
@@ -1135,7 +1136,7 @@ const armarYProcesarLibroCompleto = async () => {
         pagesCount: globalPageCounter - 1
       }).catch(() => {});
 
-      await cargarPdfDesdeBuffer(unifiedBytes.buffer);
+      await cargarPdfDesdeBuffer(unifiedBytes);
     } else {
       // Si no encontramos secciones separadas, verificamos si existe un Master directo previo
       const master = await getMasterPdf(props.empleado.id);
@@ -1155,11 +1156,32 @@ const armarYProcesarLibroCompleto = async () => {
   }
 };
 
-const cargarPdfDesdeBuffer = async (buffer) => {
+const cargarPdfDesdeBuffer = async (dataInput) => {
   try {
     isLoading.value = true;
-    const proxy = await pdfjsLib.getDocument({ data: buffer }).promise;
-    pdfDocProxy.value = proxy;
+    let uint8Data;
+    if (dataInput instanceof Uint8Array) {
+      uint8Data = dataInput;
+    } else if (dataInput instanceof ArrayBuffer) {
+      uint8Data = new Uint8Array(dataInput);
+    } else if (dataInput && dataInput.buffer instanceof ArrayBuffer) {
+      uint8Data = new Uint8Array(
+        dataInput.buffer,
+        dataInput.byteOffset || 0,
+        dataInput.byteLength || dataInput.buffer.byteLength
+      );
+    } else {
+      console.warn('Tipo de buffer PDF no soportado:', dataInput);
+      return;
+    }
+
+    const proxy = await pdfjsLib.getDocument({
+      data: uint8Data,
+      cMapUrl: 'https://unpkg.com/pdfjs-dist@4.10.38/cmaps/',
+      cMapPacked: true
+    }).promise;
+
+    pdfDocProxy = proxy;
     totalPdfPages.value = proxy.numPages;
 
     // Si no teníamos un mapa detallado (por ejemplo PDF master directo), mapeamos 1 a 1
@@ -1260,7 +1282,7 @@ const getCanvasAsync = async (id, maxTries = 25, delayMs = 25) => {
 };
 
 const renderizarPaginasActuales = async () => {
-  if (!pdfDocProxy.value) return;
+  if (!pdfDocProxy) return;
 
   if (currentPage.value === 1) {
     // Carátula HTML pura, sin canvas
@@ -1299,7 +1321,7 @@ const renderizarPaginasActuales = async () => {
 };
 
 const renderizarCanvas = async (canvasId, pdfPageNum) => {
-  if (!pdfDocProxy.value || pdfPageNum < 1 || pdfPageNum > totalPdfPages.value) return;
+  if (!pdfDocProxy || pdfPageNum < 1 || pdfPageNum > totalPdfPages.value) return;
 
   try {
     const canvas = await getCanvasAsync(canvasId);
@@ -1318,20 +1340,22 @@ const renderizarCanvas = async (canvasId, pdfPageNum) => {
       activeRenderTasks.delete(canvasId);
     }
 
-    const page = await pdfDocProxy.value.getPage(pdfPageNum);
+    const page = await pdfDocProxy.getPage(pdfPageNum);
     const dpr = window.devicePixelRatio || 1;
 
-    // Escala nítida basada en ancho de página estándar (540px)
+    // Escala nítida basada en ancho de página estándar Oficio (530px)
     const baseTargetWidth = 530;
     const unscaledViewport = page.getViewport({ scale: 1.0 });
-    const scale = (baseTargetWidth / unscaledViewport.width) * dpr;
+    const scale = (baseTargetWidth / unscaledViewport.width) * Math.max(dpr, 1.5);
     const viewport = page.getViewport({ scale });
 
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.objectFit = 'contain';
+    canvas.style.maxWidth = '100%';
+    canvas.style.maxHeight = '100%';
+    canvas.style.width = 'auto';
+    canvas.style.height = 'auto';
+    canvas.style.display = 'block';
 
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -1360,24 +1384,27 @@ const toggleFilmstrip = async () => {
 };
 
 const renderFilmstrip = async () => {
-  if (!pdfDocProxy.value || !showFilmstrip.value || totalPdfPages.value === 0) return;
+  if (!pdfDocProxy || !showFilmstrip.value || totalPdfPages.value === 0) return;
   await nextTick();
-  await new Promise((r) => setTimeout(r, 120));
+  await new Promise((r) => setTimeout(r, 100));
 
   for (let i = 1; i <= totalPdfPages.value; i++) {
     try {
-      const page = await pdfDocProxy.value.getPage(i);
-      const canvas = await getCanvasAsync(`filmstrip-canvas-${i}`, 15, 20);
+      const page = await pdfDocProxy.getPage(i);
+      const canvas = await getCanvasAsync(`filmstrip-canvas-${i}`, 20, 25);
       if (canvas) {
-        const viewport = page.getViewport({ scale: 0.18 });
+        const dpr = window.devicePixelRatio || 1;
+        const unscaled = page.getViewport({ scale: 1.0 });
+        const scale = (52 / unscaled.width) * dpr;
+        const viewport = page.getViewport({ scale });
         canvas.width = Math.floor(viewport.width);
         canvas.height = Math.floor(viewport.height);
         const context = canvas.getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: context, viewport }).promise;
       }
-    } catch {
-      // Ignorar errores individuales en miniaturas
+    } catch (err) {
+      console.warn(`Miniatura ${i} error:`, err);
     }
   }
 };
@@ -1408,6 +1435,16 @@ const goToPage = async (page) => {
   await renderizarPaginasActuales();
 };
 
+watch(
+  () => currentPage.value,
+  async (newPage) => {
+    if (newPage > 1) {
+      await nextTick();
+      await renderizarPaginasActuales();
+    }
+  }
+);
+
 const onModeChange = async () => {
   calcularTotalPaginasVisor();
   if (currentPage.value > totalPages.value) {
@@ -1429,12 +1466,18 @@ const zoomOut = () => {
 
 const ajustarZoomOptimo = () => {
   const w = window.innerWidth;
+  const h = window.innerHeight;
+  // Alto disponible descontando cabecera y filmstrip
+  const availableH = h - 170;
+  // Alto del papel oficio a escala (810px)
+  const scaleByH = Math.min(1.0, Math.max(0.45, availableH / 820));
+
   if (w < 768) {
-    zoomScale.value = 0.65;
+    zoomScale.value = Math.min(scaleByH, 0.60);
   } else if (w < 1200) {
-    zoomScale.value = 0.82;
+    zoomScale.value = Math.min(scaleByH, 0.78);
   } else {
-    zoomScale.value = 0.95;
+    zoomScale.value = Math.min(scaleByH, 0.92);
   }
 };
 
@@ -1507,12 +1550,13 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
-/* ========================================= */
-/* CARÁTULA OFICIAL DEL EXPEDIENTE (PÁG 1)   */
-/* ========================================= */
+/* ============================================================= */
+/* FORMATO PAPEL OFICIO BOLIVIANO: 8.5" x 13" (21.59cm x 33.02cm) */
+/* Proporción 1 : 1.5294 (530px ancho x 810px alto)              */
+/* ============================================================= */
 .book-cover-folder {
-  width: 540px;
-  min-height: 760px;
+  width: 530px;
+  height: 810px;
   background: #fdfbf7;
   color: #0f172a;
   border-radius: 8px;
@@ -1522,6 +1566,8 @@ onBeforeUnmount(() => {
     0 0 0 1px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .cover-header-section {
@@ -1680,13 +1726,14 @@ onBeforeUnmount(() => {
 
 .book-page-left,
 .book-page-right {
-  min-width: 520px;
-  min-height: 730px;
+  width: 530px;
+  height: 810px;
   background: #ffffff;
   position: relative;
   display: flex;
   flex-direction: column;
   box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
 }
 
 .book-page-left {
@@ -1850,8 +1897,14 @@ onBeforeUnmount(() => {
 }
 
 .single-page-card {
+  width: 530px;
+  height: 810px;
   background: #ffffff;
   border-radius: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(0, 0, 0, 0.2);
@@ -1928,8 +1981,8 @@ onBeforeUnmount(() => {
 }
 
 .filmstrip-thumb-box {
-  width: 58px;
-  height: 74px;
+  width: 52px;
+  height: 80px;
   background: #1e293b;
   border-radius: 3px;
   overflow: hidden;
@@ -1950,9 +2003,11 @@ onBeforeUnmount(() => {
 }
 
 .filmstrip-canvas {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
 }
 
 .filmstrip-num {

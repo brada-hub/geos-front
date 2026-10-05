@@ -332,6 +332,7 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
 import { PDFDocument } from 'pdf-lib/dist/pdf-lib.min.js';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {
   getEmpleadoSecciones,
   saveEmpleadoSecciones,
@@ -348,8 +349,8 @@ if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.toHex) {
   };
 }
 
-// Configurar worker de PDF.js estable 4.10.38
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+// Configurar worker de PDF.js local empaquetado por Vite
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker || 'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
 
 const props = defineProps({
   modelValue: Boolean,
