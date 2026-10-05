@@ -337,7 +337,7 @@ import {
   saveEmpleadoSecciones,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
-import { saveSectionPdf } from 'src/utils/pdfStorageHelper';
+import { saveSectionPdf, saveMasterPdf } from 'src/utils/pdfStorageHelper';
 
 // Configurar worker de PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version || '4.10.38'}/build/pdf.worker.min.mjs`;
@@ -624,6 +624,14 @@ const ejecutarDesglose = async () => {
       }
 
       totalDesglosados++;
+    }
+
+    // Guardar también el PDF maestro completo escaneado para el Visor Modo Libro
+    if (pdfArrayBuffer.value) {
+      await saveMasterPdf(props.empleado.id, pdfArrayBuffer.value, {
+        filename: pdfFile.value?.name || `EXP_${props.empleado.id}_COMPLETO.pdf`,
+        pagesCount: totalPages.value
+      });
     }
 
     // Guardar metadata actualizada del file

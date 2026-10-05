@@ -39,6 +39,18 @@
             <q-btn
               unelevated
               size="sm"
+              icon="menu_book"
+              label="Ver como Libro"
+              color="indigo-7"
+              text-color="white"
+              class="text-weight-bold"
+              @click="abrirVisorLibroCompleto"
+            >
+              <q-tooltip>Abrir y ojear el expediente completo como un libro digital / cartapacio</q-tooltip>
+            </q-btn>
+            <q-btn
+              unelevated
+              size="sm"
               icon="print"
               label="Ficha A4 / PDF"
               color="amber-5"
@@ -120,6 +132,21 @@
                 Dictamen: <b :class="resumenFile.porcentaje >= 75 ? 'text-positive' : 'text-amber-9'">{{ resumenFile.estadoGeneral }}</b>
               </div>
               <div class="row q-gutter-xs">
+                <q-btn
+                  dense
+                  no-caps
+                  unelevated
+                  color="indigo-8"
+                  text-color="white"
+                  icon="menu_book"
+                  label="Ver como Libro"
+                  class="q-px-sm text-weight-bolder"
+                  size="sm"
+                  @click="abrirVisorLibroCompleto"
+                >
+                  <q-tooltip>Abrir visor interactivo en modo libro / cartapacio</q-tooltip>
+                </q-btn>
+
                 <q-btn
                   dense
                   no-caps
@@ -231,18 +258,18 @@
                   <q-tooltip>Detalle o número de documento de respaldo</q-tooltip>
                 </q-input>
 
-                <!-- BOTÓN PARA VER EL PDF RECORTADO DE ESTA SECCIÓN -->
+                <!-- BOTÓN PARA PREVISUALIZAR EL PDF DE ESTA SECCIÓN -->
                 <q-btn
                   v-if="pdfsMap[sec.codigo]"
                   flat
                   round
                   dense
                   size="sm"
-                  icon="picture_as_pdf"
+                  icon="visibility"
                   color="red-7"
-                  @click="abrirPdfSeccion(sec.codigo)"
+                  @click="previsualizarPdfSeccion(sec.codigo)"
                 >
-                  <q-tooltip>Abrir PDF escaneado de esta sección ({{ pdfsMap[sec.codigo]?.pagesCount || 0 }} fojas)</q-tooltip>
+                  <q-tooltip>Previsualizar PDF interactivo de esta sección ({{ pdfsMap[sec.codigo]?.pagesCount || 0 }} fojas)</q-tooltip>
                 </q-btn>
               </div>
             </div>
@@ -339,6 +366,13 @@
       :empleado="kardex"
       @saved="onDesgloseSaved"
     />
+
+    <!-- VISOR DIGITAL MODO LIBRO & PREVISUALIZADOR PDF -->
+    <VisorLibroPdfDialog
+      v-model="showVisorLibro"
+      :empleado="kardex"
+      :seccion-codigo-inicial="seccionSeleccionadaVisor"
+    />
   </q-dialog>
 </template>
 
@@ -349,18 +383,21 @@ import { api } from 'src/boot/axios';
 import { useGeosStore } from 'src/stores/geosStore';
 import FichaKardexDialog from 'src/components/Kardex/FichaKardexDialog.vue';
 import DesglosadorPdfDialog from 'src/components/Kardex/DesglosadorPdfDialog.vue';
+import VisorLibroPdfDialog from 'src/components/Kardex/VisorLibroPdfDialog.vue';
 import {
   getEmpleadoSecciones,
   saveEmpleadoSecciones,
   calcularResumenFile,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
-import { getEmpleadoPdfsMap, getSectionPdf } from 'src/utils/pdfStorageHelper';
+import { getEmpleadoPdfsMap } from 'src/utils/pdfStorageHelper';
 
 const $q = useQuasar();
 const store = useGeosStore();
 const showFicha = ref(false);
 const showDesglosador = ref(false);
+const showVisorLibro = ref(false);
+const seccionSeleccionadaVisor = ref(null);
 const pdfsMap = ref({});
 const activeTab = ref('secciones');
 
@@ -370,6 +407,18 @@ const props = defineProps({
 });
 
 defineEmits(['update:modelValue']);
+
+// Abrir visor de libro completo
+const abrirVisorLibroCompleto = () => {
+  seccionSeleccionadaVisor.value = null;
+  showVisorLibro.value = true;
+};
+
+// Previsualizar PDF de una sección específica
+const previsualizarPdfSeccion = (codigo) => {
+  seccionSeleccionadaVisor.value = codigo;
+  showVisorLibro.value = true;
+};
 
 // Estados: 0 = Presente, 1 = Ausente, 2 = Prestado
 const estadoOptions = [
@@ -394,17 +443,6 @@ const resumenFile = computed(() => {
 const cargarPdfsMap = async () => {
   if (!props.kardex?.id) return;
   pdfsMap.value = await getEmpleadoPdfsMap(props.kardex.id);
-};
-
-const abrirPdfSeccion = async (codigo) => {
-  if (!props.kardex?.id) return;
-  const record = await getSectionPdf(props.kardex.id, codigo);
-  if (record && record.blob) {
-    const url = URL.createObjectURL(record.blob);
-    window.open(url, '_blank');
-  } else {
-    $q.notify({ type: 'warning', message: 'No se encontró el archivo PDF para esta sección' });
-  }
 };
 
 const onDesgloseSaved = async (nuevasSecciones) => {

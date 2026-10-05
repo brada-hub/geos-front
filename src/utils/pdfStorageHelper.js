@@ -154,6 +154,103 @@ export async function getEmpleadoPdfsMap(empleadoId) {
 }
 
 /**
+ * Guarda el archivo PDF maestro (el expediente completo escaneado) de un empleado
+ */
+export async function saveMasterPdf(empleadoId, pdfBytesOrBlob, meta = {}) {
+  try {
+    const db = await openDB();
+    const cleanId = String(empleadoId);
+    const key = `${cleanId}_MASTER`;
+
+    let dataBuffer;
+    if (pdfBytesOrBlob instanceof Blob) {
+      dataBuffer = await pdfBytesOrBlob.arrayBuffer();
+    } else if (pdfBytesOrBlob instanceof Uint8Array) {
+      dataBuffer = pdfBytesOrBlob.buffer.slice(
+        pdfBytesOrBlob.byteOffset,
+        pdfBytesOrBlob.byteOffset + pdfBytesOrBlob.byteLength
+      );
+    } else if (pdfBytesOrBlob instanceof ArrayBuffer) {
+      dataBuffer = pdfBytesOrBlob;
+    } else {
+      dataBuffer = new ArrayBuffer(0);
+    }
+
+    const cleanFilename = String(meta.filename || `FILE_COMPLETO_EXP_${cleanId}.pdf`);
+    const cleanPagesCount = Number(meta.pagesCount || 0);
+
+    const record = {
+      key,
+      empleadoId: cleanId,
+      seccionCodigo: 'MASTER',
+      dataBuffer,
+      filename: cleanFilename,
+      pagesCount: cleanPagesCount,
+      updatedAt: new Date().toISOString()
+    };
+
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+
+    return new Promise((resolve, reject) => {
+      const req = store.put(record);
+      req.onsuccess = () => resolve(true);
+      req.onerror = (err) => {
+        console.error('Error al guardar Master PDF en IndexedDB:', err);
+        reject(err);
+      };
+    });
+  } catch (error) {
+    console.error('Error guardando Master PDF:', error);
+    return false;
+  }
+}
+
+/**
+ * Obtiene el archivo PDF maestro de un empleado
+ */
+export async function getMasterPdf(empleadoId) {
+  try {
+    const db = await openDB();
+    const key = `${String(empleadoId)}_MASTER`;
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+
+    return new Promise((resolve) => {
+      const req = store.get(key);
+      req.onsuccess = () => {
+        const item = req.result;
+        if (!item) return resolve(null);
+
+        let blob = null;
+        if (item.dataBuffer && item.dataBuffer.byteLength > 0) {
+          blob = new Blob([item.dataBuffer], { type: 'application/pdf' });
+        } else if (item.blob instanceof Blob) {
+          blob = item.blob;
+        }
+
+        resolve({
+          ...item,
+          blob
+        });
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (error) {
+    console.error('Error obteniendo Master PDF:', error);
+    return null;
+  }
+}
+
+/**
+ * Verifica si existe un PDF maestro para el empleado
+ */
+export async function hasMasterPdf(empleadoId) {
+  const master = await getMasterPdf(empleadoId);
+  return Boolean(master && master.blob);
+}
+
+/**
  * Elimina el PDF de una sección
  */
 export async function deleteSectionPdf(empleadoId, seccionCodigo) {
