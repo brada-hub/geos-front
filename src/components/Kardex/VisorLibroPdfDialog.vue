@@ -867,8 +867,17 @@ import {
   saveMasterPdf
 } from 'src/utils/pdfStorageHelper';
 
-// Configurar worker de PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version || '6.4.299'}/build/pdf.worker.min.mjs`;
+// Polyfill preventivo para navegadores sin Uint8Array.prototype.toHex
+if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.toHex) {
+  Uint8Array.prototype.toHex = function () {
+    return Array.from(this)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  };
+}
+
+// Configurar worker de PDF.js estable 4.10.38
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1172,6 +1181,9 @@ const cargarPdfDesdeBuffer = async (buffer) => {
     ajustarZoomOptimo();
 
     await nextTick();
+    if (currentPage.value > 1) {
+      await renderizarPaginasActuales();
+    }
     if (showFilmstrip.value) {
       renderFilmstrip();
     }
@@ -1198,7 +1210,7 @@ const calcularTotalPaginasVisor = () => {
   }
 };
 
-const saltarASeccion = (codigo) => {
+const saltarASeccion = async (codigo) => {
   seccionActivaCodigo.value = codigo;
   const startFoja = seccionStartPageMap.value[codigo];
   const sec = secciones.value.find((s) => s.codigo === codigo);
@@ -1212,7 +1224,7 @@ const saltarASeccion = (codigo) => {
     return;
   }
 
-  irAFoja(startFoja);
+  await irAFoja(startFoja);
   $q.notify({
     type: 'positive',
     message: `Abriendo Sección ${sec?.id || ''}: ${sec?.nombre || ''} (Foja ${startFoja})`,
@@ -1221,18 +1233,18 @@ const saltarASeccion = (codigo) => {
   });
 };
 
-const irAFoja = (fojaNum) => {
+const irAFoja = async (fojaNum) => {
   if (viewMode.value === 'single') {
-    goToPage(fojaNum + 2);
+    await goToPage(fojaNum + 2);
     return;
   }
   // En modo libro:
   if (fojaNum === 1) {
-    goToPage(2);
+    await goToPage(2);
     return;
   }
   const spread = 2 + Math.ceil((fojaNum - 1) / 2);
-  goToPage(spread);
+  await goToPage(spread);
 };
 
 // =========================================================================
@@ -1317,8 +1329,9 @@ const renderizarCanvas = async (canvasId, pdfPageNum) => {
 
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);
-    canvas.style.width = `${Math.floor(viewport.width / dpr)}px`;
-    canvas.style.height = `${Math.floor(viewport.height / dpr)}px`;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.objectFit = 'contain';
 
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -1754,17 +1767,25 @@ onBeforeUnmount(() => {
 /* MEMBRETE SUPERIOR DE SECCIÓN EN FOJA */
 .page-sec-header {
   height: 28px;
+  flex-shrink: 0;
 }
 
 .page-canvas-container {
-  min-height: 660px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #ffffff;
   overflow: hidden;
+  padding: 4px;
 }
 
 .page-canvas-rendered {
-  display: block;
   max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 .book-page-folio-left,
@@ -1772,11 +1793,15 @@ onBeforeUnmount(() => {
 .book-page-folio {
   font-size: 11px;
   color: #94a3b8;
-  padding: 4px 10px;
+  padding: 4px 12px;
   text-align: center;
   border-top: 1px solid #f1f5f9;
   background: #ffffff;
   height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .book-blank-page {

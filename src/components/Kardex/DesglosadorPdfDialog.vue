@@ -339,8 +339,17 @@ import {
 } from 'src/utils/fileSectionsHelper';
 import { saveSectionPdf, saveMasterPdf } from 'src/utils/pdfStorageHelper';
 
-// Configurar worker de PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version || '4.10.38'}/build/pdf.worker.min.mjs`;
+// Polyfill preventivo para navegadores sin Uint8Array.prototype.toHex
+if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.toHex) {
+  Uint8Array.prototype.toHex = function () {
+    return Array.from(this)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  };
+}
+
+// Configurar worker de PDF.js estable 4.10.38
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
 
 const props = defineProps({
   modelValue: Boolean,
