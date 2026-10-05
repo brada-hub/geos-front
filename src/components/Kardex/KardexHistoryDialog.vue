@@ -41,32 +41,30 @@
               size="sm"
               icon="menu_book"
               label="Ver como Libro"
-              color="indigo-7"
-              text-color="white"
+              color="white"
+              text-color="primary"
               class="text-weight-bold"
               @click="abrirVisorLibroCompleto"
             >
               <q-tooltip>Abrir y ojear el expediente completo como un libro digital / cartapacio</q-tooltip>
             </q-btn>
             <q-btn
-              unelevated
+              flat
               size="sm"
               icon="label"
               label="Rótulo Folder"
-              color="amber-8"
-              text-color="dark"
+              color="white"
               class="text-weight-bold"
               @click="showRotulo = true"
             >
               <q-tooltip>Imprimir rótulo adhesivo con Código QR para la carpeta física</q-tooltip>
             </q-btn>
             <q-btn
-              unelevated
+              flat
               size="sm"
               icon="print"
-              label="Ficha A4 / PDF"
-              color="amber-5"
-              text-color="dark"
+              label="Ficha A4"
+              color="white"
               class="text-weight-bold"
               @click="showFicha = true"
             >
@@ -141,18 +139,17 @@
 
             <div class="row items-center justify-between q-mt-sm border-top q-pt-xs">
               <div class="text-caption text-slate-600">
-                Dictamen: <b :class="resumenFile.porcentaje >= 75 ? 'text-positive' : 'text-amber-9'">{{ resumenFile.estadoGeneral }}</b>
+                Dictamen: <b class="text-slate-800">{{ resumenFile.estadoGeneral }}</b>
               </div>
               <div class="row q-gutter-xs">
                 <q-btn
                   dense
                   no-caps
                   unelevated
-                  color="indigo-8"
-                  text-color="white"
+                  color="primary"
                   icon="menu_book"
                   label="Ver como Libro"
-                  class="q-px-sm text-weight-bolder"
+                  class="q-px-sm text-weight-bold"
                   size="sm"
                   @click="abrirVisorLibroCompleto"
                 >
@@ -162,12 +159,11 @@
                 <q-btn
                   dense
                   no-caps
-                  unelevated
-                  color="amber-8"
-                  text-color="dark"
+                  outline
+                  color="primary"
                   icon="content_cut"
                   label="Desglosar PDF"
-                  class="q-px-sm text-weight-bolder"
+                  class="q-px-sm text-weight-bold"
                   size="sm"
                   @click="showDesglosador = true"
                 >
@@ -177,13 +173,12 @@
                 <q-btn
                   dense
                   no-caps
-                  unelevated
-                  color="teal-8"
-                  text-color="white"
+                  flat
+                  color="primary"
                   icon="cloud_sync"
                   label="Sincronizar Nube"
                   :loading="isSyncingCloud"
-                  class="q-px-sm text-weight-bolder"
+                  class="q-px-sm text-weight-bold"
                   size="sm"
                   @click="forzarSincronizacionNube"
                 >
@@ -194,7 +189,7 @@
                   dense
                   no-caps
                   unelevated
-                  color="positive"
+                  color="primary"
                   icon="save"
                   label="Guardar"
                   class="q-px-sm text-weight-bold"
@@ -205,7 +200,7 @@
                   dense
                   no-caps
                   flat
-                  color="primary"
+                  color="slate-600"
                   icon="refresh"
                   label="Restablecer"
                   size="sm"
@@ -289,7 +284,8 @@
                 <!-- BADGE ESTADO NUBE / LOCAL -->
                 <q-badge
                   v-if="pdfsMap[sec.codigo]"
-                  :color="pdfsMap[sec.codigo]?.isCloud ? 'teal-8' : 'indigo-8'"
+                  color="slate-800"
+                  text-color="white"
                   class="q-mr-xs text-weight-bold"
                   style="font-size: 9.5px;"
                 >
@@ -305,7 +301,7 @@
                   dense
                   size="sm"
                   icon="visibility"
-                  color="red-7"
+                  color="primary"
                   @click="previsualizarPdfSeccion(sec.codigo)"
                 >
                   <q-tooltip>Previsualizar PDF interactivo de esta sección ({{ pdfsMap[sec.codigo]?.pagesCount || 0 }} fojas)</q-tooltip>
@@ -318,7 +314,7 @@
                   dense
                   size="sm"
                   icon="note_add"
-                  color="indigo-7"
+                  color="primary"
                   @click="iniciarSubidaSeccion(sec)"
                 >
                   <q-tooltip>
@@ -436,9 +432,9 @@
       <q-card style="min-width: 440px; max-width: 520px; width: 95vw;" class="bg-slate-900 text-white q-pa-sm">
         <q-card-section class="q-pb-none row items-center justify-between">
           <div class="row items-center q-gutter-x-sm">
-            <q-icon name="note_add" size="24px" color="amber-4" />
+            <q-icon name="note_add" size="24px" color="primary" />
             <div>
-              <div class="text-subtitle1 text-weight-bolder">
+              <div class="text-subtitle1 text-weight-bolder text-white">
                 {{ seccionSubidaActual?.nombre }}
               </div>
               <div class="text-caption text-slate-400 font-mono" style="font-size: 11px;">
@@ -452,7 +448,7 @@
         <q-card-section class="q-gutter-y-sm">
           <div class="row items-center justify-between bg-slate-950 q-pa-sm rounded-borders border border-slate-800">
             <span class="text-caption text-slate-300">Fojas físicas actuales:</span>
-            <q-badge color="indigo-7" class="text-weight-bold font-mono" style="font-size: 12px;">
+            <q-badge color="slate-800" text-color="white" class="text-weight-bold font-mono" style="font-size: 12px;">
               {{ seccionSubidaActual?.fojas || 0 }} fojas
             </q-badge>
           </div>
@@ -468,7 +464,7 @@
               no-caps
               rounded
               unelevated
-              toggle-color="teal-8"
+              toggle-color="primary"
               color="slate-800"
               text-color="slate-300"
               :options="[
@@ -476,10 +472,10 @@
                 { label: 'Reemplazar documento', value: 'reemplazar', icon: 'sync' }
               ]"
             />
-            <div class="text-caption q-mt-xs font-mono" style="font-size: 10.5px;" :class="modoSubidaDirecta === 'acumular' ? 'text-teal-3' : 'text-amber-4'">
+            <div class="text-caption q-mt-xs font-mono text-slate-300" style="font-size: 10.5px;">
               {{ modoSubidaDirecta === 'acumular'
-                ? '✅ El nuevo archivo se anexará al final de los documentos existentes sin borrar nada.'
-                : '⚠️ El nuevo archivo reemplazará los documentos previos de esta sección.' }}
+                ? 'El nuevo archivo se anexará al final de los documentos existentes sin borrar nada.'
+                : 'El nuevo archivo reemplazará los documentos previos de esta sección.' }}
             </div>
           </div>
 
@@ -490,10 +486,10 @@
             dense
             label="Seleccionar archivo PDF"
             accept=".pdf"
-            color="amber-4"
+            color="primary"
           >
             <template v-slot:prepend>
-              <q-icon name="attach_file" color="amber-4" />
+              <q-icon name="attach_file" color="primary" />
             </template>
           </q-file>
         </q-card-section>
@@ -502,8 +498,8 @@
           <q-btn flat label="Cancelar" color="slate-400" v-close-popup />
           <q-btn
             unelevated
-            color="amber-8"
-            text-color="dark"
+            color="primary"
+            text-color="white"
             icon="save"
             :label="modoSubidaDirecta === 'acumular' ? 'Anexar Fojas' : 'Guardar y Reemplazar'"
             :loading="guardandoArchivoSeccion"

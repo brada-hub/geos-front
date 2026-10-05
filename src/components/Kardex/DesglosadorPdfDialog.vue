@@ -16,13 +16,13 @@
           </q-btn>
 
           <div class="desglosador-icon-box flex flex-center">
-            <q-icon name="content_cut" size="20px" color="amber-4" />
+            <q-icon name="content_cut" size="20px" color="primary" />
           </div>
 
           <div>
             <div class="row items-center q-gutter-x-sm">
               <span class="text-subtitle1 text-weight-bolder">Desglosador & Clasificador de File PDF</span>
-              <q-badge color="indigo-7" class="text-weight-bold">
+              <q-badge color="slate-800" text-color="white" class="text-weight-bold">
                 {{ empleado?.codigo_archivo || `EXP-${empleado?.numero_unico || empleado?.id}` }}
               </q-badge>
             </div>
@@ -35,7 +35,7 @@
         <!-- ACCIONES SUPERIORES -->
         <div class="row items-center q-gutter-sm">
           <span v-if="totalPages > 0" class="text-caption text-slate-400 gt-xs">
-            Total páginas detectadas: <b class="text-amber-4 font-mono">{{ totalPages }}</b>
+            Total páginas detectadas: <b class="text-white font-mono">{{ totalPages }}</b>
           </span>
 
           <q-btn
@@ -53,7 +53,8 @@
           <q-btn
             unelevated
             no-caps
-            color="positive"
+            color="primary"
+            text-color="white"
             icon="save"
             :label="modoGuardado === 'acumular' ? 'Guardar y Acumular File' : 'Guardar y Reemplazar File'"
             class="text-weight-bolder"
@@ -89,7 +90,7 @@
           @click="triggerFileInput"
         >
           <div class="upload-icon-circle flex flex-center q-mb-md">
-            <q-icon name="cloud_upload" size="48px" color="indigo-4" />
+            <q-icon name="cloud_upload" size="48px" color="primary" />
           </div>
 
           <div class="text-h6 text-weight-bolder text-white q-mb-xs">
@@ -120,7 +121,7 @@
           <div class="row items-center justify-between q-px-md q-py-xs bg-slate-950 border-bottom col-auto">
             <div class="row items-center q-gutter-xs">
               <span class="text-caption text-slate-300 text-weight-bold">
-                Seleccionadas: <b class="text-amber-4 font-mono">{{ selectedPages.length }}</b> de {{ totalPages }}
+                Seleccionadas: <b class="text-white font-mono">{{ selectedPages.length }}</b> de {{ totalPages }}
               </span>
               <q-separator vertical inset class="q-mx-xs bg-slate-700" />
               <q-btn flat dense no-caps size="xs" color="slate-300" label="Todas" @click="selectAllPages" />
@@ -160,7 +161,7 @@
                 unelevated
                 no-caps
                 size="xs"
-                color="indigo-7"
+                color="primary"
                 label="Marcar Rango"
                 class="text-weight-bold q-px-sm"
                 @click="seleccionarRango"
@@ -238,7 +239,7 @@
               <div class="text-subtitle2 text-weight-bolder text-white">
                 13 Secciones del Legajo
               </div>
-              <q-badge color="indigo-9" class="text-weight-bold font-mono">
+              <q-badge color="slate-800" text-color="white" class="text-weight-bold font-mono">
                 {{ Object.keys(asignaciones).filter(k => (asignaciones[k] || []).length > 0).length }} asignadas
               </q-badge>
             </div>
@@ -259,7 +260,7 @@
               rounded
               unelevated
               size="xs"
-              toggle-color="teal-8"
+              toggle-color="primary"
               color="slate-800"
               text-color="slate-300"
               :options="[
@@ -295,8 +296,8 @@
                       </span>
                       <q-badge
                         v-if="sec.fojas > 0"
-                        color="amber-9"
-                        text-color="dark"
+                        color="slate-800"
+                        text-color="white"
                         class="text-weight-bold font-mono"
                         style="font-size: 9px;"
                       >
@@ -315,7 +316,7 @@
                   dense
                   no-caps
                   size="sm"
-                  color="indigo-7"
+                  color="primary"
                   icon="add"
                   :label="selectedPages.length > 0 ? `Asignar (${selectedPages.length})` : 'Asignar'"
                   class="text-weight-bold q-px-xs col-auto"
@@ -332,10 +333,10 @@
                 class="row items-center justify-between q-mt-xs q-pt-xs border-top-dark text-caption"
               >
                 <div class="row items-center q-gutter-xs">
-                  <q-badge color="teal-8" class="text-weight-bold font-mono">
+                  <q-badge color="slate-800" text-color="white" class="text-weight-bold font-mono">
                     +{{ (asignaciones[sec.codigo] || []).length }} f. nuevas
                   </q-badge>
-                  <span v-if="sec.fojas > 0 && modoGuardado === 'acumular'" class="text-amber-3 text-weight-bolder font-mono" style="font-size: 10px;">
+                  <span v-if="sec.fojas > 0 && modoGuardado === 'acumular'" class="text-white text-weight-bolder font-mono" style="font-size: 10px;">
                     → Total: {{ Number(sec.fojas) + (asignaciones[sec.codigo] || []).length }} fojas
                   </span>
                   <span class="text-slate-400" style="font-size: 10px;">
@@ -349,7 +350,7 @@
                   round
                   size="xs"
                   icon="close"
-                  color="negative"
+                  color="slate-400"
                   @click="removerAsignacion(sec.codigo)"
                 >
                   <q-tooltip>Quitar asignación de páginas de esta sección</q-tooltip>
@@ -768,8 +769,8 @@ const ejecutarDesglose = async () => {
   transition: all 0.25s ease;
 }
 .upload-dropzone:hover, .dropzone-active {
-  border-color: #6366f1;
-  background: rgba(49, 46, 129, 0.25);
+  border-color: #3b82f6;
+  background: rgba(30, 41, 59, 0.7);
   transform: scale(1.01);
 }
 
@@ -777,8 +778,8 @@ const ejecutarDesglose = async () => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 /* MOSAICO DE PÁGINAS */
@@ -805,13 +806,13 @@ const ejecutarDesglose = async () => {
 }
 
 .page-selected {
-  border-color: #f59e0b !important;
-  background: #2b2214 !important;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5);
+  border-color: #3b82f6 !important;
+  background: #1e293b !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
 .page-assigned {
-  border-color: #10b981;
+  border-color: #3b82f6;
 }
 
 .page-number-tag {
@@ -841,7 +842,7 @@ const ejecutarDesglose = async () => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(16, 185, 129, 0.9);
+  background: rgba(37, 99, 235, 0.95);
   color: white;
   font-size: 9px;
   font-weight: 800;
@@ -862,13 +863,14 @@ const ejecutarDesglose = async () => {
 }
 
 .section-has-pages {
-  border-color: #059669;
-  background: #062a22;
+  border-color: #3b82f6;
+  background: #1e293b;
 }
 
 .sec-badge-num {
-  background: #312e81;
+  background: #0f172a;
   color: #ffffff;
+  border: 1px solid #334155;
   font-size: 10px;
   font-weight: 800;
   padding: 2px 5px;

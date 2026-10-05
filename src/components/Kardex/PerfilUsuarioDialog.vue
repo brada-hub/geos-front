@@ -10,7 +10,7 @@
       <div class="profile-header q-pa-md bg-slate-900 text-white row items-center justify-between">
         <div class="row items-center q-gutter-sm">
           <div class="header-icon-circle flex flex-center">
-            <q-icon name="manage_accounts" size="22px" color="amber-4" />
+            <q-icon name="manage_accounts" size="22px" color="primary" />
           </div>
           <div>
             <div class="text-subtitle1 text-weight-bolder">Mi Perfil y Seguridad</div>
@@ -27,8 +27,8 @@
         v-model="activeTab"
         dense
         class="bg-slate-950 text-slate-400 profile-tabs"
-        active-color="amber-4"
-        indicator-color="amber-4"
+        active-color="primary"
+        indicator-color="primary"
         align="left"
       >
         <q-tab name="general" icon="badge" label="General" no-caps />
@@ -43,15 +43,15 @@
         <!-- TAB 1: INFORMACIÓN GENERAL -->
         <q-tab-panel name="general" class="q-pa-md q-gutter-y-md">
           <div class="row items-center q-gutter-md q-pa-md bg-slate-800 rounded-borders border border-slate-700">
-            <q-avatar size="64px" color="indigo-7" text-color="white" class="text-weight-bolder text-h5 shadow-4">
+            <q-avatar size="64px" color="primary" text-color="white" class="text-weight-bolder text-h5 shadow-4">
               {{ initials }}
             </q-avatar>
             <div class="col">
               <div class="text-h6 text-weight-bolder text-white">{{ userName }}</div>
               <div class="text-caption text-slate-400">{{ userEmail }}</div>
               <div class="row items-center q-gutter-x-xs q-mt-xs">
-                <q-badge color="indigo-9" text-color="indigo-2" label="Administrador RRHH" class="text-weight-bold" />
-                <q-badge color="emerald-9" text-color="emerald-2" label="● Sesión Activa" class="text-weight-bold" />
+                <q-badge color="slate-800" text-color="white" label="Administrador RRHH" class="text-weight-bold" />
+                <q-badge color="slate-800" text-color="slate-300" label="● Sesión Activa" class="text-weight-bold font-mono" />
               </div>
             </div>
           </div>
@@ -88,6 +88,7 @@
                 outlined
                 dense
                 dark
+                color="primary"
                 placeholder="Ingresa tu contraseña actual"
                 :rules="[val => !!val || 'La contraseña actual es requerida']"
               >
@@ -109,6 +110,7 @@
                 outlined
                 dense
                 dark
+                color="primary"
                 placeholder="Mínimo 6 caracteres"
                 :rules="[
                   val => !!val || 'Ingresa la nueva contraseña',
@@ -133,6 +135,7 @@
                 outlined
                 dense
                 dark
+                color="primary"
                 placeholder="Repite la nueva contraseña"
                 :rules="[
                   val => !!val || 'Confirma la contraseña',
@@ -146,8 +149,8 @@
                 type="submit"
                 unelevated
                 no-caps
-                color="amber-8"
-                text-color="dark"
+                color="primary"
+                text-color="white"
                 icon="save"
                 label="Actualizar Contraseña"
                 class="text-weight-bolder"
@@ -166,31 +169,31 @@
           <!-- RENDER API BACKEND -->
           <div class="infra-box row items-center justify-between q-pa-sm bg-slate-800 rounded-borders border border-slate-700">
             <div class="row items-center q-gutter-sm">
-              <q-icon name="dns" size="20px" color="indigo-4" />
+              <q-icon name="dns" size="20px" color="primary" />
               <div>
                 <div class="text-weight-bold text-slate-200">API Backend en Render</div>
                 <div class="text-caption text-slate-400" style="font-size: 11px;">Laravel 11 • PostgreSQL • Sanctum Auth</div>
               </div>
             </div>
-            <q-badge color="positive" label="🟢 Conectado" class="text-weight-bold" />
+            <q-badge color="slate-800" text-color="white" label="Conectado" class="text-weight-bold font-mono" />
           </div>
 
           <!-- SUPABASE STORAGE CDN -->
           <div class="infra-box row items-center justify-between q-pa-sm bg-slate-800 rounded-borders border border-slate-700">
             <div class="row items-center q-gutter-sm">
-              <q-icon name="cloud_queue" size="20px" color="teal-4" />
+              <q-icon name="cloud_queue" size="20px" color="primary" />
               <div>
                 <div class="text-weight-bold text-slate-200">Supabase Cloud Storage</div>
                 <div class="text-caption text-slate-400" style="font-size: 11px;">Bucket 'expedientes' • CDN Global Global</div>
               </div>
             </div>
-            <q-badge color="positive" label="🟢 CDN Activo" class="text-weight-bold" />
+            <q-badge color="slate-800" text-color="white" label="CDN Activo" class="text-weight-bold font-mono" />
           </div>
 
           <!-- INDEXEDDB LOCAL CACHE -->
           <div class="infra-box row items-center justify-between q-pa-sm bg-slate-800 rounded-borders border border-slate-700">
             <div class="row items-center q-gutter-sm">
-              <q-icon name="storage" size="20px" color="amber-4" />
+              <q-icon name="storage" size="20px" color="primary" />
               <div>
                 <div class="text-weight-bold text-slate-200">IndexedDB Caché Local</div>
                 <div class="text-caption text-slate-400" style="font-size: 11px;">Visualización ultrarrápida sin consumo de red</div>
@@ -201,7 +204,7 @@
               dense
               no-caps
               size="xs"
-              color="amber-4"
+              color="slate-300"
               icon="delete_sweep"
               label="Limpiar Caché"
               @click="limpiarCacheLocal"
@@ -318,8 +321,8 @@ const limpiarCacheLocal = async () => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(251, 191, 36, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .profile-tabs {

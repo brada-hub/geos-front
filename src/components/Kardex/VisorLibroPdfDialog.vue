@@ -19,7 +19,7 @@
             no-caps
             icon="arrow_back"
             label="Volver"
-            color="amber-4"
+            color="white"
             class="text-weight-bold gt-xs"
             @click="cerrarVisor"
           >
@@ -30,13 +30,13 @@
             round
             dense
             icon="arrow_back"
-            color="amber-4"
+            color="white"
             class="lt-sm"
             @click="cerrarVisor"
           />
 
           <div class="book-icon-badge flex flex-center gt-xs">
-            <q-icon :name="viewMode === 'book' ? 'menu_book' : 'picture_as_pdf'" size="18px" color="amber-4" />
+            <q-icon :name="viewMode === 'book' ? 'menu_book' : 'picture_as_pdf'" size="18px" color="white" />
           </div>
 
           <div class="column justify-center ellipsis" style="min-width: 0;">
@@ -44,7 +44,7 @@
               <span class="text-weight-bolder text-white ellipsis text-caption" style="font-size: 13px;">
                 {{ empleado?.nombre_completo || 'Expediente' }}
               </span>
-              <q-badge color="indigo-7" class="text-weight-bold font-mono gt-sm" style="font-size: 10px;">
+              <q-badge color="slate-800" text-color="white" class="text-weight-bold font-mono gt-sm" style="font-size: 10px;">
                 {{ empleado?.codigo_archivo || `EXP-${empleado?.numero_unico || empleado?.id}` }}
               </q-badge>
             </div>
@@ -75,7 +75,7 @@
             round
             icon="chevron_left"
             size="md"
-            color="amber-4"
+            color="white"
             :disable="currentPage <= 1"
             @click="prevPage"
           >
@@ -85,19 +85,19 @@
           <!-- INDICADOR VISUAL CLARO -->
           <div class="row items-center q-px-xs text-caption font-mono text-weight-bold text-center" style="min-width: 120px; justify-content: center;">
             <template v-if="currentPage === 1">
-              <span class="text-amber-4">Carátula</span>
+              <span class="text-white">Carátula</span>
             </template>
             <template v-else-if="currentPage === 2 && viewMode === 'book'">
-              <span class="text-amber-4">Índice • Foja 1</span>
+              <span class="text-white">Índice • Foja 1</span>
             </template>
             <template v-else-if="currentPage === 2 && viewMode === 'single'">
-              <span class="text-amber-4">Índice General</span>
+              <span class="text-white">Índice General</span>
             </template>
             <template v-else-if="viewMode === 'book'">
-              <span class="text-amber-4">Fojas {{ getLeftPdfNum(currentPage) }} - {{ Math.min(getRightPdfNum(currentPage), totalPdfPages) }}</span>
+              <span class="text-white">Fojas {{ getLeftPdfNum(currentPage) }} - {{ Math.min(getRightPdfNum(currentPage), totalPdfPages) }}</span>
             </template>
             <template v-else>
-              <span class="text-amber-4">Foja {{ currentPage - 2 }}</span>
+              <span class="text-white">Foja {{ currentPage - 2 }}</span>
             </template>
             <span class="text-slate-500 q-mx-xs">/</span>
             <span class="text-slate-300">{{ totalPdfPages > 0 ? `${totalPdfPages} f.` : 'Sin fojas' }}</span>
@@ -109,7 +109,7 @@
             round
             icon="chevron_right"
             size="md"
-            color="amber-4"
+            color="white"
             :disable="currentPage >= totalPages"
             @click="nextPage"
           >
@@ -140,7 +140,7 @@
             rounded
             unelevated
             size="xs"
-            toggle-color="indigo-7"
+            toggle-color="primary"
             color="slate-800"
             text-color="slate-300"
             class="gt-xs"
@@ -170,7 +170,7 @@
             dense
             no-caps
             size="sm"
-            color="amber-4"
+            color="white"
             icon="format_list_bulleted"
             label="Índice"
             class="gt-xs"
@@ -185,7 +185,7 @@
             dense
             no-caps
             size="sm"
-            :color="showFilmstrip ? 'amber-4' : 'slate-400'"
+            :color="showFilmstrip ? 'primary' : 'slate-300'"
             icon="view_carousel"
             label="Miniaturas"
             class="gt-sm"
@@ -198,11 +198,11 @@
           <q-btn
             unelevated
             no-caps
-            color="negative"
+            color="slate-800"
             text-color="white"
             icon="close"
             label="Cerrar"
-            class="text-weight-bolder q-px-sm q-ml-xs shadow-2 exit-button-fixed"
+            class="text-weight-bold q-px-sm q-ml-xs shadow-2 exit-button-fixed"
             @click="cerrarVisor"
           >
             <q-tooltip>Cerrar visor (Esc)</q-tooltip>
@@ -217,7 +217,7 @@
           <div v-if="showSidebar" class="col-auto column no-wrap bg-slate-900 border-right sidebar-sections shadow-5">
             <div class="row items-center justify-between q-pa-sm bg-slate-950 border-bottom col-auto">
               <div class="row items-center q-gutter-x-xs">
-                <q-icon name="bookmarks" size="18px" color="amber-4" />
+                <q-icon name="bookmarks" size="18px" color="primary" />
                 <span class="text-caption text-weight-bolder text-white">Índice del Legajo</span>
               </div>
               <q-btn flat round dense icon="chevron_left" size="xs" color="slate-400" @click="showSidebar = false" />
@@ -231,10 +231,10 @@
                 @click="goToPage(1)"
               >
                 <div class="row items-center q-gutter-xs ellipsis">
-                  <q-icon name="folder_shared" size="16px" color="amber-4" />
+                  <q-icon name="folder_shared" size="16px" color="primary" />
                   <span class="text-caption text-weight-bold text-slate-200">00. Carátula Oficial</span>
                 </div>
-                <q-badge color="amber-9" text-color="dark" label="Portada" class="text-weight-bold" />
+                <q-badge color="slate-800" text-color="white" label="Portada" class="text-weight-bold" />
               </div>
 
               <div
@@ -243,10 +243,10 @@
                 @click="goToPage(2)"
               >
                 <div class="row items-center q-gutter-xs ellipsis">
-                  <q-icon name="toc" size="16px" color="indigo-4" />
+                  <q-icon name="toc" size="16px" color="slate-400" />
                   <span class="text-caption text-weight-bold text-slate-200">Índice General</span>
                 </div>
-                <q-badge color="indigo-8" text-color="white" label="Tabla" class="text-weight-bold" />
+                <q-badge color="slate-800" text-color="white" label="Tabla" class="text-weight-bold" />
               </div>
             </div>
 
@@ -275,7 +275,7 @@
                   <div class="row items-center q-gutter-xs">
                     <q-badge
                       v-if="sec.fojas > 0"
-                      color="indigo-9"
+                      color="slate-800"
                       text-color="white"
                       class="text-weight-bold"
                       style="font-size: 9.5px;"
@@ -286,7 +286,7 @@
                       v-if="pdfsDisponibles[sec.codigo]?.hasPdf"
                       name="description"
                       size="14px"
-                      color="amber-4"
+                      color="primary"
                       title="Tiene fojas digitalizadas"
                     />
                   </div>
@@ -305,8 +305,8 @@
           <!-- SPINNER DE CARGA -->
           <div v-if="isLoading" class="absolute-full flex flex-center bg-slate-950 bg-opacity-80 z-top">
             <div class="column items-center q-gutter-y-sm">
-              <q-spinner-dots size="56px" color="amber-4" />
-              <div class="text-caption text-amber-3 font-mono text-weight-bold">
+              <q-spinner-dots size="56px" color="primary" />
+              <div class="text-caption text-slate-300 font-mono text-weight-bold">
                 Construyendo libro de expediente en alta definición...
               </div>
             </div>
@@ -321,12 +321,12 @@
             :style="{ transform: `scale(${zoomScale})`, transformOrigin: 'center center' }"
           >
             <div class="book-cover-folder shadow-24 relative-position column justify-between">
-              <!-- CABECERA INSTITUCIONAL CON BORDE DORADO -->
+              <!-- CABECERA INSTITUCIONAL CON BORDE ELEGANTE -->
               <div class="cover-header-section q-pa-md text-center">
                 <div class="row items-center justify-between q-mb-sm">
                   <div class="row items-center q-gutter-xs">
                     <img :src="docusLogo" alt="DOCUS" style="height: 34px;" />
-                    <span class="text-weight-bolder text-amber-5 font-mono text-h6">DOCUS</span>
+                    <span class="text-weight-bolder text-white font-mono text-h6">DOCUS</span>
                   </div>
                   <div class="column items-end" style="line-height: 1.15;">
                     <span class="cover-inst-badge">ESTADO PLURINACIONAL DE BOLIVIA</span>
@@ -348,7 +348,7 @@
                 <!-- TARJETA FILIACIÓN DEL FUNCIONARIO -->
                 <div class="cover-person-card q-pa-md row items-center q-gutter-md q-mb-sm">
                   <div class="cover-avatar-box flex flex-center">
-                    <q-icon name="folder_shared" size="42px" color="amber-8" />
+                    <q-icon name="folder_shared" size="42px" color="primary" />
                   </div>
                   <div class="col" style="min-width: 0;">
                     <div class="cover-name-text ellipsis">{{ empleado?.nombre_completo }}</div>
@@ -358,13 +358,13 @@
                       <span><strong>Cargo:</strong> {{ empleado?.cargo || 'Funcionario Registrado' }}</span>
                     </div>
                     <div class="cover-detail-row row items-center q-gutter-x-sm q-mt-xs">
-                      <q-badge color="indigo-9" text-color="white" class="text-weight-bold">
+                      <q-badge color="slate-800" text-color="white" class="text-weight-bold">
                         {{ empleado?.tipo_contrato?.nombre || 'Planta' }}
                       </q-badge>
                       <span v-if="empleado?.sede?.nombre">• Sede: {{ empleado?.sede?.nombre }}</span>
                     </div>
                     <div class="cover-location-badge q-mt-xs">
-                      <q-icon name="inbox" size="13px" color="amber-9" class="q-mr-xs" />
+                      <q-icon name="inbox" size="13px" color="primary" class="q-mr-xs" />
                       <span><strong>Ubicación Archivística:</strong> {{ ubicacionTextoEmpleado }}</span>
                     </div>
                   </div>
@@ -408,8 +408,8 @@
                 <q-btn
                   unelevated
                   no-caps
-                  color="amber-9"
-                  text-color="dark"
+                  color="primary"
+                  text-color="white"
                   icon-right="arrow_forward"
                   label="Abrir Expediente & Fojas"
                   class="text-weight-bolder cover-open-btn shadow-3"
@@ -454,10 +454,10 @@
                 <div class="indice-header q-pa-md border-bottom bg-slate-50">
                   <div class="row items-center justify-between q-mb-xs">
                     <div class="row items-center q-gutter-x-xs">
-                      <q-icon name="toc" size="22px" color="indigo-9" />
+                      <q-icon name="toc" size="22px" color="primary" />
                       <span class="text-subtitle2 text-weight-bolder text-slate-900 font-mono">ÍNDICE GENERAL DEL EXPEDIENTE</span>
                     </div>
-                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold">
+                    <q-badge color="slate-800" text-color="white" class="font-mono text-weight-bold">
                       13 SECCIONES
                     </q-badge>
                   </div>
@@ -485,7 +485,7 @@
 
                       <div class="row items-center q-gutter-x-xs col-auto">
                         <q-badge
-                          :color="pdfsDisponibles[sec.codigo]?.hasPdf ? 'positive' : 'grey-5'"
+                          color="slate-800"
                           text-color="white"
                           class="text-weight-bold"
                           style="font-size: 9px;"
@@ -500,7 +500,7 @@
                           round
                           size="xs"
                           icon="arrow_forward"
-                          color="indigo-9"
+                          color="primary"
                           @click="saltarASeccion(sec.codigo)"
                         >
                           <q-tooltip>Ir a la primera foja de esta sección</q-tooltip>
@@ -527,12 +527,12 @@
                   <!-- MEMBRETE DE SECCIÓN -->
                   <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
                     <div class="row items-center q-gutter-x-xs ellipsis">
-                      <q-icon name="folder" size="14px" color="indigo-8" />
+                      <q-icon name="folder" size="14px" color="primary" />
                       <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
                         SECCIÓN {{ getInfoFoja(1).seccionId }}: {{ getInfoFoja(1).seccionNombre }}
                       </span>
                     </div>
-                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                    <q-badge color="slate-800" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
                       Foja {{ getInfoFoja(1).fojaLocal }} de {{ getInfoFoja(1).totalFojasLocal }}
                     </q-badge>
                   </div>
@@ -546,7 +546,7 @@
                   <div class="book-page-folio-right font-mono row items-center justify-between q-px-md">
                     <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
                     <span>Foja 1 de {{ totalPdfPages }}</span>
-                    <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                    <span style="font-size: 9px; color: #1e293b; font-weight: bold;">DOCUS DIGITAL</span>
                   </div>
                 </template>
 
@@ -597,12 +597,12 @@
                 <template v-if="getLeftPdfNum(currentPage) <= totalPdfPages">
                   <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
                     <div class="row items-center q-gutter-x-xs ellipsis">
-                      <q-icon name="folder" size="14px" color="indigo-8" />
+                      <q-icon name="folder" size="14px" color="primary" />
                       <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
                         SECCIÓN {{ getInfoFoja(getLeftPdfNum(currentPage)).seccionId }}: {{ getInfoFoja(getLeftPdfNum(currentPage)).seccionNombre }}
                       </span>
                     </div>
-                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                    <q-badge color="slate-800" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
                       Foja {{ getInfoFoja(getLeftPdfNum(currentPage)).fojaLocal }} de {{ getInfoFoja(getLeftPdfNum(currentPage)).totalFojasLocal }}
                     </q-badge>
                   </div>
@@ -614,7 +614,7 @@
                   <div class="book-page-folio-left font-mono row items-center justify-between q-px-md">
                     <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
                     <span>Foja {{ getLeftPdfNum(currentPage) }} de {{ totalPdfPages }}</span>
-                    <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                    <span style="font-size: 9px; color: #1e293b; font-weight: bold;">DOCUS DIGITAL</span>
                   </div>
                 </template>
 
@@ -637,12 +637,12 @@
                 <template v-if="getRightPdfNum(currentPage) <= totalPdfPages">
                   <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
                     <div class="row items-center q-gutter-x-xs ellipsis">
-                      <q-icon name="folder" size="14px" color="indigo-8" />
+                      <q-icon name="folder" size="14px" color="primary" />
                       <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
                         SECCIÓN {{ getInfoFoja(getRightPdfNum(currentPage)).seccionId }}: {{ getInfoFoja(getRightPdfNum(currentPage)).seccionNombre }}
                       </span>
                     </div>
-                    <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                    <q-badge color="slate-800" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
                       Foja {{ getInfoFoja(getRightPdfNum(currentPage)).fojaLocal }} de {{ getInfoFoja(getRightPdfNum(currentPage)).totalFojasLocal }}
                     </q-badge>
                   </div>
@@ -654,7 +654,7 @@
                   <div class="book-page-folio-right font-mono row items-center justify-between q-px-md">
                     <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
                     <span>Foja {{ getRightPdfNum(currentPage) }} de {{ totalPdfPages }}</span>
-                    <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                    <span style="font-size: 9px; color: #1e293b; font-weight: bold;">DOCUS DIGITAL</span>
                   </div>
                 </template>
 
@@ -700,10 +700,10 @@
               <div class="indice-header q-pa-md border-bottom bg-slate-50">
                 <div class="row items-center justify-between q-mb-xs">
                   <div class="row items-center q-gutter-x-xs">
-                    <q-icon name="toc" size="22px" color="indigo-9" />
+                    <q-icon name="toc" size="22px" color="primary" />
                     <span class="text-subtitle2 text-weight-bolder text-slate-900 font-mono">ÍNDICE GENERAL DEL EXPEDIENTE</span>
                   </div>
-                  <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold">
+                  <q-badge color="slate-800" text-color="white" class="font-mono text-weight-bold">
                     13 SECCIONES
                   </q-badge>
                 </div>
@@ -730,7 +730,7 @@
 
                     <div class="row items-center q-gutter-x-xs col-auto">
                       <q-badge
-                        :color="pdfsDisponibles[sec.codigo]?.hasPdf ? 'positive' : 'grey-5'"
+                        color="slate-800"
                         text-color="white"
                         class="text-weight-bold"
                         style="font-size: 9px;"
@@ -745,7 +745,7 @@
                         round
                         size="xs"
                         icon="arrow_forward"
-                        color="indigo-9"
+                        color="primary"
                         @click="saltarASeccion(sec.codigo)"
                       >
                         <q-tooltip>Ir a la primera foja de esta sección</q-tooltip>
@@ -764,12 +764,12 @@
             <div v-else class="single-page-card shadow-12 relative-position">
               <div class="page-sec-header row items-center justify-between q-px-sm q-py-xs bg-slate-100 border-bottom">
                 <div class="row items-center q-gutter-x-xs ellipsis">
-                  <q-icon name="folder" size="14px" color="indigo-8" />
+                  <q-icon name="folder" size="14px" color="primary" />
                   <span class="text-caption text-weight-bolder text-slate-800 ellipsis font-mono" style="font-size: 10px;">
                     SECCIÓN {{ getInfoFoja(currentPage - 2).seccionId }}: {{ getInfoFoja(currentPage - 2).seccionNombre }}
                   </span>
                 </div>
-                <q-badge color="indigo-9" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
+                <q-badge color="slate-800" text-color="white" class="font-mono text-weight-bold" style="font-size: 9px;">
                   Foja {{ getInfoFoja(currentPage - 2).fojaLocal }} de {{ getInfoFoja(currentPage - 2).totalFojasLocal }}
                 </q-badge>
               </div>
@@ -781,7 +781,7 @@
               <div class="book-page-folio font-mono row items-center justify-between q-px-md">
                 <span style="font-size: 9px; color: #64748b;">{{ empleado?.codigo_archivo }}</span>
                 <span>Foja {{ currentPage - 2 }} de {{ totalPdfPages }}</span>
-                <span style="font-size: 9px; color: #10b981; font-weight: bold;">DOCUS DIGITAL</span>
+                <span style="font-size: 9px; color: #1e293b; font-weight: bold;">DOCUS DIGITAL</span>
               </div>
             </div>
 
@@ -807,8 +807,8 @@
               :class="{ 'filmstrip-active': currentPage === 1 }"
               @click="goToPage(1)"
             >
-              <div class="filmstrip-thumb-box flex flex-center bg-amber-9 text-dark text-weight-bolder">
-                <q-icon name="folder_shared" size="24px" color="amber-1" />
+              <div class="filmstrip-thumb-box flex flex-center bg-slate-800 text-white text-weight-bolder">
+                <q-icon name="folder_shared" size="24px" color="white" />
               </div>
               <span class="filmstrip-num font-mono">Carátula</span>
             </div>
@@ -819,8 +819,8 @@
               :class="{ 'filmstrip-active': currentPage === 2 }"
               @click="goToPage(2)"
             >
-              <div class="filmstrip-thumb-box flex flex-center bg-indigo-9 text-white text-weight-bolder">
-                <q-icon name="toc" size="24px" color="indigo-2" />
+              <div class="filmstrip-thumb-box flex flex-center bg-slate-800 text-white text-weight-bolder">
+                <q-icon name="toc" size="24px" color="slate-300" />
               </div>
               <span class="filmstrip-num font-mono">Índice</span>
             </div>
@@ -1560,7 +1560,7 @@ onBeforeUnmount(() => {
   background: #fdfbf7;
   color: #0f172a;
   border-radius: 8px;
-  border: 3px double #d97706;
+  border: 2px solid #334155;
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.75),
     0 0 0 1px rgba(0, 0, 0, 0.3);
@@ -1573,13 +1573,13 @@ onBeforeUnmount(() => {
 .cover-header-section {
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   color: #ffffff;
-  border-bottom: 2px solid #f59e0b;
+  border-bottom: 2px solid #3b82f6;
 }
 
 .cover-inst-badge {
   font-size: 11px;
   font-weight: 900;
-  color: #fbbf24;
+  color: #ffffff;
   letter-spacing: 0.05em;
 }
 
@@ -1606,12 +1606,13 @@ onBeforeUnmount(() => {
 
 .cover-code-pill {
   display: inline-block;
-  background: #f59e0b;
-  color: #0f172a;
+  background: #1e293b;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 900;
-  padding: 2px 12px;
+  padding: 2px 14px;
   border-radius: 999px;
+  border: 1px solid #475569;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
@@ -1626,8 +1627,8 @@ onBeforeUnmount(() => {
   width: 58px;
   height: 58px;
   border-radius: 8px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(30, 41, 59, 0.05);
+  border: 1px solid #cbd5e1;
 }
 
 .cover-name-text {
@@ -1682,7 +1683,7 @@ onBeforeUnmount(() => {
 .cover-sections-badge {
   font-size: 10px;
   font-weight: 800;
-  color: #d97706;
+  color: #1e40af;
 }
 
 .cover-sec-mini-item {
@@ -1696,7 +1697,7 @@ onBeforeUnmount(() => {
   font-size: 9px;
   font-weight: 800;
   color: #1e40af;
-  background: #eff6ff;
+  background: #f1f5f9;
   border-radius: 3px;
   padding: 1px 4px;
 }
@@ -1863,9 +1864,9 @@ onBeforeUnmount(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.75);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  border: 1px solid #334155;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1876,8 +1877,9 @@ onBeforeUnmount(() => {
 }
 
 .book-nav-arrow:hover {
-  background: #f59e0b;
-  color: #0f172a;
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #3b82f6;
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -1930,12 +1932,12 @@ onBeforeUnmount(() => {
 }
 
 .sidebar-section-item.item-active {
-  background: #312e81;
-  border-color: #818cf8;
+  background: #1e293b;
+  border-color: #3b82f6;
 }
 
 .sidebar-section-item.item-has-pdf {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid #3b82f6;
 }
 
 .sidebar-sec-num {
@@ -1943,7 +1945,7 @@ onBeforeUnmount(() => {
   font-weight: 800;
   font-size: 11px;
   background: #0f172a;
-  color: #93c5fd;
+  color: #e2e8f0;
   padding: 1px 4px;
   border-radius: 4px;
 }
@@ -1976,8 +1978,8 @@ onBeforeUnmount(() => {
 }
 
 .filmstrip-item.filmstrip-active {
-  background: rgba(251, 191, 36, 0.1);
-  border-color: #fbbf24;
+  background: rgba(37, 99, 235, 0.15);
+  border-color: #3b82f6;
 }
 
 .filmstrip-thumb-box {
@@ -1993,8 +1995,8 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 2px;
   right: 2px;
-  background: rgba(15, 23, 42, 0.85);
-  color: #fbbf24;
+  background: rgba(15, 23, 42, 0.9);
+  color: #ffffff;
   font-size: 8px;
   font-weight: 900;
   padding: 1px 3px;
@@ -2018,7 +2020,7 @@ onBeforeUnmount(() => {
 }
 
 .filmstrip-active .filmstrip-num {
-  color: #fbbf24;
+  color: #60a5fa;
 }
 
 /* ANIMACIONES */
