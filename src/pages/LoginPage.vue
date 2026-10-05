@@ -100,53 +100,69 @@
           label="Ingresar al Sistema"
           icon-right="arrow_forward"
           :loading="authStore.loading"
-        />
+        >
+          <template v-slot:loading>
+            <div class="row items-center q-gutter-x-xs">
+              <q-spinner-dots size="18px" />
+              <span>Verificando acceso...</span>
+            </div>
+          </template>
+        </q-btn>
 
-        <!-- AYUDA / RECORDATORIO DE CREDENCIALES POR DEFECTO -->
-        <div class="credentials-hint q-pa-sm rounded-borders text-center">
-          <div class="row items-center justify-center q-gutter-x-xs text-caption text-slate-400" style="font-size: 11px;">
-            <q-icon name="info" size="14px" color="amber-4" />
-            <span>Credenciales iniciales:</span>
-          </div>
-          <div class="text-caption font-mono text-amber-3 q-mt-xs" style="font-size: 11px;">
-            <b>admin@docus.com</b> / <b>Admin123*</b>
-          </div>
+        <!-- AVISO DE CONEXIÓN CON EL SERVIDOR -->
+        <div v-if="authStore.loading && isWarmingServer" class="text-center text-caption text-amber-4 q-mt-xs">
+          <q-spinner size="12px" color="amber-4" class="q-mr-xs" />
+          Conectando con el servidor seguro en la nube...
         </div>
       </q-form>
 
       <!-- PIE DE TARJETA -->
       <div class="q-px-lg q-py-xs bg-slate-900 border-top text-center text-caption text-slate-500" style="font-size: 11px;">
-        DOCUS RRHH • Gestión Física de Archivos • Bolivia
+        DOCUS RRHH • Control Seguro de Expedientes
       </div>
     </q-card>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'src/stores/authStore';
 import { useQuasar } from 'quasar';
+import { api } from 'src/boot/axios';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const $q = useQuasar();
 
-const email = ref('admin@docus.com');
-const password = ref('Admin123*');
+// Campos en blanco para máxima privacidad
+const email = ref('');
+const password = ref('');
 const showPassword = ref(false);
 const errorMessage = ref('');
+const isWarmingServer = ref(false);
+
+// Pre-calentar el servidor en segundo plano apenas carga la pantalla de login
+onMounted(() => {
+  api.get('/up').catch(() => {
+    // Si no tiene endpoint /up, intentar ping silencioso
+    api.get('/catalogos/tipos-contrato').catch(() => {});
+  });
+});
 
 const handleLogin = async () => {
   errorMessage.value = '';
+  isWarmingServer.value = true;
 
   const res = await authStore.login(email.value, password.value);
+  isWarmingServer.value = false;
+
   if (res.success) {
     $q.notify({
       type: 'positive',
-      message: `¡Bienvenido, ${authStore.userName}! Sesión iniciada con éxito.`,
+      message: `¡Bienvenido, ${authStore.userName}!`,
       icon: 'verified_user',
-      timeout: 1500,
+      timeout: 1200,
     });
     router.push('/');
   } else {
@@ -205,11 +221,6 @@ const handleLogin = async () => {
 .login-submit-btn:hover {
   background-color: #4338ca !important;
   transform: translateY(-1px);
-}
-
-.credentials-hint {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px dashed rgba(245, 158, 11, 0.3);
 }
 
 .login-input :deep(.q-field__control) {
