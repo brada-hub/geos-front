@@ -55,13 +55,15 @@
             no-caps
             color="positive"
             icon="save"
-            label="Guardar y Desglosar File"
+            :label="modoGuardado === 'acumular' ? 'Guardar y Acumular File' : 'Guardar y Reemplazar File'"
             class="text-weight-bolder"
             :loading="isProcessing"
             :disable="!hasAnyAssignment"
             @click="ejecutarDesglose"
           >
             <q-tooltip v-if="!hasAnyAssignment">Asigna al menos una página a una sección para guardar</q-tooltip>
+            <q-tooltip v-else-if="modoGuardado === 'acumular'">Las fojas asignadas se sumarán a los documentos existentes sin borrar nada</q-tooltip>
+            <q-tooltip v-else>Las fojas asignadas sobrescribirán los documentos anteriores de las secciones seleccionadas</q-tooltip>
           </q-btn>
 
           <q-btn flat round dense icon="close" color="white" v-close-popup />
@@ -287,8 +289,19 @@
                 <div class="row items-center q-gutter-xs ellipsis col">
                   <span class="sec-badge-num">{{ String(sec.id).padStart(2, '0') }}</span>
                   <div class="ellipsis">
-                    <div class="text-weight-bold text-white ellipsis" style="font-size: 12px;">
-                      {{ sec.nombre }}
+                    <div class="row items-center no-wrap q-gutter-x-xs">
+                      <span class="text-weight-bold text-white ellipsis" style="font-size: 12px;">
+                        {{ sec.nombre }}
+                      </span>
+                      <q-badge
+                        v-if="sec.fojas > 0"
+                        color="amber-9"
+                        text-color="dark"
+                        class="text-weight-bold font-mono"
+                        style="font-size: 9px;"
+                      >
+                        {{ sec.fojas }} f. actuales
+                      </q-badge>
                     </div>
                     <div class="text-caption text-slate-400 ellipsis" style="font-size: 10px;">
                       {{ sec.descripcion }}
@@ -319,11 +332,14 @@
                 class="row items-center justify-between q-mt-xs q-pt-xs border-top-dark text-caption"
               >
                 <div class="row items-center q-gutter-xs">
-                  <q-badge color="teal-8" class="text-weight-bold">
-                    {{ (asignaciones[sec.codigo] || []).length }} Fojas
+                  <q-badge color="teal-8" class="text-weight-bold font-mono">
+                    +{{ (asignaciones[sec.codigo] || []).length }} f. nuevas
                   </q-badge>
+                  <span v-if="sec.fojas > 0 && modoGuardado === 'acumular'" class="text-amber-3 text-weight-bolder font-mono" style="font-size: 10px;">
+                    → Total: {{ Number(sec.fojas) + (asignaciones[sec.codigo] || []).length }} fojas
+                  </span>
                   <span class="text-slate-400" style="font-size: 10px;">
-                    Págs: {{ (asignaciones[sec.codigo] || []).join(', ') }}
+                    (Págs: {{ (asignaciones[sec.codigo] || []).join(', ') }})
                   </span>
                 </div>
 
@@ -371,7 +387,7 @@ import {
   saveEmpleadoSecciones,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
-import { saveSectionPdf, saveMasterPdf, appendSectionPdf } from 'src/utils/pdfStorageHelper';
+import { saveSectionPdf, appendSectionPdf } from 'src/utils/pdfStorageHelper';
 
 // Polyfill preventivo para navegadores sin Uint8Array.prototype.toHex
 if (typeof Uint8Array !== 'undefined' && !Uint8Array.prototype.toHex) {
@@ -449,6 +465,17 @@ watch(() => props.empleado, (newEmp) => {
     secciones.value = getEmpleadoSecciones(newEmp.id);
   }
 }, { immediate: true });
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen && props.empleado?.id) {
+      secciones.value = getEmpleadoSecciones(props.empleado.id);
+      asignaciones.value = {};
+      selectedPages.value = [];
+    }
+  }
+);
 
 const triggerFileInput = () => {
   fileInputRef.value?.click();
@@ -682,23 +709,20 @@ const ejecutarDesglose = async () => {
       totalDesglosados++;
     }
 
-    // Guardar también el PDF maestro completo escaneado para el Visor Modo Libro
-    if (pdfArrayBuffer.value) {
-      await saveMasterPdf(props.empleado.id, pdfArrayBuffer.value, {
-        filename: pdfFile.value?.name || `EXP_${props.empleado.id}_COMPLETO.pdf`,
-        pagesCount: totalPages.value
-      });
-    }
-
     // Guardar metadata actualizada del file
     saveEmpleadoSecciones(props.empleado.id, seccionesActualizadas);
 
     $q.notify({
       type: 'positive',
-      message: `¡File desglosado con éxito! Se crearon ${totalDesglosados} secciones con sus fojas físicas actualizadas.`,
+      message: `¡File guardado con éxito! Se actualizaron ${totalDesglosados} secciones con sus fojas físicas acumuladas.`,
       icon: 'check_circle',
       timeout: 2500
     });
+
+    pdfFile.value = null;
+    pdfArrayBuffer.value = null;
+    asignaciones.value = {};
+    selectedPages.value = [];
 
     emit('saved', seccionesActualizadas);
     emit('update:modelValue', false);
