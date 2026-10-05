@@ -124,9 +124,24 @@
                   dense
                   no-caps
                   unelevated
+                  color="amber-8"
+                  text-color="dark"
+                  icon="content_cut"
+                  label="Desglosar PDF"
+                  class="q-px-sm text-weight-bolder"
+                  size="sm"
+                  @click="showDesglosador = true"
+                >
+                  <q-tooltip>Cargar un PDF escaneado completo y clasificarlo en las 13 secciones</q-tooltip>
+                </q-btn>
+
+                <q-btn
+                  dense
+                  no-caps
+                  unelevated
                   color="positive"
                   icon="save"
-                  label="Guardar Auditoría"
+                  label="Guardar"
                   class="q-px-sm text-weight-bold"
                   size="sm"
                   @click="guardarSecciones"
@@ -215,6 +230,20 @@
                 >
                   <q-tooltip>Detalle o número de documento de respaldo</q-tooltip>
                 </q-input>
+
+                <!-- BOTÓN PARA VER EL PDF RECORTADO DE ESTA SECCIÓN -->
+                <q-btn
+                  v-if="pdfsMap[sec.codigo]"
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  icon="picture_as_pdf"
+                  color="red-7"
+                  @click="abrirPdfSeccion(sec.codigo)"
+                >
+                  <q-tooltip>Abrir PDF escaneado de esta sección ({{ pdfsMap[sec.codigo]?.pagesCount || 0 }} fojas)</q-tooltip>
+                </q-btn>
               </div>
             </div>
           </div>
@@ -303,6 +332,13 @@
 
     <!-- FICHA OFICIAL DE KARDEX (IMPRIMIBLE / PDF) -->
     <FichaKardexDialog v-model="showFicha" :empleado="kardex" />
+
+    <!-- DESGLOSADOR VISUAL DE FILE PDF -->
+    <DesglosadorPdfDialog
+      v-model="showDesglosador"
+      :empleado="kardex"
+      @saved="onDesgloseSaved"
+    />
   </q-dialog>
 </template>
 
@@ -312,16 +348,20 @@ import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useGeosStore } from 'src/stores/geosStore';
 import FichaKardexDialog from 'src/components/Kardex/FichaKardexDialog.vue';
+import DesglosadorPdfDialog from 'src/components/Kardex/DesglosadorPdfDialog.vue';
 import {
   getEmpleadoSecciones,
   saveEmpleadoSecciones,
   calcularResumenFile,
   SECCIONES_FILE_DEFAULT
 } from 'src/utils/fileSectionsHelper';
+import { getEmpleadoPdfsMap, getSectionPdf } from 'src/utils/pdfStorageHelper';
 
 const $q = useQuasar();
 const store = useGeosStore();
 const showFicha = ref(false);
+const showDesglosador = ref(false);
+const pdfsMap = ref({});
 const activeTab = ref('secciones');
 
 const props = defineProps({
@@ -351,12 +391,33 @@ const resumenFile = computed(() => {
   return calcularResumenFile(secciones.value);
 });
 
+const cargarPdfsMap = async () => {
+  if (!props.kardex?.id) return;
+  pdfsMap.value = await getEmpleadoPdfsMap(props.kardex.id);
+};
+
+const abrirPdfSeccion = async (codigo) => {
+  if (!props.kardex?.id) return;
+  const record = await getSectionPdf(props.kardex.id, codigo);
+  if (record && record.blob) {
+    const url = URL.createObjectURL(record.blob);
+    window.open(url, '_blank');
+  } else {
+    $q.notify({ type: 'warning', message: 'No se encontró el archivo PDF para esta sección' });
+  }
+};
+
+const onDesgloseSaved = async (nuevasSecciones) => {
+  secciones.value = nuevasSecciones;
+  await cargarPdfsMap();
+};
+
 watch(() => props.kardex, async (newKardex) => {
   if (newKardex) {
     localEstado.value = newKardex.estado ?? 0;
     comentario.value = '';
     secciones.value = getEmpleadoSecciones(newKardex.id);
-    await loadHistorial();
+    await Promise.all([loadHistorial(), cargarPdfsMap()]);
   }
 }, { immediate: true });
 
