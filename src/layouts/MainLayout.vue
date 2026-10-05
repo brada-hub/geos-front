@@ -112,10 +112,10 @@
           <!-- PERFIL DE USUARIO / ROL -->
           <div class="user-pill row items-center q-gutter-xs q-px-sm q-py-xs cursor-pointer">
             <div class="user-avatar-mini flex flex-center">
-              <span>RH</span>
+              <span>{{ userInitials }}</span>
             </div>
             <div class="gt-sm column items-start" style="line-height: 1.15;">
-              <span class="user-name-text">Admin RRHH</span>
+              <span class="user-name-text">{{ authStore.currentUser?.name || 'Admin RRHH' }}</span>
               <span class="user-role-text">Sede Central</span>
             </div>
             <q-icon name="expand_more" size="16px" color="grey-7" class="gt-xs" />
@@ -128,12 +128,12 @@
                 <q-item>
                   <q-item-section avatar>
                     <q-avatar size="34px" color="indigo" text-color="white" class="text-weight-bold">
-                      RH
+                      {{ userInitials }}
                     </q-avatar>
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label class="text-weight-bold text-slate-900">Administrador RRHH</q-item-label>
-                    <q-item-label caption class="text-slate-500">admin@docus.bo</q-item-label>
+                    <q-item-label class="text-weight-bold text-slate-900">{{ authStore.currentUser?.name || 'Administrador' }}</q-item-label>
+                    <q-item-label caption class="text-slate-500">{{ authStore.currentUser?.email || 'admin@docus.com' }}</q-item-label>
                   </q-item-section>
                 </q-item>
                 <q-separator class="q-my-xs" />
@@ -148,6 +148,13 @@
                     <q-icon name="refresh" color="teal" size="18px" />
                   </q-item-section>
                   <q-item-section class="text-slate-800">Recargar Catálogos</q-item-section>
+                </q-item>
+                <q-separator class="q-my-xs" />
+                <q-item clickable @click="handleLogout" class="text-negative">
+                  <q-item-section avatar>
+                    <q-icon name="logout" color="negative" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-weight-bold">Cerrar Sesión</q-item-section>
                 </q-item>
               </q-list>
             </q-menu>
@@ -528,16 +535,40 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useGeosStore } from 'src/stores/geosStore';
+import { useAuthStore } from 'src/stores/authStore';
 import ImportPersonalDialog from 'src/components/Personal/ImportPersonalDialog.vue';
 import GlobalSpotlightDialog from 'src/components/Search/GlobalSpotlightDialog.vue';
 import MetricasCapacidadDialog from 'src/components/Kardex/MetricasCapacidadDialog.vue';
 import { exportInventoryExcel } from 'src/utils/exportInventoryExcel';
 import docusLogo from 'src/assets/docus-app-icon.png';
 
+const router = useRouter();
 const $q = useQuasar();
 const store = useGeosStore();
+const authStore = useAuthStore();
+
+const userInitials = computed(() => {
+  const name = authStore.currentUser?.name || 'Admin RRHH';
+  const parts = name.trim().split(' ');
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+});
+
+const handleLogout = async () => {
+  await authStore.logout();
+  $q.notify({
+    type: 'info',
+    message: 'Has cerrado sesión exitosamente',
+    icon: 'lock',
+    timeout: 1200
+  });
+  router.push('/login');
+};
 
 const leftDrawerOpen = ref(true);
 const syncing = ref(false);

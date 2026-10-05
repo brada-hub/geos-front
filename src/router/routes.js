@@ -1,7 +1,13 @@
 const routes = [
   {
+    path: '/login',
+    component: () => import('pages/LoginPage.vue'),
+    meta: { public: true },
+  },
+  {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
     children: [
       { path: '', redirect: '/kardex' },
       { path: 'kardex', component: () => import('pages/MapaKardex.vue') },
@@ -15,6 +21,6 @@ const routes = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-]
+];
 
-export default routes
+export default routes;
