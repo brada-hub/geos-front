@@ -421,3 +421,19 @@ export async function deleteSectionPdf(empleadoId, seccionCodigo) {
     return false;
   }
 }
+
+/**
+ * Limpia toda la caché local de IndexedDB
+ */
+export async function clearAllPdfs() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.clear();
+    return true;
+  } catch (error) {
+    console.error('Error limpiando IndexedDB:', error);
+    return false;
+  }
+}

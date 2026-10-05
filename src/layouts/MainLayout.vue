@@ -137,6 +137,12 @@
                   </q-item-section>
                 </q-item>
                 <q-separator class="q-my-xs" />
+                <q-item clickable @click="profileDialogOpen = true">
+                  <q-item-section avatar>
+                    <q-icon name="manage_accounts" color="amber-9" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-slate-800">Mi Perfil y Seguridad</q-item-section>
+                </q-item>
                 <q-item clickable @click="openImportDialog">
                   <q-item-section avatar>
                     <q-icon name="upload_file" color="indigo" size="18px" />
@@ -530,6 +536,9 @@
 
     <!-- MODAL DE MÉTRICAS DE CAPACIDAD & OCUPACIÓN -->
     <MetricasCapacidadDialog v-model="metricasOpen" />
+
+    <!-- MODAL DE PERFIL Y SEGURIDAD -->
+    <PerfilUsuarioDialog v-model="profileDialogOpen" />
   </q-layout>
 </template>
 
@@ -542,6 +551,7 @@ import { useAuthStore } from 'src/stores/authStore';
 import ImportPersonalDialog from 'src/components/Personal/ImportPersonalDialog.vue';
 import GlobalSpotlightDialog from 'src/components/Search/GlobalSpotlightDialog.vue';
 import MetricasCapacidadDialog from 'src/components/Kardex/MetricasCapacidadDialog.vue';
+import PerfilUsuarioDialog from 'src/components/Kardex/PerfilUsuarioDialog.vue';
 import { exportInventoryExcel } from 'src/utils/exportInventoryExcel';
 import docusLogo from 'src/assets/docus-app-icon.png';
 
@@ -576,6 +586,7 @@ const isFullscreen = ref(false);
 const importDialogOpen = ref(false);
 const spotlightOpen = ref(false);
 const metricasOpen = ref(false);
+const profileDialogOpen = ref(false);
 const liveTime = ref('');
 
 const installPromptEvent = ref(null);

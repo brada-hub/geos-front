@@ -32,6 +32,10 @@
               <q-badge v-if="viewMode === 'book'" color="amber-9" text-color="dark" class="text-weight-bold">
                 Modo Libro / Cartapacio
               </q-badge>
+              <q-badge color="teal-9" text-color="white" class="text-weight-bold gt-xs">
+                <q-icon name="cloud_done" size="11px" class="q-mr-xs" />
+                Supabase Cloud
+              </q-badge>
             </div>
             <div class="text-caption text-slate-400 ellipsis" style="max-width: 450px;">
               {{ empleado?.nombre_completo }} • {{ totalPages > 0 ? `${totalPages} fojas en total` : 'Cargando archivo...' }}
@@ -159,6 +163,21 @@
             @click="showSidebar = !showSidebar"
           >
             <q-tooltip>Ver índice de las 13 secciones del legajo</q-tooltip>
+          </q-btn>
+
+          <!-- BOTÓN MINIATURAS FILMSTRIP -->
+          <q-btn
+            flat
+            dense
+            no-caps
+            size="sm"
+            :color="showFilmstrip ? 'amber-4' : 'slate-300'"
+            icon="view_carousel"
+            label="Miniaturas"
+            class="gt-xs"
+            @click="toggleFilmstrip"
+          >
+            <q-tooltip>Mostrar / Ocultar carrusel inferior de miniaturas de páginas</q-tooltip>
           </q-btn>
 
           <!-- DESCARGAR / IMPRIMIR -->
@@ -394,6 +413,28 @@
         </div>
       </div>
 
+      <!-- CINTA INFERIOR DE MINIATURAS (FILMSTRIP) -->
+      <transition name="slide-up">
+        <div v-if="showFilmstrip && totalPages > 0" class="filmstrip-drawer row no-wrap items-center q-px-sm q-py-xs bg-slate-900 border-top col-auto z-top shadow-8">
+          <div class="row items-center no-wrap q-gutter-x-sm scroll full-width filmstrip-scroll-area">
+            <div
+              v-for="p in totalPages"
+              :key="p"
+              class="filmstrip-item column items-center cursor-pointer"
+              :class="{
+                'filmstrip-active': viewMode === 'book' ? (p === currentPage || (currentPage > 1 && p === currentPage + 1)) : p === currentPage
+              }"
+              @click="goToPage(p)"
+            >
+              <div class="filmstrip-thumb-box flex flex-center">
+                <canvas :id="`filmstrip-canvas-${p}`" class="filmstrip-canvas"></canvas>
+              </div>
+              <span class="filmstrip-num font-mono">Pág. {{ p }}</span>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <!-- INPUT OCULTO PARA CARGAR ARCHIVO DIRECTAMENTE SI LO DESEA -->
       <input
         ref="fileInputRef"
@@ -446,6 +487,7 @@ const viewMode = ref('book'); // 'book' (2 páginas) | 'single' (1 página)
 const zoomScale = ref(1.0);
 const isFullscreen = ref(false);
 const showSidebar = ref(false);
+const showFilmstrip = ref(true);
 const fileInputRef = ref(null);
 const viewerContainerRef = ref(null);
 
@@ -569,11 +611,41 @@ const cargarPdfDesdeBuffer = async (buffer, titulo = 'Documento PDF') => {
 
     await nextTick();
     await renderizarPaginasActuales();
+    if (showFilmstrip.value) {
+      renderFilmstrip();
+    }
   } catch (error) {
     console.error('Error cargando PDF en PDF.js:', error);
     $q.notify({ type: 'negative', message: 'Error procesando páginas del PDF.' });
   } finally {
     isLoading.value = false;
+  }
+};
+
+const toggleFilmstrip = async () => {
+  showFilmstrip.value = !showFilmstrip.value;
+  if (showFilmstrip.value) {
+    await nextTick();
+    renderFilmstrip();
+  }
+};
+
+const renderFilmstrip = async () => {
+  if (!pdfDocProxy.value || totalPages.value === 0) return;
+  for (let i = 1; i <= totalPages.value; i++) {
+    try {
+      const page = await pdfDocProxy.value.getPage(i);
+      const canvas = document.getElementById(`filmstrip-canvas-${i}`);
+      if (canvas) {
+        const viewport = page.getViewport({ scale: 0.15 });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const context = canvas.getContext('2d');
+        await page.render({ canvasContext: context, viewport }).promise;
+      }
+    } catch {
+      // Ignorar advertencia en miniatura individual
+    }
   }
 };
 
@@ -1098,6 +1170,75 @@ onBeforeUnmount(() => {
 .slide-sidebar-enter-from,
 .slide-sidebar-leave-to {
   transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* FILMSTRIP (CARRUSEL INFERIOR DE MINIATURAS) */
+.filmstrip-drawer {
+  height: 120px;
+  background: #090d16;
+  border-top: 1px solid #1e293b;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.filmstrip-scroll-area {
+  padding-bottom: 4px;
+}
+
+.filmstrip-item {
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.filmstrip-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #475569;
+}
+
+.filmstrip-item.filmstrip-active {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: #fbbf24;
+}
+
+.filmstrip-thumb-box {
+  width: 62px;
+  height: 80px;
+  background: #1e293b;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.filmstrip-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.filmstrip-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.filmstrip-active .filmstrip-num {
+  color: #fbbf24;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
   opacity: 0;
 }
 </style>

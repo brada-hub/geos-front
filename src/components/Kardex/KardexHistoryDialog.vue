@@ -51,6 +51,18 @@
             <q-btn
               unelevated
               size="sm"
+              icon="label"
+              label="Rótulo Folder"
+              color="amber-8"
+              text-color="dark"
+              class="text-weight-bold"
+              @click="showRotulo = true"
+            >
+              <q-tooltip>Imprimir rótulo adhesivo con Código QR para la carpeta física</q-tooltip>
+            </q-btn>
+            <q-btn
+              unelevated
+              size="sm"
               icon="print"
               label="Ficha A4 / PDF"
               color="amber-5"
@@ -258,6 +270,17 @@
                   <q-tooltip>Detalle o número de documento de respaldo</q-tooltip>
                 </q-input>
 
+                <!-- BADGE ESTADO NUBE / LOCAL -->
+                <q-badge
+                  v-if="pdfsMap[sec.codigo]"
+                  :color="pdfsMap[sec.codigo]?.isCloud ? 'teal-8' : 'indigo-8'"
+                  class="q-mr-xs text-weight-bold"
+                  style="font-size: 9.5px;"
+                >
+                  <q-icon :name="pdfsMap[sec.codigo]?.isCloud ? 'cloud_done' : 'save'" size="10px" class="q-mr-xs" />
+                  {{ pdfsMap[sec.codigo]?.isCloud ? 'Nube' : 'Local' }}
+                </q-badge>
+
                 <!-- BOTÓN PARA PREVISUALIZAR EL PDF DE ESTA SECCIÓN -->
                 <q-btn
                   v-if="pdfsMap[sec.codigo]"
@@ -373,6 +396,9 @@
       :empleado="kardex"
       :seccion-codigo-inicial="seccionSeleccionadaVisor"
     />
+
+    <!-- RÓTULO ADHESIVO CON QR PARA EL FOLDER FÍSICO -->
+    <RotuloFolderDialog v-model="showRotulo" :empleado="kardex" />
   </q-dialog>
 </template>
 
@@ -384,6 +410,7 @@ import { useGeosStore } from 'src/stores/geosStore';
 import FichaKardexDialog from 'src/components/Kardex/FichaKardexDialog.vue';
 import DesglosadorPdfDialog from 'src/components/Kardex/DesglosadorPdfDialog.vue';
 import VisorLibroPdfDialog from 'src/components/Kardex/VisorLibroPdfDialog.vue';
+import RotuloFolderDialog from 'src/components/Kardex/RotuloFolderDialog.vue';
 import {
   getEmpleadoSecciones,
   saveEmpleadoSecciones,
@@ -397,6 +424,7 @@ const store = useGeosStore();
 const showFicha = ref(false);
 const showDesglosador = ref(false);
 const showVisorLibro = ref(false);
+const showRotulo = ref(false);
 const seccionSeleccionadaVisor = ref(null);
 const pdfsMap = ref({});
 const activeTab = ref('secciones');

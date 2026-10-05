@@ -11,9 +11,21 @@
           <q-btn
             unelevated
             no-caps
+            color="amber-8"
+            text-color="dark"
+            icon="label"
+            label="Rótulo para Folder"
+            class="text-weight-bolder"
+            @click="showRotulo = true"
+          >
+            <q-tooltip>Imprimir etiqueta adhesiva para la cejilla/lomo del folder físico</q-tooltip>
+          </q-btn>
+          <q-btn
+            unelevated
+            no-caps
             color="primary"
             icon="print"
-            label="Imprimir / Guardar como PDF"
+            label="Imprimir Ficha A4"
             class="text-weight-bold"
             @click="imprimirFicha"
           />
@@ -43,17 +55,22 @@
               </div>
             </div>
 
-            <!-- CÓDIGO ARCHIVO Y QR/BARCODE SIMULADO -->
-            <div class="column items-end">
-              <div class="ficha-code-badge">
-                {{ empleado?.codigo_archivo || `EXP-${empleado?.numero_unico || empleado?.id}` }}
+            <!-- CÓDIGO ARCHIVO Y QR OFICIAL DINÁMICO -->
+            <div class="row items-center q-gutter-x-sm">
+              <div class="column items-end">
+                <div class="ficha-code-badge font-mono">
+                  {{ empleado?.codigo_archivo || `EXP-${empleado?.numero_unico || empleado?.id}` }}
+                </div>
+                <div class="text-caption text-slate-700 q-mt-xs font-mono" style="font-size: 11px;">
+                  CI: <b>{{ empleado?.documento_identidad }}</b>
+                </div>
+                <div class="text-caption text-slate-400" style="font-size: 10px;">
+                  Emisión: {{ fechaEmision }}
+                </div>
               </div>
-              <div class="barcode-container q-mt-xs">
-                <div class="barcode-lines"></div>
-                <span class="barcode-text">CI: {{ empleado?.documento_identidad }}</span>
-              </div>
-              <div class="text-caption text-slate-400" style="font-size: 10px;">
-                Emisión: {{ fechaEmision }}
+              <div class="ficha-qr-box flex flex-center">
+                <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR Expediente" class="ficha-qr-img" />
+                <q-spinner v-else size="20px" color="indigo" />
               </div>
             </div>
           </div>
@@ -257,11 +274,16 @@
         </div>
       </q-scroll-area>
     </q-card>
+
+    <!-- DIÁLOGO PARA IMPRIMIR RÓTULO ADHESIVO CON QR PARA EL FOLDER FÍSICO -->
+    <RotuloFolderDialog v-model="showRotulo" :empleado="empleado" />
   </q-dialog>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+import QRCode from 'qrcode';
+import RotuloFolderDialog from './RotuloFolderDialog.vue';
 import { getEmpleadoSecciones, calcularResumenFile } from 'src/utils/fileSectionsHelper';
 
 const props = defineProps({
@@ -280,6 +302,26 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
+const showRotulo = ref(false);
+const qrDataUrl = ref('');
+
+watch(
+  () => props.empleado,
+  async (emp) => {
+    if (!emp) return;
+    try {
+      const appUrl = `${window.location.origin}/#/kardex?id=${emp.id}&ci=${emp.documento_identidad || ''}`;
+      qrDataUrl.value = await QRCode.toDataURL(appUrl, {
+        width: 130,
+        margin: 1,
+        color: { dark: '#0f172a', light: '#ffffff' }
+      });
+    } catch (e) {
+      console.error('Error generando QR de ficha:', e);
+    }
+  },
+  { immediate: true }
+);
 
 const isOpen = computed({
   get: () => props.modelValue,
@@ -362,6 +404,21 @@ const imprimirFicha = () => {
   padding: 3px 10px;
   border-radius: 4px;
   font-family: monospace;
+}
+
+.ficha-qr-box {
+  width: 62px;
+  height: 62px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 2px;
+  background: #ffffff;
+}
+
+.ficha-qr-img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .barcode-container {

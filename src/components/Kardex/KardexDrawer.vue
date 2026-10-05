@@ -56,12 +56,27 @@
         </div>
         <div v-else class="drawer-label-placeholder"></div>
 
-        <!-- CONTEO DE EXPEDIENTES -->
+        <!-- CONTEO DE EXPEDIENTES Y BARRA DE OCUPACIÓN -->
         <div class="row items-center justify-center q-mt-xs">
           <span class="count-pill" :class="{ 'count-pill-active': empleadosCount > 0 }">
             <q-icon name="folder" size="12px" class="q-mr-xs" />
             {{ empleadosCount }} {{ empleadosCount === 1 ? 'exp.' : 'exp.' }}
+            <span v-if="empleadosCount > 0" class="text-caption text-grey-7 q-ml-xs" style="font-size: 9.5px;">
+              • {{ Math.round(occupancyPercent) }}%
+            </span>
           </span>
+        </div>
+
+        <!-- BARRA VISUAL DE OCUPACIÓN DE GAVETA -->
+        <div class="full-width q-px-sm q-mt-xs" :title="`Ocupación: ${empleadosCount} de ${capacidadRef} expedientes (${Math.round(occupancyPercent)}%)`">
+          <q-linear-progress
+            :value="occupancyRatio"
+            rounded
+            size="4px"
+            :color="occupancyColor"
+            track-color="blue-grey-1"
+            class="drawer-occupancy-bar"
+          />
         </div>
 
         <!-- CONTRATOS PRESENTES (MICRO-PILLS) -->
@@ -143,6 +158,15 @@ const localEmpleados = computed({
 });
 
 const empleadosCount = computed(() => (props.cajon.empleados || []).length);
+
+const capacidadRef = computed(() => props.cajon.capacidad || 40);
+const occupancyRatio = computed(() => Math.min(1, (empleadosCount.value || 0) / capacidadRef.value));
+const occupancyPercent = computed(() => (occupancyRatio.value * 100));
+const occupancyColor = computed(() => {
+  if (occupancyPercent.value >= 90) return 'negative';
+  if (occupancyPercent.value >= 70) return 'warning';
+  return 'positive';
+});
 
 const contratosPresentes = computed(() => {
   if (!props.cajon.empleados || props.cajon.empleados.length === 0) return [];
@@ -276,6 +300,15 @@ const handleChange = (evt) => {
   color: #1d4ed8;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
+}
+
+.drawer-occupancy-bar {
+  opacity: 0.75;
+  transition: all 0.25s ease;
+}
+
+.cajon-cell:hover .drawer-occupancy-bar {
+  opacity: 1;
 }
 
 .badge-contrato-item {
