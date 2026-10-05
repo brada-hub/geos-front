@@ -1,9 +1,14 @@
-// Utilidad para almacenamiento local de PDFs de secciones de expedientes usando IndexedDB
-// Diseñado con ArrayBuffer puro para garantizar compatibilidad con el Structured Clone Algorithm
+// Utilidad para almacenamiento híbrido de PDFs (Cloud Supabase Storage + Caché Local IndexedDB)
+// Garantiza persistencia en la nube compartida entre equipos y acceso local de alta velocidad sin bloqueos
 
 const DB_NAME = 'DOCUS_FILE_STORAGE';
-const DB_VERSION = 2; // Actualizamos versión para asegurar esquema limpio
+const DB_VERSION = 2;
 const STORE_NAME = 'secciones_pdf';
+
+// Configuración de Supabase Storage en la Nube
+const SUPABASE_URL = 'https://xmqcarehbyyqhzgwubhd.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_jIoZ6rFXA1tgVDzpFMLzgQ_GjHJMu8p';
+const BUCKET_NAME = 'expedientes';
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -22,16 +27,84 @@ function openDB() {
 }
 
 /**
- * Guarda el archivo PDF de una sección en IndexedDB de forma 100% segura frente a DataCloneError
+ * Sube un archivo binario a Supabase Storage con soporte para sobrescritura (upsert)
+ */
+async function uploadToCloud(path, dataBuffer, contentType = 'application/pdf') {
+  try {
+    const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET_NAME}/${path}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': contentType,
+        'x-upsert': 'true',
+      },
+      body: dataBuffer,
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.warn(`[Cloud Storage] Aviso al subir ${path}:`, errData);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn(`[Cloud Storage] Error de conexión al subir ${path}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Descarga un archivo binario de Supabase Storage desde su CDN público
+ */
+async function downloadFromCloud(path) {
+  try {
+    const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${path}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return await res.arrayBuffer();
+  } catch (err) {
+    console.warn(`[Cloud Storage] Error al descargar ${path}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Lista los archivos de un empleado en Supabase Storage
+ */
+async function listFromCloud(empleadoId) {
+  try {
+    const url = `${SUPABASE_URL}/storage/v1/object/list/${BUCKET_NAME}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prefix: `${String(empleadoId)}/`, limit: 100 }),
+    });
+
+    if (!res.ok) return [];
+    const files = await res.json();
+    return Array.isArray(files) ? files : [];
+  } catch (err) {
+    console.warn(`[Cloud Storage] Error al listar archivos de empleado ${empleadoId}:`, err);
+    return [];
+  }
+}
+
+/**
+ * Guarda el archivo PDF de una sección en IndexedDB y lo sincroniza con Supabase Storage
  */
 export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBytesOrBlob, meta = {}) {
   try {
-    const db = await openDB();
     const cleanId = String(empleadoId);
     const cleanCod = String(seccionCodigo);
     const key = `${cleanId}_${cleanCod}`;
 
-    // Convertir a ArrayBuffer puro para evitar cualquier DataCloneError con Vue Proxies o Blobs
+    // Convertir a ArrayBuffer puro para evitar cualquier DataCloneError con Vue Proxies
     let dataBuffer;
     if (pdfBytesOrBlob instanceof Blob) {
       dataBuffer = await pdfBytesOrBlob.arrayBuffer();
@@ -46,9 +119,8 @@ export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBytesOrBlob, 
       dataBuffer = new ArrayBuffer(0);
     }
 
-    // Limpiar metadatos de posibles proxies reactivos de Vue 3
     const cleanPages = Array.isArray(meta.pageNumbers)
-      ? Array.from(meta.pageNumbers).map(n => Number(n))
+      ? Array.from(meta.pageNumbers).map((n) => Number(n))
       : [];
     const cleanFilename = String(meta.filename || `${cleanCod}_EXP_${cleanId}.pdf`);
     const cleanPagesCount = Number(meta.pagesCount || cleanPages.length || 0);
@@ -61,104 +133,91 @@ export async function saveSectionPdf(empleadoId, seccionCodigo, pdfBytesOrBlob, 
       filename: cleanFilename,
       pagesCount: cleanPagesCount,
       pageNumbers: cleanPages,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
+    // 1. Guardar en caché local IndexedDB
+    const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const req = store.put(record);
       req.onsuccess = () => resolve(true);
-      req.onerror = (err) => {
-        console.error('Error al guardar en IndexedDB store.put:', err);
-        reject(err);
-      };
+      req.onerror = (e) => reject(e);
     });
+
+    // 2. Subir en la Nube a Supabase Storage (en segundo plano)
+    const cloudPath = `${cleanId}/sec_${cleanCod}.pdf`;
+    uploadToCloud(cloudPath, dataBuffer);
+
+    return true;
   } catch (error) {
-    console.error('Error guardando PDF en IndexedDB:', error);
+    console.error('Error guardando PDF:', error);
     return false;
   }
 }
 
 /**
- * Obtiene el archivo PDF de una sección reconstruyendo el Blob desde el ArrayBuffer
+ * Obtiene el PDF de una sección (primero desde caché local, si no está lo descarga de Supabase)
  */
 export async function getSectionPdf(empleadoId, seccionCodigo) {
   try {
+    const cleanId = String(empleadoId);
+    const cleanCod = String(seccionCodigo);
+    const key = `${cleanId}_${cleanCod}`;
+
+    // 1. Intentar desde caché local IndexedDB
     const db = await openDB();
-    const key = `${String(empleadoId)}_${String(seccionCodigo)}`;
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
 
-    return new Promise((resolve) => {
+    const localItem = await new Promise((resolve) => {
       const req = store.get(key);
-      req.onsuccess = () => {
-        const item = req.result;
-        if (!item) return resolve(null);
-
-        // Reconstruir el Blob al vuelo para que sea utilizable por URL.createObjectURL
-        let blob = null;
-        if (item.dataBuffer && item.dataBuffer.byteLength > 0) {
-          blob = new Blob([item.dataBuffer], { type: 'application/pdf' });
-        } else if (item.blob instanceof Blob) {
-          blob = item.blob;
-        }
-
-        resolve({
-          ...item,
-          blob
-        });
-      };
+      req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => resolve(null);
     });
+
+    if (localItem && localItem.dataBuffer && localItem.dataBuffer.byteLength > 0) {
+      return {
+        ...localItem,
+        blob: new Blob([localItem.dataBuffer], { type: 'application/pdf' }),
+      };
+    }
+
+    // 2. Si no está en este equipo, descargarlo de Supabase Cloud Storage
+    const cloudPath = `${cleanId}/sec_${cleanCod}.pdf`;
+    const cloudBuffer = await downloadFromCloud(cloudPath);
+
+    if (cloudBuffer && cloudBuffer.byteLength > 0) {
+      const cloudBlob = new Blob([cloudBuffer], { type: 'application/pdf' });
+
+      // Guardar en la caché local para que la próxima lectura sea instantánea
+      saveSectionPdf(cleanId, cleanCod, cloudBuffer, {
+        filename: `${cleanCod}_EXP_${cleanId}.pdf`,
+      }).catch(() => {});
+
+      return {
+        key,
+        empleadoId: cleanId,
+        seccionCodigo: cleanCod,
+        dataBuffer: cloudBuffer,
+        blob: cloudBlob,
+        filename: `${cleanCod}_EXP_${cleanId}.pdf`,
+      };
+    }
+
+    return null;
   } catch (error) {
-    console.error('Error obteniendo PDF desde IndexedDB:', error);
+    console.error('Error obteniendo PDF de sección:', error);
     return null;
   }
 }
 
 /**
- * Obtiene un resumen de todas las secciones que tienen PDF guardado para un empleado
- */
-export async function getEmpleadoPdfsMap(empleadoId) {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-
-    return new Promise((resolve) => {
-      const req = store.getAll();
-      req.onsuccess = () => {
-        const all = req.result || [];
-        const map = {};
-        all.forEach(item => {
-          if (String(item.empleadoId) === String(empleadoId)) {
-            map[item.seccionCodigo] = {
-              hasPdf: true,
-              filename: item.filename,
-              pagesCount: item.pagesCount,
-              pageNumbers: item.pageNumbers,
-              updatedAt: item.updatedAt
-            };
-          }
-        });
-        resolve(map);
-      };
-      req.onerror = () => resolve({});
-    });
-  } catch (error) {
-    console.error('Error obteniendo mapa de PDFs:', error);
-    return {};
-  }
-}
-
-/**
- * Guarda el archivo PDF maestro (el expediente completo escaneado) de un empleado
+ * Guarda el archivo PDF maestro completo en IndexedDB y Supabase Storage
  */
 export async function saveMasterPdf(empleadoId, pdfBytesOrBlob, meta = {}) {
   try {
-    const db = await openDB();
     const cleanId = String(empleadoId);
     const key = `${cleanId}_MASTER`;
 
@@ -186,20 +245,24 @@ export async function saveMasterPdf(empleadoId, pdfBytesOrBlob, meta = {}) {
       dataBuffer,
       filename: cleanFilename,
       pagesCount: cleanPagesCount,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
+    // 1. Guardar en local
+    const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const req = store.put(record);
       req.onsuccess = () => resolve(true);
-      req.onerror = (err) => {
-        console.error('Error al guardar Master PDF en IndexedDB:', err);
-        reject(err);
-      };
+      req.onerror = (e) => reject(e);
     });
+
+    // 2. Subir expediente maestro a Supabase Cloud Storage
+    const cloudPath = `${cleanId}/MASTER.pdf`;
+    uploadToCloud(cloudPath, dataBuffer);
+
+    return true;
   } catch (error) {
     console.error('Error guardando Master PDF:', error);
     return false;
@@ -207,35 +270,54 @@ export async function saveMasterPdf(empleadoId, pdfBytesOrBlob, meta = {}) {
 }
 
 /**
- * Obtiene el archivo PDF maestro de un empleado
+ * Obtiene el archivo PDF maestro completo (local o nube)
  */
 export async function getMasterPdf(empleadoId) {
   try {
+    const cleanId = String(empleadoId);
+    const key = `${cleanId}_MASTER`;
+
+    // 1. Revisar caché local
     const db = await openDB();
-    const key = `${String(empleadoId)}_MASTER`;
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
 
-    return new Promise((resolve) => {
+    const localItem = await new Promise((resolve) => {
       const req = store.get(key);
-      req.onsuccess = () => {
-        const item = req.result;
-        if (!item) return resolve(null);
-
-        let blob = null;
-        if (item.dataBuffer && item.dataBuffer.byteLength > 0) {
-          blob = new Blob([item.dataBuffer], { type: 'application/pdf' });
-        } else if (item.blob instanceof Blob) {
-          blob = item.blob;
-        }
-
-        resolve({
-          ...item,
-          blob
-        });
-      };
+      req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => resolve(null);
     });
+
+    if (localItem && localItem.dataBuffer && localItem.dataBuffer.byteLength > 0) {
+      return {
+        ...localItem,
+        blob: new Blob([localItem.dataBuffer], { type: 'application/pdf' }),
+      };
+    }
+
+    // 2. Descargar de Supabase Cloud Storage
+    const cloudPath = `${cleanId}/MASTER.pdf`;
+    const cloudBuffer = await downloadFromCloud(cloudPath);
+
+    if (cloudBuffer && cloudBuffer.byteLength > 0) {
+      const cloudBlob = new Blob([cloudBuffer], { type: 'application/pdf' });
+
+      // Guardar en caché local
+      saveMasterPdf(cleanId, cloudBuffer, {
+        filename: `FILE_COMPLETO_EXP_${cleanId}.pdf`,
+      }).catch(() => {});
+
+      return {
+        key,
+        empleadoId: cleanId,
+        seccionCodigo: 'MASTER',
+        dataBuffer: cloudBuffer,
+        blob: cloudBlob,
+        filename: `FILE_COMPLETO_EXP_${cleanId}.pdf`,
+      };
+    }
+
+    return null;
   } catch (error) {
     console.error('Error obteniendo Master PDF:', error);
     return null;
@@ -243,28 +325,97 @@ export async function getMasterPdf(empleadoId) {
 }
 
 /**
- * Verifica si existe un PDF maestro para el empleado
+ * Obtiene el mapa unificado de PDFs de un empleado (unifica local + Supabase Cloud)
  */
-export async function hasMasterPdf(empleadoId) {
-  const master = await getMasterPdf(empleadoId);
-  return Boolean(master && master.blob);
+export async function getEmpleadoPdfsMap(empleadoId) {
+  try {
+    const cleanId = String(empleadoId);
+    const map = {};
+
+    // 1. Leer mapa local
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+
+    const all = await new Promise((resolve) => {
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+
+    all.forEach((item) => {
+      if (String(item.empleadoId) === cleanId) {
+        map[item.seccionCodigo] = {
+          hasPdf: true,
+          filename: item.filename,
+          pagesCount: item.pagesCount,
+          pageNumbers: item.pageNumbers,
+          updatedAt: item.updatedAt,
+        };
+      }
+    });
+
+    // 2. Consultar archivos en la Nube (Supabase)
+    const cloudFiles = await listFromCloud(cleanId);
+    cloudFiles.forEach((file) => {
+      // Formato: sec_11_CONTRATOS.pdf o MASTER.pdf
+      if (file.name.startsWith('sec_') && file.name.endsWith('.pdf')) {
+        const codigo = file.name.replace('sec_', '').replace('.pdf', '');
+        if (!map[codigo]) {
+          map[codigo] = {
+            hasPdf: true,
+            filename: file.name,
+            pagesCount: 0,
+            pageNumbers: [],
+            updatedAt: file.updated_at,
+            isCloud: true,
+          };
+        }
+      } else if (file.name === 'MASTER.pdf') {
+        map['MASTER'] = {
+          hasPdf: true,
+          filename: 'MASTER.pdf',
+          updatedAt: file.updated_at,
+          isCloud: true,
+        };
+      }
+    });
+
+    return map;
+  } catch (error) {
+    console.error('Error obteniendo mapa de PDFs:', error);
+    return {};
+  }
 }
 
 /**
- * Elimina el PDF de una sección
+ * Elimina un PDF (local y en Supabase)
  */
 export async function deleteSectionPdf(empleadoId, seccionCodigo) {
   try {
+    const cleanId = String(empleadoId);
+    const cleanCod = String(seccionCodigo);
+    const key = `${cleanId}_${cleanCod}`;
+
+    // 1. Eliminar local
     const db = await openDB();
-    const key = `${String(empleadoId)}_${String(seccionCodigo)}`;
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
+    store.delete(key);
 
-    return new Promise((resolve) => {
-      const req = store.delete(key);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => resolve(false);
-    });
+    // 2. Eliminar de Supabase Cloud
+    const cloudPath = `${cleanId}/sec_${cleanCod}.pdf`;
+    fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET_NAME}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prefixes: [cloudPath] }),
+    }).catch(() => {});
+
+    return true;
   } catch (error) {
     console.error('Error eliminando PDF:', error);
     return false;
