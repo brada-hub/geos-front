@@ -108,6 +108,7 @@
               :is-matched="isEmpleadoMatchedLocal(element)"
               :is-highlighted="element.id === highlightedKardexId"
               @click="$emit('open-kardex', element)"
+              @open-file="$emit('open-file', element)"
             />
           </template>
         </draggable>
@@ -159,6 +160,7 @@ const emit = defineEmits([
   'drag-start',
   'drag-end',
   'open-kardex',
+  'open-file',
   'configure'
 ]);
 

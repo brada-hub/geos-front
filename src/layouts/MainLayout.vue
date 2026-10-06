@@ -108,6 +108,20 @@
             <q-tooltip>{{ isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa' }}</q-tooltip>
           </q-btn>
 
+          <!-- BOTÓN DIRECTO GESTIÓN USUARIOS Y ROLES (TOOLBAR) -->
+          <q-btn
+            flat
+            round
+            dense
+            size="sm"
+            icon="manage_accounts"
+            color="primary"
+            class="toolbar-action-btn"
+            @click="openProfileDialog('usuarios')"
+          >
+            <q-tooltip>Gestión de Usuarios & Roles</q-tooltip>
+          </q-btn>
+
           <q-separator vertical inset class="q-mx-xs gt-xs" style="background: #e2e8f0;" />
 
           <!-- PERFIL DE USUARIO / ROL -->
@@ -275,6 +289,24 @@
               </q-item-section>
               <q-item-section side v-if="store.personal.length > 0">
                 <span class="drawer-count-badge">{{ store.personal.length }}</span>
+              </q-item-section>
+            </q-item>
+
+            <!-- BOTÓN GESTIÓN DE USUARIOS Y ROLES (DIRECTO EN NAVEGACIÓN) -->
+            <q-item
+              clickable
+              v-ripple
+              @click="openProfileDialog('usuarios')"
+              class="drawer-nav-item"
+            >
+              <q-item-section avatar class="drawer-avatar-col">
+                <div class="drawer-icon-box flex flex-center">
+                  <q-icon name="manage_accounts" size="18px" />
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="drawer-item-title">Usuarios & Roles</q-item-label>
+                <q-item-label caption class="drawer-item-sub">Accesos, roles y permisos</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>

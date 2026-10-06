@@ -141,6 +141,7 @@
       @drag-start="onDragStart"
       @drag-end="onDragEnd"
       @open-kardex="openKardex"
+      @open-file="openVisorLibroDirecto"
       @configure="openDrawerConfig"
     />
 
@@ -154,6 +155,12 @@
     <KardexHistoryDialog
       v-model="kardexDialog"
       :kardex="selectedKardex"
+    />
+
+    <!-- VISOR DIRECTO DE LIBRO PDF -->
+    <VisorLibroPdfDialog
+      v-model="visorLibroOpen"
+      :empleado="selectedVisorEmpleado"
     />
 
     <!-- DIALOGS DE CREACIÓN -->
@@ -179,6 +186,7 @@ import KardexMueble from 'src/components/Kardex/KardexMueble.vue';
 import KardexDetailPanel from 'src/components/Kardex/KardexDetailPanel.vue';
 import KardexDrawerConfigDialog from 'src/components/Kardex/KardexDrawerConfigDialog.vue';
 import KardexHistoryDialog from 'src/components/Kardex/KardexHistoryDialog.vue';
+import VisorLibroPdfDialog from 'src/components/Kardex/VisorLibroPdfDialog.vue';
 import NewMuebleDialog from 'src/components/Kardex/NewMuebleDialog.vue';
 import NewEmpleadoDialog from 'src/components/Kardex/NewEmpleadoDialog.vue';
 import GavetaVirtualDock from 'src/components/Kardex/GavetaVirtualDock.vue';
@@ -209,6 +217,8 @@ const empleadoDialog = ref(false);
 const drawerPanelOpen = ref(false);
 const configDialogOpen = ref(false);
 const kardexDialog = ref(false);
+const visorLibroOpen = ref(false);
+const selectedVisorEmpleado = ref(null);
 
 const selectedDrawer = ref(null);
 const selectedConfigDrawer = ref(null);
@@ -216,6 +226,11 @@ const selectedKardex = ref(null);
 const highlightedKardexId = ref(null);
 
 // Actions
+const openVisorLibroDirecto = (empleado) => {
+  selectedVisorEmpleado.value = empleado;
+  visorLibroOpen.value = true;
+};
+
 const openDrawer = (cajon) => {
   selectedDrawer.value = cajon;
   highlightedKardexId.value = null;

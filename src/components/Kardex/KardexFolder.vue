@@ -42,68 +42,84 @@
           </div>
         </div>
 
-        <div class="column items-end q-gutter-xs">
-          <div class="row items-center q-gutter-xs no-wrap">
-            <!-- BADGE TIPO DE CONTRATO (3FN) -->
-            <q-badge
-              v-if="kardex.tipo_contrato"
-              :color="kardex.tipo_contrato.color || 'primary'"
-              text-color="white"
-              class="q-px-xs text-weight-bold"
-              style="font-size: 10px;"
-            >
-              {{ kardex.tipo_contrato.nombre }}
-            </q-badge>
+        <div class="row items-center q-gutter-x-xs no-wrap col-auto">
+          <!-- BADGE TIPO DE CONTRATO (3FN) -->
+          <q-badge
+            v-if="kardex.tipo_contrato"
+            :color="kardex.tipo_contrato.color || 'primary'"
+            text-color="white"
+            class="q-px-xs text-weight-bold"
+            style="font-size: 10px;"
+          >
+            {{ kardex.tipo_contrato.nombre }}
+          </q-badge>
 
-            <!-- ESTADO EXPEDIENTE INTERACTIVO (CLIC PARA MENÚ RÁPIDO) -->
-            <q-chip
-              :color="estadoColor"
-              text-color="white"
-              size="xs"
-              dense
-              clickable
-              class="text-weight-bold cursor-pointer estado-chip"
-              @click.stop
-            >
-              {{ estadoLabel }}
-              <q-icon name="arrow_drop_down" size="14px" class="q-ml-xs" />
+          <!-- ESTADO EXPEDIENTE INTERACTIVO (CLIC PARA MENÚ RÁPIDO) -->
+          <q-chip
+            :color="estadoColor"
+            text-color="white"
+            size="xs"
+            dense
+            clickable
+            class="text-weight-bold cursor-pointer estado-chip"
+            @click.stop
+          >
+            {{ estadoLabel }}
+            <q-icon name="arrow_drop_down" size="14px" class="q-ml-xs" />
 
-              <q-menu auto-close anchor="bottom right" self="top right" class="shadow-4 rounded-borders">
-                <q-list dense style="min-width: 140px">
-                  <q-item clickable @click="setEstado(0)" :active="kardex.estado === 0">
-                    <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
-                      <q-icon name="check_circle" color="primary" size="18px" />
-                    </q-item-section>
-                    <q-item-section class="text-weight-medium text-caption">Presente</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="setEstado(1)" :active="kardex.estado === 1">
-                    <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
-                      <q-icon name="cancel" color="negative" size="18px" />
-                    </q-item-section>
-                    <q-item-section class="text-weight-medium text-caption">Ausente</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="setEstado(2)" :active="kardex.estado === 2">
-                    <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
-                      <q-icon name="schedule" color="grey-7" size="18px" />
-                    </q-item-section>
-                    <q-item-section class="text-weight-medium text-caption">Prestado</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-chip>
-          </div>
+            <q-menu auto-close anchor="bottom right" self="top right" class="shadow-4 rounded-borders">
+              <q-list dense style="min-width: 140px">
+                <q-item clickable @click="setEstado(0)" :active="kardex.estado === 0">
+                  <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
+                    <q-icon name="check_circle" color="primary" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-weight-medium text-caption">Presente</q-item-section>
+                </q-item>
+                <q-item clickable @click="setEstado(1)" :active="kardex.estado === 1">
+                  <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
+                    <q-icon name="cancel" color="negative" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-weight-medium text-caption">Ausente</q-item-section>
+                </q-item>
+                <q-item clickable @click="setEstado(2)" :active="kardex.estado === 2">
+                  <q-item-section avatar class="q-pr-xs" style="min-width: 24px">
+                    <q-icon name="schedule" color="grey-7" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-weight-medium text-caption">Prestado</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-chip>
+
+          <!-- BOTÓN DIRECTO VER FILE (EXPEDIENTE COMPLETO / VISOR LIBRO) -->
+          <q-btn
+            unelevated
+            dense
+            no-caps
+            size="xs"
+            color="primary"
+            text-color="white"
+            icon="menu_book"
+            label="Ver File"
+            class="text-weight-bolder q-px-xs q-mx-xs shadow-1 btn-ver-file-directo"
+            @click.stop="$emit('open-file', kardex)"
+          >
+            <q-tooltip anchor="top middle" self="bottom middle">
+              Abrir y ojear el file completo en el visor interactivo de fojas
+            </q-tooltip>
+          </q-btn>
+
+          <!-- DRAG HANDLE PARA REORDENAR DENTRO DEL CAJÓN -->
+          <q-icon
+            name="drag_indicator"
+            color="grey-5"
+            size="22px"
+            class="drag-handle q-ml-xs cursor-move"
+            @click.stop
+          >
+            <q-tooltip>Arrastrar para reordenar en la gaveta</q-tooltip>
+          </q-icon>
         </div>
-
-        <!-- DRAG HANDLE PARA REORDENAR DENTRO DEL CAJÓN -->
-        <q-icon
-          name="drag_indicator"
-          color="grey-5"
-          size="22px"
-          class="drag-handle q-ml-xs cursor-move"
-          @click.stop
-        >
-          <q-tooltip>Arrastrar para reordenar en la gaveta</q-tooltip>
-        </q-icon>
       </div>
     </div>
   </div>
@@ -131,7 +147,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['click']);
+defineEmits(['click', 'open-file']);
 
 const $q = useQuasar();
 const store = useGeosStore();
@@ -348,6 +364,20 @@ function handleSwipe({ direction }) {
 }
 .estado-chip:hover {
   transform: scale(1.05);
+}
+
+.btn-ver-file-directo {
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  height: 24px;
+  padding: 0 8px;
+  background: #2563eb !important;
+  transition: all 0.2s ease;
+}
+.btn-ver-file-directo:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 /* Modo oscuro */
