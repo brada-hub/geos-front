@@ -32,38 +32,6 @@
 
       <q-separator class="bg-slate-800" />
 
-      <!-- TARJETA DE AYUDA DE CREDENCIALES (AUTOCOMPLETAR CON 1 CLIC) -->
-      <div class="q-px-lg q-pt-md">
-        <div class="demo-credentials-box q-pa-sm rounded-borders row items-center justify-between no-wrap">
-          <div class="row items-center q-gutter-xs col ellipsis">
-            <q-icon name="key" size="16px" color="primary" />
-            <div class="column ellipsis" style="font-size: 11px;">
-              <div class="text-slate-300">
-                Usuario: <b class="text-white">admin@docus.com</b>
-              </div>
-              <div class="text-slate-400">
-                Clave: <b class="text-primary font-mono">Admin123*</b>
-              </div>
-            </div>
-          </div>
-
-          <q-btn
-            unelevated
-            dense
-            no-caps
-            size="xs"
-            color="primary"
-            text-color="white"
-            icon="auto_fix_high"
-            label="Autocompletar"
-            class="text-weight-bold q-px-sm"
-            @click="fillAdminCredentials"
-          >
-            <q-tooltip>Rellenar credenciales de Administrador automáticamente</q-tooltip>
-          </q-btn>
-        </div>
-      </div>
-
       <!-- FORMULARIO DE INICIO DE SESIÓN -->
       <q-form @submit.prevent="handleLogin" class="q-pa-lg q-gutter-y-md">
         <!-- BANNER DE ERROR -->
@@ -93,7 +61,7 @@
             outlined
             dense
             dark
-            placeholder="admin@docus.com"
+            placeholder="correo@institucion.gob.do"
             class="login-input-field"
             :rules="[val => !!val || 'El correo electrónico es requerido']"
           >
@@ -109,7 +77,7 @@
             <label class="text-caption text-slate-300 text-weight-bold">
               Contraseña de Acceso
             </label>
-            <span class="text-caption text-slate-500 font-mono" style="font-size: 10.5px;">Admin123*</span>
+            <span class="text-caption text-slate-500" style="font-size: 10px;">Obligatorio</span>
           </div>
           <q-input
             v-model="password"
@@ -147,13 +115,13 @@
             size="sm"
             class="text-caption text-slate-400"
           >
-            <span style="font-size: 11.5px;">Recordar en este equipo</span>
+            <span style="font-size: 11.5px;">Recordar correo en este equipo</span>
           </q-checkbox>
 
           <span
             class="text-caption text-primary cursor-pointer hover-underline"
             style="font-size: 11.5px;"
-            @click="fillAdminCredentials"
+            @click="handleForgotPassword"
           >
             ¿Olvidaste tu clave?
           </span>
@@ -203,29 +171,29 @@ const router = useRouter();
 const authStore = useAuthStore();
 const $q = useQuasar();
 
-// Credenciales por defecto precargadas para facilitar acceso
-const email = ref(localStorage.getItem('docus_saved_email') || 'admin@docus.com');
-const password = ref(localStorage.getItem('docus_saved_pass') || 'Admin123*');
-const rememberMe = ref(true);
+// Credenciales guardadas si el usuario activó "recordar correo"
+const email = ref(localStorage.getItem('docus_saved_email') || '');
+const password = ref('');
+const rememberMe = ref(Boolean(localStorage.getItem('docus_saved_email')));
 const showPassword = ref(false);
 const errorMessage = ref('');
 
 // Precalentar el servidor en segundo plano
 onMounted(() => {
+  // Limpiar cualquier residuo previo de contraseña en texto plano en localStorage por seguridad
+  localStorage.removeItem('docus_saved_pass');
+
   api.get('/up').catch(() => {
     api.get('/catalogos/tipos-contrato').catch(() => {});
   });
 });
 
-const fillAdminCredentials = () => {
-  email.value = 'admin@docus.com';
-  password.value = 'Admin123*';
-  errorMessage.value = '';
+const handleForgotPassword = () => {
   $q.notify({
     type: 'info',
-    message: 'Credenciales de Administrador cargadas (admin@docus.com / Admin123*)',
-    icon: 'vpn_key',
-    timeout: 1500
+    message: 'Para restablecer su clave institucional, comuníquese con el Administrador del Sistema.',
+    icon: 'support_agent',
+    timeout: 3500,
   });
 };
 
@@ -234,11 +202,10 @@ const handleLogin = async () => {
 
   if (rememberMe.value) {
     localStorage.setItem('docus_saved_email', email.value);
-    localStorage.setItem('docus_saved_pass', password.value);
   } else {
     localStorage.removeItem('docus_saved_email');
-    localStorage.removeItem('docus_saved_pass');
   }
+  localStorage.removeItem('docus_saved_pass');
 
   const res = await authStore.login(email.value, password.value);
 
@@ -321,11 +288,6 @@ const handleLogin = async () => {
   padding: 3px 7px;
   border-radius: 4px;
   letter-spacing: 0.04em;
-}
-
-.demo-credentials-box {
-  background: #1e293b;
-  border: 1px solid rgba(37, 99, 235, 0.3);
 }
 
 .login-input-field :deep(.q-field__control) {
