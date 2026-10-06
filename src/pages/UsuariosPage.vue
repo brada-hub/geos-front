@@ -1,6 +1,6 @@
 <template>
   <q-page class="usuarios-page-canvas q-pa-lg">
-    <!-- ENCABEZADO EJECUTIVO -->
+    <!-- ENCABEZADO INTEGRAL -->
     <div class="row items-center justify-between q-mb-lg">
       <div class="row items-center q-gutter-md">
         <div class="header-icon-badge flex flex-center">
@@ -9,31 +9,27 @@
         <div>
           <div class="row items-center q-gutter-xs">
             <span class="text-h5 text-weight-bolder text-slate-900" style="letter-spacing: -0.02em;">
-              Gestión de Usuarios & Roles
+              Gestión Integral de Usuarios & Roles
             </span>
             <q-badge color="slate-800" text-color="white" class="text-weight-bold q-ml-xs header-tag">
-              Control Institucional
+              Control Activo
             </q-badge>
           </div>
           <div class="text-caption text-slate-500 q-mt-xs">
-            Administración de cuentas, asignación de roles jerárquicos y matriz granular de permisos
+            Administración de cuentas institucionales, asignación de roles y matriz de permisos
           </div>
         </div>
       </div>
 
       <div class="row q-gutter-sm items-center">
         <q-btn
-          flat
-          dense
-          round
+          unelevated
           icon="refresh"
-          color="slate-600"
+          label="Recargar"
+          class="action-btn-secondary"
           :loading="loadingUsers"
-          class="q-mr-xs"
           @click="fetchUsuarios"
-        >
-          <q-tooltip>Recargar usuarios</q-tooltip>
-        </q-btn>
+        />
         <q-btn
           unelevated
           icon="person_add"
@@ -44,9 +40,8 @@
       </div>
     </div>
 
-    <!-- TARJETAS DE MÉTRICAS / KPIS -->
+    <!-- TARJETAS DE MÉTRICAS EJECUTIVAS -->
     <div class="row q-col-gutter-md q-mb-md">
-      <!-- KPI 1: TOTAL USUARIOS -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card flat bordered class="kpi-card bg-white q-pa-md">
           <div class="row items-center justify-between no-wrap">
@@ -68,7 +63,6 @@
         </q-card>
       </div>
 
-      <!-- KPI 2: ADMINISTRADORES -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card flat bordered class="kpi-card bg-white q-pa-md">
           <div class="row items-center justify-between no-wrap">
@@ -90,7 +84,6 @@
         </q-card>
       </div>
 
-      <!-- KPI 3: OPERATIVOS / ARCHIVISTAS -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card flat bordered class="kpi-card bg-white q-pa-md">
           <div class="row items-center justify-between no-wrap">
@@ -102,7 +95,7 @@
                 {{ totalOperativos }}
               </div>
               <div class="text-caption text-slate-400 q-mt-xs" style="font-size: 11px;">
-                Gestión de fojas y gavetas
+                Fojas, gavetas y digitalización
               </div>
             </div>
             <div class="kpi-icon-circle bg-slate-100 text-slate-700 flex flex-center">
@@ -112,7 +105,6 @@
         </q-card>
       </div>
 
-      <!-- KPI 4: CUENTAS ACTIVAS -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card flat bordered class="kpi-card bg-white q-pa-md">
           <div class="row items-center justify-between no-wrap">
@@ -124,7 +116,7 @@
                 {{ totalActivos }}
               </div>
               <div class="text-caption text-slate-400 q-mt-xs" style="font-size: 11px;">
-                Con inicio de sesión activo
+                Inicio de sesión permitido
               </div>
             </div>
             <div class="kpi-icon-circle bg-green-50 text-positive flex flex-center">
@@ -135,17 +127,17 @@
       </div>
     </div>
 
-    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <!-- BARRA DE FILTROS -->
     <q-card flat bordered class="q-mb-md q-pa-sm bg-white" style="border-radius: 10px;">
       <div class="row q-col-gutter-sm items-center">
-        <!-- BUSCADOR -->
+        <!-- BUSCADOR TEXTO -->
         <div class="col-12 col-md-4">
           <q-input
             v-model="filterSearch"
             outlined
             dense
             clearable
-            placeholder="Buscar por nombre, correo o cargo..."
+            placeholder="Buscar por nombre, correo, cargo..."
           >
             <template v-slot:prepend>
               <q-icon name="search" />
@@ -153,7 +145,7 @@
           </q-input>
         </div>
 
-        <!-- FILTRO DE ROL -->
+        <!-- FILTRO POR ROL -->
         <div class="col-12 col-sm-6 col-md-3">
           <q-select
             v-model="filterRole"
@@ -166,7 +158,7 @@
           />
         </div>
 
-        <!-- FILTRO DE ESTADO -->
+        <!-- FILTRO POR ESTADO -->
         <div class="col-12 col-sm-6 col-md-3">
           <q-select
             v-model="filterEstado"
@@ -179,7 +171,7 @@
           />
         </div>
 
-        <!-- CONTADOR DE REGISTROS -->
+        <!-- TOTAL REGISTROS -->
         <div class="col-12 col-md-2 text-right">
           <q-badge color="blue-grey-8" class="q-pa-xs text-caption">
             {{ usuariosFiltrados.length }} usuarios
@@ -188,7 +180,7 @@
       </div>
     </q-card>
 
-    <!-- TABLA PRINCIPAL DE USUARIOS -->
+    <!-- TABLA DE USUARIOS (IDÉNTICA EN ESTRUCTURA A DIRECTORIO DE PERSONAL) -->
     <q-card flat bordered class="q-mb-xl" style="border-radius: 10px;">
       <q-table
         :rows="usuariosFiltrados"
@@ -197,25 +189,25 @@
         :loading="loadingUsers"
         flat
         separator="horizontal"
-        :pagination="{ rowsPerPage: 10 }"
+        :pagination="{ rowsPerPage: 15 }"
         no-data-label="No se encontraron usuarios registrados"
       >
-        <!-- COLUMNA USUARIO (AVATAR + NOMBRE + EMAIL + CARGO) -->
-        <template v-slot:body-cell-usuario="props">
+        <!-- COLUMNA USUARIO Y DATOS -->
+        <template v-slot:body-cell-nombre_completo="props">
           <q-td :props="props">
             <div class="row items-center no-wrap">
               <q-avatar
-                size="38px"
-                :color="props.row.role === 'admin' ? 'primary' : 'slate-800'"
+                size="34px"
+                color="slate-800"
                 text-color="white"
                 class="q-mr-sm text-weight-bold"
-                style="font-size: 13px;"
+                style="font-size: 12px;"
               >
                 {{ getInitials(props.row.name) }}
               </q-avatar>
-              <div class="column">
+              <div>
                 <div class="row items-center q-gutter-x-xs">
-                  <span class="text-weight-bold text-slate-900 text-body2">{{ props.row.name }}</span>
+                  <span class="text-weight-bold text-grey-9">{{ props.row.name }}</span>
                   <q-badge
                     v-if="props.row.id === authStore.currentUser?.id"
                     color="primary"
@@ -225,48 +217,53 @@
                     style="font-size: 9px; padding: 2px 6px;"
                   />
                 </div>
-                <div class="text-caption text-slate-500">{{ props.row.email }}</div>
-                <div v-if="props.row.cargo" class="text-caption text-slate-400" style="font-size: 10.5px;">
-                  {{ props.row.cargo }}
+                <div class="text-caption text-grey-6">
+                  {{ props.row.email }}
                 </div>
               </div>
             </div>
           </q-td>
         </template>
 
-        <!-- COLUMNA ROL -->
+        <!-- COLUMNA ROL INSTITUCIONAL -->
         <template v-slot:body-cell-role="props">
           <q-td :props="props">
             <q-badge
-              :color="getRoleBadgeColor(props.row.role)"
+              color="slate-800"
               text-color="white"
-              class="text-weight-bold q-px-sm q-py-xs"
-              style="font-size: 11px; border-radius: 6px;"
+              class="q-px-sm text-weight-bold uppercase"
+              style="letter-spacing: 0.03em;"
             >
-              <q-icon :name="getRoleIcon(props.row.role)" size="13px" class="q-mr-xs" />
+              <q-icon :name="getRoleIcon(props.row.role)" size="12px" class="q-mr-xs" />
               {{ getRoleLabel(props.row.role) }}
             </q-badge>
           </q-td>
         </template>
 
-        <!-- COLUMNA PERMISOS -->
+        <!-- COLUMNA CARGO INSTITUCIONAL -->
+        <template v-slot:body-cell-cargo="props">
+          <q-td :props="props">
+            <div class="text-weight-medium text-grey-9">
+              {{ props.row.cargo || 'Sin cargo asignado' }}
+            </div>
+          </q-td>
+        </template>
+
+        <!-- COLUMNA PERMISOS ACTIVOS -->
         <template v-slot:body-cell-permissions="props">
           <q-td :props="props">
-            <div class="row items-center q-gutter-xs cursor-pointer">
+            <div class="row items-center no-wrap text-caption cursor-pointer">
               <q-badge
                 color="blue-50"
                 text-color="primary"
-                class="text-weight-bold q-px-sm q-py-xs border border-blue-200"
-                style="font-size: 11px;"
+                class="text-weight-bold q-px-sm border border-blue-200"
               >
-                {{ (props.row.permissions || []).length }} permisos asignados
+                {{ (props.row.permissions || []).length }} permisos
               </q-badge>
-              <q-icon name="info" size="14px" color="slate-400" />
-
               <q-tooltip class="bg-slate-950 text-white shadow-4" style="max-width: 320px;">
                 <div class="text-weight-bold q-mb-xs">Permisos activos:</div>
                 <div v-if="(props.row.permissions || []).length === 0" class="text-caption text-slate-400">
-                  Sin permisos especiales asignados (solo lectura).
+                  Sin permisos especiales (solo lectura).
                 </div>
                 <div v-for="p in (props.row.permissions || [])" :key="p" class="text-caption q-my-xs">
                   • {{ getPermissionLabel(p) }}
@@ -276,29 +273,18 @@
           </q-td>
         </template>
 
-        <!-- COLUMNA ESTADO -->
-        <template v-slot:body-cell-activo="props">
+        <!-- COLUMNA ESTADO (BADGE REAL AZUL COMO 'PRESENTE' EN PERSONAL) -->
+        <template v-slot:body-cell-estado="props">
           <q-td :props="props">
-            <q-chip
-              clickable
-              :color="props.row.activo ? 'green-1' : 'red-1'"
-              :text-color="props.row.activo ? 'positive' : 'negative'"
-              dense
-              class="text-weight-bold"
-              style="font-size: 11px;"
+            <q-badge
+              :color="props.row.activo ? 'primary' : 'red-9'"
+              text-color="white"
+              class="q-px-sm text-weight-bold cursor-pointer"
               @click="toggleUserActivo(props.row)"
             >
-              <q-icon :name="props.row.activo ? 'check_circle' : 'cancel'" size="14px" class="q-mr-xs" />
-              {{ props.row.activo ? 'Habilitado' : 'Inactivo' }}
+              {{ props.row.activo ? 'HABILITADO' : 'INACTIVO' }}
               <q-tooltip>Clic para alternar estado de acceso</q-tooltip>
-            </q-chip>
-          </q-td>
-        </template>
-
-        <!-- COLUMNA FECHA -->
-        <template v-slot:body-cell-created_at="props">
-          <q-td :props="props" class="text-slate-500 font-mono" style="font-size: 11.5px;">
-            {{ props.row.created_at || '—' }}
+            </q-badge>
           </q-td>
         </template>
 
@@ -306,7 +292,6 @@
         <template v-slot:body-cell-acciones="props">
           <q-td :props="props">
             <div class="row items-center q-gutter-xs no-wrap justify-end">
-              <!-- EDITAR -->
               <q-btn
                 flat
                 round
@@ -318,8 +303,6 @@
               >
                 <q-tooltip>Editar usuario y permisos</q-tooltip>
               </q-btn>
-
-              <!-- CAMBIAR CONTRASEÑA -->
               <q-btn
                 flat
                 round
@@ -331,8 +314,6 @@
               >
                 <q-tooltip>Restablecer contraseña</q-tooltip>
               </q-btn>
-
-              <!-- ELIMINAR (SI NO ES EL MISMO USUARIO) -->
               <q-btn
                 flat
                 round
@@ -353,7 +334,7 @@
       </q-table>
     </q-card>
 
-    <!-- SECCIÓN INFORMATIVA: ROLES Y CAPACIDADES INSTITUCIONALES -->
+    <!-- SECCIÓN INFORMATIVA DE ROLES -->
     <div class="q-mt-md">
       <div class="row items-center q-gutter-xs q-mb-md">
         <q-icon name="security" size="20px" color="primary" />
@@ -372,7 +353,7 @@
             <div>
               <div class="row items-center justify-between q-mb-sm">
                 <q-badge
-                  :color="role.badgeColor"
+                  color="slate-800"
                   text-color="white"
                   class="text-weight-bold q-px-sm q-py-xs"
                   style="border-radius: 6px; font-size: 11px;"
@@ -399,12 +380,9 @@
       </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- MODAL CREAR / EDITAR USUARIO CON ROLES Y PERMISOS       -->
-    <!-- ======================================================= -->
+    <!-- MODAL CREAR / EDITAR USUARIO -->
     <q-dialog v-model="userModalOpen" persistent transition-show="scale" transition-hide="scale">
       <q-card class="bg-white text-slate-900 shadow-24" style="width: 620px; max-width: 95vw; border-radius: 14px; overflow: hidden;">
-        <!-- CABECERA -->
         <div class="q-pa-md bg-slate-900 text-white row items-center justify-between">
           <div class="row items-center q-gutter-sm">
             <div class="modal-header-icon-circle flex flex-center">
@@ -424,7 +402,6 @@
 
         <q-form @submit.prevent="saveUser">
           <div class="q-pa-lg q-gutter-y-md">
-            <!-- NOMBRE COMPLETO -->
             <div>
               <div class="text-caption text-slate-700 text-weight-bold q-mb-xs">Nombre Completo *</div>
               <q-input
@@ -436,7 +413,6 @@
               />
             </div>
 
-            <!-- EMAIL Y CARGO EN 2 COLUMNAS -->
             <div class="row q-col-gutter-md">
               <div class="col-12 col-sm-6">
                 <div class="text-caption text-slate-700 text-weight-bold q-mb-xs">Correo Electrónico *</div>
@@ -464,7 +440,6 @@
               </div>
             </div>
 
-            <!-- CONTRASEÑA -->
             <div>
               <div class="row items-center justify-between q-mb-xs">
                 <span class="text-caption text-slate-700 text-weight-bold">
@@ -493,7 +468,6 @@
               </q-input>
             </div>
 
-            <!-- SELECCIÓN DE ROL CON DESCRIPCIÓN -->
             <div>
               <div class="text-caption text-slate-700 text-weight-bold q-mb-xs">Rol Institucional *</div>
               <q-select
@@ -510,7 +484,6 @@
               </div>
             </div>
 
-            <!-- MATRIZ DE PERMISOS ESPECÍFICOS -->
             <div class="q-pt-xs">
               <div class="row items-center justify-between q-mb-xs">
                 <span class="text-caption text-slate-700 text-weight-bold uppercase" style="letter-spacing: 0.05em;">
@@ -548,7 +521,6 @@
               </div>
             </div>
 
-            <!-- USUARIO ACTIVO / TOGGLE -->
             <div class="row items-center justify-between q-pa-sm bg-slate-50 rounded-borders border border-slate-200">
               <div>
                 <div class="text-caption text-weight-bold text-slate-800">Estado de la Cuenta</div>
@@ -558,7 +530,6 @@
             </div>
           </div>
 
-          <!-- BOTONES MODAL -->
           <div class="q-pa-md bg-slate-50 border-top border-slate-200 row items-center justify-end q-gutter-x-sm">
             <q-btn flat no-caps color="slate-600" label="Cancelar" v-close-popup />
             <q-btn
@@ -577,9 +548,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- ======================================================= -->
-    <!-- MODAL RESTABLECER CONTRASEÑA RÁPIDA                     -->
-    <!-- ======================================================= -->
+    <!-- MODAL RESTABLECER CONTRASEÑA -->
     <q-dialog v-model="passModalOpen" transition-show="scale" transition-hide="scale">
       <q-card class="bg-white text-slate-900 shadow-24" style="width: 440px; max-width: 95vw; border-radius: 14px;">
         <div class="q-pa-md bg-slate-900 text-white row items-center justify-between">
@@ -685,7 +654,6 @@ const roleDefinitions = [
     code: 'ADMIN',
     title: 'Administrador',
     icon: 'admin_panel_settings',
-    badgeColor: 'primary',
     description: 'Control y configuración global de DOCUS. Administra usuarios, archivadores, reglas y procesos masivos.',
     keyPermissions: 'Acceso total sin restricciones'
   },
@@ -693,7 +661,6 @@ const roleDefinitions = [
     code: 'ARCHIVISTA',
     title: 'Archivista / Kardex',
     icon: 'dashboard',
-    badgeColor: 'slate-800',
     description: 'Responsable de la organización física en gavetas, traslados, préstamos de carpetas y desgloses.',
     keyPermissions: 'Mover carpetas, configurar gavetas, subir fojas'
   },
@@ -701,7 +668,6 @@ const roleDefinitions = [
     code: 'OPERADOR',
     title: 'Operador Digital',
     icon: 'badge',
-    badgeColor: 'slate-700',
     description: 'Enfocado en la digitalización, desglose de PDFs y subida de contratos y legajos al sistema.',
     keyPermissions: 'Subir fojas, desglosar PDFs, actualizar datos'
   },
@@ -709,21 +675,20 @@ const roleDefinitions = [
     code: 'CONSULTA',
     title: 'Solo Consulta',
     icon: 'visibility',
-    badgeColor: 'slate-600',
     description: 'Perfil auditor o directivo con permisos de visualización de libros, expedientes y reportes.',
     keyPermissions: 'Lectura protegida (sin edición ni borrado)'
   }
 ];
 
 // ========================================================
-// COLUMNAS TABLA
+// COLUMNAS TABLA (CALCADAS DE DIRECTORIO DE PERSONAL)
 // ========================================================
 const columns = [
-  { name: 'usuario', label: 'USUARIO INSTITUCIONAL', align: 'left', field: 'name', sortable: true },
+  { name: 'nombre_completo', label: 'APELLIDOS Y NOMBRES', align: 'left', field: 'name', sortable: true },
   { name: 'role', label: 'ROL ASIGNADO', align: 'left', field: 'role', sortable: true },
+  { name: 'cargo', label: 'CARGO INSTITUCIONAL', align: 'left', field: 'cargo', sortable: true },
   { name: 'permissions', label: 'PERMISOS ACTIVOS', align: 'left', field: 'permissions' },
-  { name: 'activo', label: 'ESTADO', align: 'center', field: 'activo', sortable: true },
-  { name: 'created_at', label: 'REGISTRO', align: 'left', field: 'created_at', sortable: true },
+  { name: 'estado', label: 'ESTADO', align: 'center', field: 'activo', sortable: true },
   { name: 'acciones', label: 'ACCIONES', align: 'right' }
 ];
 
@@ -771,16 +736,6 @@ function getRoleLabel(role) {
     case 'operador': return 'Operador Digital';
     case 'consulta': return 'Solo Consulta';
     default: return role || 'Archivista';
-  }
-}
-
-function getRoleBadgeColor(role) {
-  switch (role) {
-    case 'admin': return 'primary';
-    case 'archivista': return 'slate-900';
-    case 'operador': return 'slate-800';
-    case 'consulta': return 'slate-600';
-    default: return 'slate-800';
   }
 }
 
@@ -876,7 +831,7 @@ const toggleUserActivo = async (user) => {
       user.activo = nuevoEstado;
       $q.notify({
         type: 'info',
-        message: `Usuario ${user.name} marcado como ${nuevoEstado ? 'Habilitado' : 'Inactivo'}.`,
+        message: `Usuario ${user.name} marcado como ${nuevoEstado ? 'HABILITADO' : 'INACTIVO'}.`,
         icon: nuevoEstado ? 'check_circle' : 'block'
       });
     }
@@ -1083,30 +1038,57 @@ onMounted(() => {
 
 <style scoped>
 .usuarios-page-canvas {
-  background: #f8fafc;
+  background: radial-gradient(circle at top right, #ffffff 0%, #f8fafc 45%, #f1f5f9 100%);
   min-height: 100vh;
 }
 
 .header-icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #2563eb;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
 }
 
 .header-tag {
-  font-size: 10.5px;
-  letter-spacing: 0.05em;
-  padding: 4px 8px;
   border-radius: 6px;
+  font-size: 11px;
+  padding: 3px 8px;
+  background: #0f172a !important;
+  color: white !important;
+}
+
+.action-btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.action-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: translateY(-1px);
 }
 
 .action-btn-primary {
   background: #2563eb;
   color: white;
-  font-weight: 700;
-  border-radius: 8px;
   padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+}
+
+.action-btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
 .kpi-card {
@@ -1147,20 +1129,21 @@ body.body--dark .role-desc-card {
   background: #1e293b !important;
   border-color: #334155 !important;
 }
-body.body--dark .text-slate-900 {
+body.body--dark .text-slate-900,
+body.body--dark .text-grey-9 {
   color: #f1f5f9 !important;
 }
-body.body--dark .text-slate-800 {
+body.body--dark .text-slate-800,
+body.body--dark .text-grey-8 {
   color: #e2e8f0 !important;
 }
-body.body--dark .text-slate-700 {
+body.body--dark .text-slate-700,
+body.body--dark .text-grey-7 {
   color: #cbd5e1 !important;
 }
-body.body--dark .text-slate-600 {
+body.body--dark .text-slate-500,
+body.body--dark .text-grey-6 {
   color: #94a3b8 !important;
-}
-body.body--dark .text-slate-500 {
-  color: #64748b !important;
 }
 body.body--dark .bg-white {
   background: #1e293b !important;
