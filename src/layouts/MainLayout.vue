@@ -159,11 +159,32 @@
                   </q-item-section>
                   <q-item-section class="text-slate-800">Importar Planilla Excel</q-item-section>
                 </q-item>
+                <q-item clickable @click="triggerExportExcel">
+                  <q-item-section avatar>
+                    <q-icon name="table_view" color="primary" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-slate-800">Exportar Inventario Excel</q-item-section>
+                </q-item>
+                <q-item clickable @click="metricasOpen = true">
+                  <q-item-section avatar>
+                    <q-icon name="insights" color="primary" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-slate-800">Métricas de Ocupación</q-item-section>
+                </q-item>
                 <q-item clickable @click="syncAllData">
                   <q-item-section avatar>
                     <q-icon name="refresh" color="primary" size="18px" />
                   </q-item-section>
                   <q-item-section class="text-slate-800">Recargar Catálogos</q-item-section>
+                </q-item>
+                <q-item clickable @click="installPwaApp">
+                  <q-item-section avatar>
+                    <q-icon name="install_desktop" color="primary" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="text-slate-800">
+                    <q-item-label>Instalar Aplicación (PWA)</q-item-label>
+                    <q-item-label caption class="text-slate-500" style="font-size: 10px;">{{ isAppInstalled ? 'Instalada como nativa' : 'En tu PC o celular' }}</q-item-label>
+                  </q-item-section>
                 </q-item>
                 <q-separator class="q-my-xs" />
                 <q-item clickable @click="handleLogout" class="text-negative">
@@ -257,223 +278,6 @@
               </q-item-section>
             </q-item>
           </q-list>
-
-          <q-separator class="q-my-md" style="background: #e2e8f0;" />
-
-          <!-- HERRAMIENTAS RÁPIDAS -->
-          <div class="drawer-section-title q-px-sm q-mb-xs">
-            HERRAMIENTAS
-          </div>
-
-          <q-list class="q-gutter-y-xs">
-            <!-- BOTÓN BÚSQUEDA SPOTLIGHT -->
-            <q-item
-              clickable
-              v-ripple
-              @click="spotlightOpen = true"
-              class="drawer-nav-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="search" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">Búsqueda Rápida</q-item-label>
-                <q-item-label caption class="drawer-item-sub">Spotlight de expedientes</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <span class="spotlight-kbd-side">Ctrl K</span>
-              </q-item-section>
-            </q-item>
-
-            <!-- BOTÓN EXPORTAR EXCEL -->
-            <q-item
-              clickable
-              v-ripple
-              @click="triggerExportExcel"
-              class="drawer-nav-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="table_view" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">Inventario en Excel</q-item-label>
-                <q-item-label caption class="drawer-item-sub">Descargar reporte (.xlsx)</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="download" size="14px" color="slate-500" />
-              </q-item-section>
-            </q-item>
-
-            <!-- BOTÓN MÉTRICAS DE CAPACIDAD -->
-            <q-item
-              clickable
-              v-ripple
-              @click="metricasOpen = true"
-              class="drawer-nav-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="insights" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">Métricas de Ocupación</q-item-label>
-                <q-item-label caption class="drawer-item-sub">Capacidad y distribución</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="arrow_forward" size="14px" color="slate-400" />
-              </q-item-section>
-            </q-item>
-
-            <!-- BOTÓN IMPORTAR EXCEL -->
-            <q-item
-              clickable
-              v-ripple
-              @click="openImportDialog"
-              class="drawer-nav-item drawer-tool-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="upload_file" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">Importar Excel</q-item-label>
-                <q-item-label caption class="drawer-item-sub">Carga masiva de planillas</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="arrow_forward" size="14px" color="slate-400" />
-              </q-item-section>
-            </q-item>
-
-            <!-- BOTÓN GESTIÓN DE USUARIOS Y ROLES -->
-            <q-item
-              clickable
-              v-ripple
-              @click="openProfileDialog('usuarios')"
-              class="drawer-nav-item drawer-tool-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="manage_accounts" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">Usuarios & Permisos</q-item-label>
-                <q-item-label caption class="drawer-item-sub">Roles y control de accesos</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="arrow_forward" size="14px" color="slate-400" />
-              </q-item-section>
-            </q-item>
-
-            <!-- BOTÓN SINCRONIZAR -->
-            <q-item
-              clickable
-              v-ripple
-              @click="syncAllData"
-              class="drawer-nav-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon name="sync" size="18px" color="primary" :class="{ 'rotate-animation': syncing }" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">Sincronizar Datos</q-item-label>
-                <q-item-label caption class="drawer-item-sub">Refrescar estado en vivo</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <!-- TOGGLE MODO OSCURO -->
-            <q-item
-              clickable
-              v-ripple
-              @click="toggleDarkMode"
-              class="drawer-nav-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">{{ $q.dark.isActive ? 'Modo Claro' : 'Modo Oscuro' }}</q-item-label>
-                <q-item-label caption class="drawer-item-sub">{{ $q.dark.isActive ? 'Tema claro institucional' : 'Tema oscuro de alto contraste' }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="$q.dark.isActive ? 'toggle_on' : 'toggle_off'" :color="$q.dark.isActive ? 'primary' : 'slate-400'" size="24px" />
-              </q-item-section>
-            </q-item>
-
-            <!-- BOTÓN INSTALAR APLICACIÓN (PWA) -->
-            <q-item
-              clickable
-              v-ripple
-              @click="installPwaApp"
-              class="drawer-nav-item"
-            >
-              <q-item-section avatar class="drawer-avatar-col">
-                <div class="drawer-icon-box flex flex-center">
-                  <q-icon :name="isAppInstalled ? 'verified' : 'install_desktop'" size="18px" color="primary" />
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="drawer-item-title">{{ isAppInstalled ? 'App Instalada' : 'Instalar Aplicación' }}</q-item-label>
-                <q-item-label caption class="drawer-item-sub">{{ isAppInstalled ? 'Funcionando como app nativa' : 'En tu PC o celular' }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <span class="spotlight-kbd-side">PWA</span>
-              </q-item-section>
-            </q-item>
-          </q-list>
-
-          <q-separator class="q-my-md" style="background: #e2e8f0;" />
-
-          <!-- WIDGET DE MÉTRICAS EN VIVO -->
-          <div class="drawer-section-title q-px-sm q-mb-xs">
-            MÉTRICAS DEL SISTEMA
-          </div>
-
-          <div class="metrics-card q-pa-sm q-mt-xs">
-            <div class="row items-center justify-between q-mb-xs">
-              <span class="text-caption text-weight-bold text-slate-700">Ocupación Física</span>
-              <span class="text-caption text-weight-bolder text-primary" style="font-size: 12.5px;">
-                {{ porcentajeArchivado }}%
-              </span>
-            </div>
-            <q-linear-progress
-              :value="porcentajeArchivadoDecimal"
-              rounded
-              color="primary"
-              track-color="slate-200"
-              class="q-mb-sm"
-              style="height: 6px; border-radius: 999px;"
-            />
-
-            <div class="column q-gutter-xs">
-              <div class="row items-center justify-between text-caption text-slate-600" style="font-size: 11.5px;">
-                <span>En Gavetas:</span>
-                <b class="text-slate-900 font-mono">{{ totalExpedientesEnGavetas }}</b>
-              </div>
-
-              <div class="row items-center justify-between text-caption text-slate-600" style="font-size: 11.5px;">
-                <span>Gaveta Virtual:</span>
-                <b class="text-slate-900 font-mono">
-                  {{ totalSinAsignar }}
-                </b>
-              </div>
-
-              <div class="row items-center justify-between text-caption text-slate-600" style="font-size: 11.5px;">
-                <span>Total Cajones:</span>
-                <b class="text-slate-900 font-mono">{{ totalGavetas }}</b>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- FOOTER DEL DRAWER -->
@@ -771,31 +575,6 @@ const onGlobalImportComplete = () => {
   store.fetchSinAsignar();
   store.fetchPersonal();
 };
-
-// Métricas en tiempo real para el drawer y toolbar
-const totalExpedientesEnGavetas = computed(() => {
-  return (store.muebles || []).reduce((acc, m) => {
-    return acc + (m.cajones || []).reduce((cAcc, c) => cAcc + (c.empleados?.length || 0), 0);
-  }, 0);
-});
-
-const totalSinAsignar = computed(() => {
-  return (store.expedientesSinAsignar || []).length;
-});
-
-const totalGavetas = computed(() => {
-  return (store.muebles || []).reduce((acc, m) => acc + (m.cajones?.length || 0), 0);
-});
-
-const porcentajeArchivadoDecimal = computed(() => {
-  const total = totalExpedientesEnGavetas.value + totalSinAsignar.value;
-  if (total === 0) return 1;
-  return totalExpedientesEnGavetas.value / total;
-});
-
-const porcentajeArchivado = computed(() => {
-  return Math.round(porcentajeArchivadoDecimal.value * 100);
-});
 
 let onBeforeInstallPrompt = null;
 let onAppInstalled = null;
