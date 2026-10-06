@@ -115,9 +115,9 @@
             dense
             size="sm"
             icon="manage_accounts"
-            color="primary"
+            to="/usuarios"
+            :color="$route.path === '/usuarios' ? 'primary' : 'slate-600'"
             class="toolbar-action-btn"
-            @click="openProfileDialog('usuarios')"
           >
             <q-tooltip>Gestión de Usuarios & Roles</q-tooltip>
           </q-btn>
@@ -158,7 +158,7 @@
                   </q-item-section>
                   <q-item-section class="text-slate-800">Mi Perfil y Seguridad</q-item-section>
                 </q-item>
-                <q-item clickable @click="openProfileDialog('usuarios')">
+                <q-item clickable to="/usuarios">
                   <q-item-section avatar>
                     <q-icon name="manage_accounts" color="primary" size="18px" />
                   </q-item-section>
@@ -292,11 +292,12 @@
               </q-item-section>
             </q-item>
 
-            <!-- BOTÓN GESTIÓN DE USUARIOS Y ROLES (DIRECTO EN NAVEGACIÓN) -->
+            <!-- BOTÓN GESTIÓN DE USUARIOS Y ROLES (PÁGINA INCRUSTADA) -->
             <q-item
               clickable
               v-ripple
-              @click="openProfileDialog('usuarios')"
+              to="/usuarios"
+              active-class="drawer-item-active"
               class="drawer-nav-item"
             >
               <q-item-section avatar class="drawer-avatar-col">

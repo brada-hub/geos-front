@@ -12,6 +12,7 @@ const routes = [
       { path: '', redirect: '/kardex' },
       { path: 'kardex', component: () => import('pages/MapaKardex.vue') },
       { path: 'personal', component: () => import('pages/PersonalPage.vue') },
+      { path: 'usuarios', component: () => import('pages/UsuariosPage.vue') },
     ],
   },
 
